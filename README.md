@@ -80,6 +80,10 @@ This framework can serve as the foundation for building comprehensive testing ma
 
 ## 📖 Quick Start
 
+### New to BGSTM? 
+👉 **[Start Here: Getting Started Guide](docs/GETTING-STARTED.md)** - Complete walkthrough for beginners
+
+### Quick Reference:
 1. **Choose Your Methodology**: Review [methodology guides](docs/methodologies/comparison.md) to select the best approach
 2. **Understand the Phases**: Read through the [six testing phases](docs/phases/01-test-planning.md)
 3. **Use Templates**: Download and customize [templates](docs/templates/README.md) for your project

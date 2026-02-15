@@ -4,6 +4,10 @@
 
 This documentation provides a comprehensive guide to professional software testing practices adaptable to various software development methodologies.
 
+## 🚀 [Getting Started Guide](GETTING-STARTED.md)
+
+New to BGSTM? Start here for a step-by-step guide to implementing this framework in your projects.
+
 ### Navigation
 
 #### Testing Phases
