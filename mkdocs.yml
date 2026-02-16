@@ -1,0 +1,155 @@
+site_name: BGSTM - Better Global Software Testing Methodology
+site_description: A comprehensive, professional software testing framework adaptable to Agile, Scrum, and Waterfall methodologies
+site_author: BGSTM Project
+site_url: https://bg-playground.github.io/BGSTM/
+
+repo_name: bg-playground/BGSTM
+repo_url: https://github.com/bg-playground/BGSTM
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024-2026 BGSTM Project. Licensed under CC BY 4.0.
+
+draft_docs: '!*'  # Do not exclude any files as drafts
+not_in_nav: warn
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+  
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+  # Uncomment and add custom logo and favicon files to docs/assets/
+  # favicon: assets/favicon.png
+  # logo: assets/logo.png
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bg-playground/BGSTM
+      name: BGSTM on GitHub
+  
+  version:
+    provider: mike
+    default: latest
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - tags
+  - minify:
+      minify_html: true
+
+nav:
+  - Home: index.md
+  - Getting Started: GETTING-STARTED.md
+  
+  - Testing Phases:
+    - phases/index.md
+    - Phase 1 - Test Planning: phases/01-test-planning.md
+    - Phase 2 - Test Case Development: phases/02-test-case-development.md
+    - Phase 3 - Test Environment Preparation: phases/03-test-environment-preparation.md
+    - Phase 4 - Test Execution: phases/04-test-execution.md
+    - Phase 5 - Test Results Analysis: phases/05-test-results-analysis.md
+    - Phase 6 - Test Results Reporting: phases/06-test-results-reporting.md
+  
+  - Methodologies:
+    - methodologies/index.md
+    - Agile Testing: methodologies/agile.md
+    - Scrum Testing: methodologies/scrum.md
+    - Waterfall Testing: methodologies/waterfall.md
+    - Methodology Comparison: methodologies/comparison.md
+    - Checklists:
+      - Agile Testing Checklist: methodologies/agile-testing-checklist.md
+      - Scrum Testing Checklist: methodologies/scrum-testing-checklist.md
+      - Waterfall Testing Checklist: methodologies/waterfall-testing-checklist.md
+  
+  - Templates:
+    - test-templates/index.md
+    - Test Plan Template: test-templates/test-plan-template.md
+    - Risk Assessment Template: test-templates/risk-assessment-template.md
+    - Test Case Template: test-templates/test-case-template.md
+    - Traceability Matrix Template: test-templates/traceability-matrix-template.md
+    - Defect Report Template: test-templates/defect-report-template.md
+    - Test Execution Report Template: test-templates/test-execution-report-template.md
+    - Test Summary Report Template: test-templates/test-summary-report-template.md
+  
+  - Examples:
+    - examples/index.md
+  
+  - Integration:
+    - integration/multi-platform-guide.md
+  
+  - About:
+    - License: LICENSE.md
+    - Contributing: CONTRIBUTING.md
+    - Changelog: CHANGELOG.md
