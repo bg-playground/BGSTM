@@ -223,147 +223,309 @@ Testing will be considered complete when:
 
 ## 5. Test Scope
 
+**Purpose:** Define specifically what will and won't be tested.
+
 ### 5.1 Features to be Tested
-| Feature ID | Feature Name | Priority | Test Approach |
-|------------|--------------|----------|---------------|
-| F1 | [Feature 1] | High | Manual + Automated |
-| F2 | [Feature 2] | Medium | Automated |
+**What to include:** List all features, modules, or functionalities that will be validated during testing. Include priority and approach for each.
+
+*Tip:* Align with requirements document. For Agile projects, list user stories or epics.
+
+| Feature ID | Feature Name | Priority | Test Approach | Notes |
+|------------|--------------|----------|---------------|-------|
+| F1 | [Feature 1] | High | Manual + Automated | Core functionality |
+| F2 | [Feature 2] | Medium | Automated | API integration |
+| F3 | [Feature 3] | High | Manual | New user workflow |
 
 ### 5.2 Features Not to be Tested
-| Feature | Reason |
-|---------|--------|
-| [Feature] | [Reason for exclusion] |
+**What to include:** Explicitly list features excluded from testing scope with clear justification.
+
+*Common reasons:* Already tested in previous release, third-party functionality, out of scope for this phase, legacy functionality not changing
+
+| Feature | Reason | Alternative Validation |
+|---------|--------|------------------------|
+| [Feature] | [Reason for exclusion] | [If any, e.g., "Vendor certification"] |
 
 ## 6. Test Environment
 
+**Purpose:** Document the infrastructure, tools, and configurations required for testing.
+
 ### 6.1 Hardware Requirements
-- Server: [Specifications]
-- Workstations: [Specifications]
-- Mobile Devices: [Specifications]
+**What to include:** Specify all hardware needed for test execution.
+
+- Server: [e.g., 4-core CPU, 16GB RAM, 500GB SSD]
+- Workstations: [e.g., Standard development laptops with 8GB RAM minimum]
+- Mobile Devices: [e.g., iPhone 12+, Samsung Galaxy S21+, tablets]
+- Network Equipment: [e.g., Load balancers, routers]
 
 ### 6.2 Software Requirements
-- Operating System: [Details]
-- Database: [Details]
-- Browser/Clients: [Details]
-- Middleware: [Details]
+**What to include:** List all software components, versions, and configurations.
+
+- Operating System: [e.g., Ubuntu 22.04 LTS, Windows Server 2022]
+- Database: [e.g., PostgreSQL 14.x, MongoDB 6.x]
+- Browser/Clients: [e.g., Chrome 120+, Firefox 121+, Safari 17+, Edge 120+]
+- Middleware: [e.g., Node.js 18.x, Nginx 1.24]
+- Application Version: [e.g., Build #2024.01.15]
 
 ### 6.3 Network Configuration
+**What to include:** Describe network setup, connectivity requirements, and security configurations.
+
+*Example:* "Isolated VLAN for test environment, VPN access for remote testers, HTTPS with SSL certificates, firewall rules for API endpoints"
+
 [Network requirements and configuration]
 
 ### 6.4 Test Tools
-- Test Management: [Tool name]
-- Defect Tracking: [Tool name]
-- Test Automation: [Tool name]
-- Performance Testing: [Tool name]
+**What to include:** List all tools required for test management, execution, automation, and defect tracking.
+
+- Test Management: [e.g., TestRail, Jira with Zephyr]
+- Defect Tracking: [e.g., Jira, Azure DevOps]
+- Test Automation: [e.g., Selenium with Python, Cypress, Playwright]
+- Performance Testing: [e.g., JMeter, k6, Gatling]
+- API Testing: [e.g., Postman, REST Assured]
+- Code Coverage: [e.g., JaCoCo, Istanbul]
 
 ## 7. Test Deliverables
 
+**Purpose:** Define all artifacts that will be produced during testing.
+
 ### 7.1 Before Testing
+**What to include:** Documents and artifacts that must be ready before test execution begins.
+
 - Test Plan (this document)
-- Test Cases
-- Test Scripts
-- Test Data
+- Test Cases and Test Scripts
+- Test Data Sets
+- Traceability Matrix
+- Test Environment Setup Documentation
 
 ### 7.2 During Testing
-- Test Execution Reports
+**What to include:** Artifacts generated during active test execution.
+
+- Test Execution Reports (daily/weekly)
 - Defect Reports
-- Test Logs
+- Test Logs and Evidence
+- Test Metrics Dashboard
+- Status Updates and Progress Reports
 
 ### 7.3 After Testing
+**What to include:** Final deliverables upon test completion.
+
 - Test Summary Report
 - Test Completion Report
-- Test Metrics
-- Lessons Learned
+- Test Metrics and Analytics
+- Lessons Learned Document
+- Sign-off Documentation
 
 ## 8. Resource Planning
 
+**Purpose:** Identify and allocate human resources, tools, and infrastructure needed for testing.
+
 ### 8.1 Team Structure
-| Role | Name | Responsibility |
-|------|------|----------------|
-| Test Manager | [Name] | [Responsibility] |
-| Test Lead | [Name] | [Responsibility] |
-| Test Engineer | [Name] | [Responsibility] |
+**What to include:** Define roles, responsibilities, and team members. Include backup resources.
+
+| Role | Name | Responsibility | Availability |
+|------|------|----------------|--------------|
+| Test Manager | [Name] | Overall test planning, coordination, and reporting | [e.g., Full-time] |
+| Test Lead | [Name] | Test execution oversight, defect triage, mentoring | [e.g., Full-time] |
+| Test Engineer | [Name] | Test case execution, defect logging, reporting | [e.g., Full-time] |
+| Automation Engineer | [Name] | Test automation development and maintenance | [e.g., 50% allocation] |
 
 ### 8.2 Training Needs
+**What to include:** Identify skills gaps and training required for successful test execution.
+
+*Examples:*
+- Tool training (e.g., new test management system)
+- Domain knowledge (e.g., financial regulations, healthcare compliance)
+- Technical skills (e.g., API testing, performance testing)
+- Methodology training (e.g., Agile testing practices)
+
 [Identify any training required for the test team]
 
 ## 9. Schedule and Milestones
 
-| Milestone | Planned Date | Actual Date | Status |
-|-----------|--------------|-------------|--------|
-| Test Planning Complete | | | |
-| Test Cases Developed | | | |
-| Environment Ready | | | |
-| Test Execution Start | | | |
-| Test Execution Complete | | | |
-| Test Sign-off | | | |
+**Purpose:** Define the timeline for testing activities with key milestones.
+
+**What to include:** Realistic dates based on effort estimates. Include buffers for unexpected issues.
+
+| Milestone | Planned Date | Actual Date | Status | Owner |
+|-----------|--------------|-------------|--------|-------|
+| Test Planning Complete | [Date] | | Not Started | [Name] |
+| Test Cases Developed | [Date] | | Not Started | [Name] |
+| Environment Ready | [Date] | | Not Started | [Name] |
+| Test Execution Start | [Date] | | Not Started | [Name] |
+| First Test Cycle Complete | [Date] | | Not Started | [Name] |
+| Test Execution Complete | [Date] | | Not Started | [Name] |
+| Test Sign-off | [Date] | | Not Started | [Name] |
+
+*Note:* Update "Actual Date" and "Status" columns as milestones are achieved.
 
 ## 10. Risk Management
 
+**Purpose:** Identify, assess, and plan mitigation strategies for testing risks.
+
 ### 10.1 Identified Risks
-| Risk ID | Risk Description | Probability | Impact | Mitigation Strategy |
-|---------|------------------|-------------|--------|---------------------|
-| R1 | [Risk 1] | High/Med/Low | High/Med/Low | [Mitigation] |
-| R2 | [Risk 2] | High/Med/Low | High/Med/Low | [Mitigation] |
+**What to include:** List all potential risks that could impact testing. Rate probability and impact honestly.
+
+**Risk Ratings:**
+- **Probability:** High (>60%), Medium (30-60%), Low (<30%)
+- **Impact:** High (Major delay/quality impact), Medium (Moderate impact), Low (Minor impact)
+
+| Risk ID | Risk Description | Probability | Impact | Mitigation Strategy | Owner |
+|---------|------------------|-------------|--------|---------------------|-------|
+| R1 | [e.g., Test environment instability] | High | High | [Backup environment, monitoring] | [Name] |
+| R2 | [e.g., Resource availability] | Medium | High | [Cross-training, contractors] | [Name] |
+| R3 | [e.g., Requirement changes] | Medium | Medium | [Change control process] | [Name] |
 
 ### 10.2 Contingency Plans
+**What to include:** Detailed backup plans for high-probability or high-impact risks.
+
+*Example:* "If primary environment fails: Switch to backup environment within 2 hours, notify stakeholders, adjust timeline if needed"
+
 [Describe backup plans for high-risk scenarios]
 
 ## 11. Dependencies
 
+**Purpose:** Document all dependencies that could impact test execution.
+
 ### 11.1 Internal Dependencies
+**What to include:** Dependencies on other teams, components, or activities within the organization.
+
+*Examples:*
+- Development team completing features by [date]
+- Database team providing data migration scripts
+- DevOps team setting up CI/CD pipelines
+- Business analysts finalizing requirements
+
 - [Dependency on other teams/components]
 
 ### 11.2 External Dependencies
+**What to include:** Dependencies on third parties, vendors, or external factors.
+
+*Examples:*
+- Third-party API availability for integration testing
+- Vendor providing test licenses
+- External security audit completion
+- Client providing production-like test data
+
 - [Third-party systems, vendors, etc.]
 
 ## 12. Defect Management
 
+**Purpose:** Define the process for handling defects found during testing.
+
 ### 12.1 Defect Workflow
+**What to include:** Describe the complete lifecycle of a defect from discovery to closure.
+
+*Standard Workflow:* New → Assigned → In Progress → Fixed → Retest → Verified → Closed (or Reopened if fix fails)
+
 [Describe defect lifecycle and workflow]
 
 ### 12.2 Severity Levels
-- **Critical**: [Definition]
-- **High**: [Definition]
-- **Medium**: [Definition]
-- **Low**: [Definition]
+**What to include:** Clear definitions for classifying defect severity. Use these consistently across the team.
+
+- **Critical**: System crash, data loss, security breach, complete feature failure affecting all users
+  *Example:* "Application crashes on login, preventing all user access"
+- **High**: Major feature not working, significant impact on functionality, affects many users
+  *Example:* "Payment processing fails for credit cards"
+- **Medium**: Feature partially working, workaround available, moderate user impact
+  *Example:* "Search returns incorrect results for special characters"
+- **Low**: Minor issues, cosmetic problems, minimal user impact, suggestions
+  *Example:* "Button alignment is slightly off"
 
 ### 12.3 Priority Levels
-- **High**: [Definition]
-- **Medium**: [Definition]
-- **Low**: [Definition]
+**What to include:** Define urgency of fixes. Priority may differ from severity based on business needs.
+
+- **High**: Must be fixed immediately, blocking release, affecting critical functionality
+- **Medium**: Should be fixed in current release/sprint, fix before go-live
+- **Low**: Can be fixed in future releases, not blocking current release
+
+*Note:* A low-severity defect can have high priority (e.g., cosmetic issue on login page seen by all users)
 
 ## 13. Communication Plan
 
+**Purpose:** Define how testing progress and issues will be communicated to stakeholders.
+
 ### 13.1 Reporting Schedule
-- Daily: [Type of report]
-- Weekly: [Type of report]
-- Milestone: [Type of report]
+**What to include:** Frequency and type of status updates.
+
+- Daily: [Standup meetings, brief status email with test execution summary, blocker issues]
+- Weekly: [Detailed test execution report, metrics dashboard, defect status, risks and issues]
+- Milestone: [Comprehensive reports at key milestones, go/no-go recommendations]
+- Ad-hoc: [Critical defects, blockers, environment issues requiring immediate attention]
 
 ### 13.2 Stakeholder Communication
+**What to include:** Define audiences, methods, and frequency of communication for each stakeholder group.
+
+| Stakeholder Group | Communication Method | Frequency | Content |
+|-------------------|---------------------|-----------|---------|
+| Test Team | Daily standups, Slack | Daily | Detailed progress, blockers |
+| Development Team | Email, Jira | As needed | Defect details, clarifications |
+| Project Manager | Status reports, meetings | Weekly | Progress, risks, issues |
+| Product Owner | Demo sessions, reports | Sprint/Phase end | Feature validation, acceptance |
+| Executive Management | Executive summaries | Monthly/Milestone | High-level status, key decisions |
+
 [How and when stakeholders will be updated]
 
 ## 14. Assumptions and Constraints
 
+**Purpose:** Document factors that influence the test plan but are outside the team's control.
+
 ### 14.1 Assumptions
+**What to include:** Conditions assumed to be true. If assumptions prove false, the plan may need revision.
+
+*Examples:*
+- Requirements will be stable after baselined
+- Test environment will be available 95% of the time
+- Adequate skilled resources will be available
+- Third-party APIs will be accessible for testing
+
 - [Assumption 1]
 - [Assumption 2]
+- [Assumption 3]
 
 ### 14.2 Constraints
+**What to include:** Limitations that restrict testing activities or approaches.
+
+*Examples:*
+- Fixed deadline: Must complete by [date]
+- Budget limitation: Cannot exceed $X for tools
+- Limited test environment: Only one environment available
+- Resource constraint: Maximum 3 testers available
+- Technology limitation: Cannot test on legacy browsers
+
 - [Constraint 1]
 - [Constraint 2]
+- [Constraint 3]
 
 ## 15. Approvals
 
+**Purpose:** Obtain formal sign-off from key stakeholders before proceeding with testing.
+
 ### 15.1 Sign-off
+**Instructions:** This test plan must be reviewed and approved by the following roles before test execution begins. Signatures indicate agreement with the approach, scope, and resource allocation.
+
 This test plan is approved by:
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| Test Manager | | | |
-| Project Manager | | | |
-| Development Lead | | | |
-| Product Owner | | | |
+| Role | Name | Signature | Date | Comments |
+|------|------|-----------|------|----------|
+| Test Manager | [Name] | | [Date] | |
+| Project Manager | [Name] | | [Date] | |
+| Development Lead | [Name] | | [Date] | |
+| Product Owner | [Name] | | [Date] | |
+| Business Analyst | [Name] | | [Date] | (if applicable) |
+
+*Note:* Electronic approvals via email or test management system are acceptable. Reference approval emails in the comments column.
 
 ---
+
+## Related Templates and Documents
+
+**After completing this test plan, proceed to:**
+- [Test Case Template](test-case-template.md) - For developing detailed test cases
+- [Risk Assessment Template](risk-assessment-template.md) - For detailed risk analysis
+- [Traceability Matrix Template](traceability-matrix-template.md) - For requirements mapping
+
+**Related Phase Documentation:**
+- [Phase 1: Test Planning](../phases/01-test-planning.md) - Detailed guidance on test planning activities
+
+---
+
 **End of Test Plan**
