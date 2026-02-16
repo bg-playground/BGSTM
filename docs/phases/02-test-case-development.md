@@ -153,6 +153,9 @@ Each test case should include:
 ## Templates
 - [Test Case Template](../templates/test-case-template.md)
 
+## Examples
+- [Test Case Suite Example](../examples/test-case-suite-example.md) - Complete test case suite with 12 detailed test cases covering guest checkout, payment processing (PayPal, Apple Pay, Google Pay), promotional codes, mobile testing, and error handling. Includes functional, integration, and negative test scenarios.
+
 ## Previous Phase
 [Test Planning](01-test-planning.md)
 

@@ -255,6 +255,10 @@ Gather and consolidate data from test execution:
 ## Templates
 - [Test Execution Report Template](../templates/test-execution-report-template.md)
 
+## Examples
+- [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Comprehensive risk management document with 13 tracked risks using Impact × Likelihood scoring methodology. Includes risk heat map, mitigation strategies, weekly review process, and escalation procedures covering technical, resource, schedule, and compliance risks.
+- [Testing Schedule Example](../examples/testing-schedule-example.md) - Detailed testing schedule showing both Agile sprint-based approach (2-week sprints with day-by-day breakdown) and Waterfall phase-gate comparison. Includes resource allocation, milestones, dependencies, and buffer time management.
+
 ## Previous Phase
 [Test Execution](04-test-execution.md)
 

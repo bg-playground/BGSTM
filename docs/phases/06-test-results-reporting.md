@@ -327,6 +327,9 @@ Different stakeholders need different information:
 - [Test Execution Report Template](../templates/test-execution-report-template.md)
 - [Defect Report Template](../templates/defect-report-template.md)
 
+## Examples
+- [Traceability Matrix Example](../examples/traceability-matrix-example.md) - Complete requirements traceability matrix linking 64 requirements to 350 test cases. Shows bidirectional traceability with test execution status, defect linkage, coverage analysis (100% achieved), gap analysis, and compliance validation (PCI-DSS, WCAG 2.1 AA). Includes final QA sign-off.
+
 ## Deliverables Checklist
 - [ ] Test summary report completed
 - [ ] Detailed test results documented

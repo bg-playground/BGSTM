@@ -192,6 +192,9 @@ Test Environment Preparation involves setting up the hardware, software, network
 ## Templates
 - [Test Plan Template](../templates/test-plan-template.md)
 
+## Examples
+- [Environment Setup Checklist Example](../examples/environment-setup-example.md) - Comprehensive environment setup checklist covering hardware infrastructure, software installation, application deployment, database configuration, third-party integrations (PayPal, Apple Pay, Google Pay, shipping APIs), test data preparation, security setup, and validation procedures with sign-off.
+
 ## Previous Phase
 [Test Case Development](02-test-case-development.md)
 
