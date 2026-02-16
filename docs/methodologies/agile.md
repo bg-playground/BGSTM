@@ -322,6 +322,13 @@ Then user should be redirected to dashboard
 - [Agile Testing Condensed by Janet Gregory and Lisa Crispin](https://agiletester.ca/)
 
 ## See Also
+
+### Practical Guides
+- [**Agile Iteration Testing Guide**](agile-iteration-testing-guide.md) - Comprehensive guide for iteration testing activities
+
+### Related Methodologies
 - [Scrum Testing Methodology](scrum.md)
 - [Methodology Comparison](comparison.md)
+
+### Testing Phases
 - [Six Testing Phases](../phases/01-test-planning.md)

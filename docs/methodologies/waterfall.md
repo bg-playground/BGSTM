@@ -502,7 +502,14 @@ Formal reviews between phases:
 - Gradual transition strategy
 
 ## See Also
+
+### Practical Guides
+- [**Waterfall Phase Gate Checklist**](waterfall-phase-gate-checklist.md) - Comprehensive phase gate checklist for Waterfall projects
+
+### Related Methodologies
 - [Agile Testing Methodology](agile.md)
 - [Scrum Testing Methodology](scrum.md)
 - [Methodology Comparison](comparison.md)
+
+### Testing Phases
 - [Six Testing Phases](../phases/01-test-planning.md)
