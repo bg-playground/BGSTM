@@ -99,11 +99,11 @@ Contributions are welcome! Whether you want to:
 - Report issues
 - Suggest features
 
-Please feel free to open issues or submit pull requests.
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
 
 ## 📄 License
 
-This project is open source and available for use in your projects and organizations.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Related Resources
 
