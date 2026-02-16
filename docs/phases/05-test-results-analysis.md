@@ -242,10 +242,7 @@ Explain how Agile, Scrum, Waterfall, etc. impact this phase:
 
 ## Templates
 - [Test Execution Report Template](../templates/test-execution-report-template.md)
-- Test Results Summary Template
 - [Defect Report Template](../templates/defect-report-template.md)
-- Risk Assessment Matrix Template
-- Metrics Dashboard Template
 
 ## Examples
 - [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Comprehensive risk management document with 13 tracked risks using Impact × Likelihood scoring methodology. Includes risk heat map, mitigation strategies, weekly review process, and escalation procedures covering technical, resource, schedule, and compliance risks.

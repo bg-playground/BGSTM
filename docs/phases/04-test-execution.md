@@ -219,7 +219,6 @@ Explain how Agile, Scrum, Waterfall, etc. impact this phase:
 ## Templates
 - [Defect Report Template](../templates/defect-report-template.md)
 - [Test Execution Report Template](../templates/test-execution-report-template.md)
-- Test Results Summary Template
 
 ## Examples
 - [Defect Report Example](../examples/defect-report-example.md) - Comprehensive defect report examples showing 10 realistic defects across all severity levels (Critical to Low). Includes complete defect lifecycle from identification through closure, with root cause analysis, reproduction steps, verification procedures, and best practices for defect documentation.
