@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 BGSTM Documentation
+    url: https://github.com/bg-playground/BGSTM
+    about: Browse the BGSTM framework documentation
