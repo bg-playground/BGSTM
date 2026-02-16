@@ -516,15 +516,20 @@ This test plan is approved by:
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**After completing this test plan, proceed to:**
-- [Test Case Template](test-case-template.md) - For developing detailed test cases
-- [Risk Assessment Template](risk-assessment-template.md) - For detailed risk analysis
-- [Traceability Matrix Template](traceability-matrix-template.md) - For requirements mapping
+### Phase Documentation
+- [Phase 1: Test Planning](../phases/01-test-planning.md) - Complete guide to the test planning phase
+- [Phase 2: Test Case Development](../phases/02-test-case-development.md) - Transition to test case development
 
-**Related Phase Documentation:**
-- [Phase 1: Test Planning](../phases/01-test-planning.md) - Detailed guidance on test planning activities
+### Related Templates
+- [Risk Assessment Template](risk-assessment-template.md) - Identify and manage testing risks
+- [Test Case Template](test-case-template.md) - Document test cases referenced in the plan
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - Adapt this template for Agile projects
+- [Scrum Testing](../methodologies/scrum.md) - Sprint planning considerations
+- [Waterfall Testing](../methodologies/waterfall.md) - Phase-based planning approach
 
 ---
 

@@ -436,16 +436,16 @@ Copy the above template for each additional risk identified. Number risks sequen
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Plan Template](test-plan-template.md) - Includes risk management section
-- [Test Execution Report Template](test-execution-report-template.md) - Reports on current risks and issues
-- [Test Summary Report Template](test-summary-report-template.md) - Summarizes risks that impacted testing
+### Phase Documentation
+- [Phase 1: Test Planning](../phases/01-test-planning.md) - Incorporate risk assessment into test planning
 
-**Related Phase Documentation:**
-- [Phase 1: Test Planning](../phases/01-test-planning.md) - Initial risk identification and planning
-- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analyzing risk impact on test results
+### Related Templates
+- [Test Plan Template](test-plan-template.md) - Reference risks in the overall test plan
+
+### Methodology Guides
+- [Methodology Comparison](../methodologies/comparison.md) - Risk considerations by methodology
 
 ---
 

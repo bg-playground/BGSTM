@@ -366,18 +366,19 @@
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Plan Template](test-plan-template.md) - References traceability approach and coverage targets
-- [Test Case Template](test-case-template.md) - Individual test cases linked in this matrix
-- [Test Execution Report Template](test-execution-report-template.md) - Reports coverage metrics from this matrix
-- [Test Summary Report Template](test-summary-report-template.md) - Summarizes coverage achievements
-- [Defect Report Template](defect-report-template.md) - Defects linked to requirements in this matrix
+### Phase Documentation
+- [Phase 2: Test Case Development](../phases/02-test-case-development.md) - Create traceability during test case development
+- [Phase 4: Test Execution](../phases/04-test-execution.md) - Update traceability during execution
 
-**Related Phase Documentation:**
-- [Phase 2: Test Case Development](../phases/02-test-case-development.md) - Establishing traceability during test design
-- [Phase 6: Test Results Reporting](../phases/06-test-results-reporting.md) - Reporting coverage results
+### Related Templates
+- [Test Case Template](test-case-template.md) - Test cases tracked in this matrix
+- [Test Plan Template](test-plan-template.md) - Traceability strategy
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - User story traceability
+- [Waterfall Testing](../methodologies/waterfall.md) - Requirements traceability
 
 ---
 

@@ -354,15 +354,20 @@
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Plan Template](test-plan-template.md) - Overall testing strategy and approach
-- [Defect Report Template](defect-report-template.md) - For logging defects found during execution
-- [Traceability Matrix Template](traceability-matrix-template.md) - For tracking requirements coverage
+### Phase Documentation
+- [Phase 2: Test Case Development](../phases/02-test-case-development.md) - Complete guide to test case development
+- [Phase 4: Test Execution](../phases/04-test-execution.md) - Executing the test cases
 
-**Related Phase Documentation:**
-- [Phase 2: Test Case Development](../phases/02-test-case-development.md) - Detailed guidance on creating test cases
+### Related Templates
+- [Test Plan Template](test-plan-template.md) - Overall testing strategy
+- [Traceability Matrix Template](traceability-matrix-template.md) - Map test cases to requirements
+- [Defect Report Template](defect-report-template.md) - Report defects found during execution
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - User story-based test cases
+- [Scrum Testing](../methodologies/scrum.md) - Sprint test case management
 
 ---
 **End of Test Case Template**

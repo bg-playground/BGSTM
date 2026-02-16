@@ -776,18 +776,21 @@ Pass Rate: 92%
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Plan Template](test-plan-template.md) - For planning testing activities reported here
-- [Test Case Template](test-case-template.md) - For individual test cases being executed
-- [Defect Report Template](defect-report-template.md) - For detailed defect information
-- [Test Summary Report Template](test-summary-report-template.md) - For final comprehensive test summary
-
-**Related Phase Documentation:**
-- [Phase 4: Test Execution](../phases/04-test-execution.md) - Detailed guidance on test execution activities
-- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analyzing test results and metrics
+### Phase Documentation
+- [Phase 4: Test Execution](../phases/04-test-execution.md) - Test execution activities
 - [Phase 6: Test Results Reporting](../phases/06-test-results-reporting.md) - Comprehensive reporting guidance
+
+### Related Templates
+- [Test Summary Report Template](test-summary-report-template.md) - Final comprehensive test report
+- [Defect Report Template](defect-report-template.md) - Detailed defect information
+- [Test Plan Template](test-plan-template.md) - Reference to test strategy and goals
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - Sprint execution reporting
+- [Scrum Testing](../methodologies/scrum.md) - Daily standup and sprint review reporting
+- [Waterfall Testing](../methodologies/waterfall.md) - Phase completion reporting
 
 ---
 

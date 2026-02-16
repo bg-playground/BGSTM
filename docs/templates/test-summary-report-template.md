@@ -736,19 +736,21 @@ This test summary report is submitted for review and approval. Signatures indica
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Plan Template](test-plan-template.md) - Original test planning document
-- [Test Case Template](test-case-template.md) - Individual test cases executed
-- [Test Execution Report Template](test-execution-report-template.md) - Detailed execution reports
-- [Defect Report Template](defect-report-template.md) - Individual defect details
-- [Traceability Matrix Template](traceability-matrix-template.md) - Requirements coverage details
-- [Risk Assessment Template](risk-assessment-template.md) - Risk analysis and mitigation
+### Phase Documentation
+- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analyze results before final report
+- [Phase 6: Test Results Reporting](../phases/06-test-results-reporting.md) - Complete reporting guidance
 
-**Related Phase Documentation:**
-- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analysis methodology
-- [Phase 6: Test Results Reporting](../phases/06-test-results-reporting.md) - Reporting guidance
+### Related Templates
+- [Test Execution Report Template](test-execution-report-template.md) - Periodic execution reports
+- [Test Plan Template](test-plan-template.md) - Reference original test objectives
+- [Defect Report Template](defect-report-template.md) - Detailed defect data
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - Sprint retrospective and release summaries
+- [Scrum Testing](../methodologies/scrum.md) - Sprint review documentation
+- [Waterfall Testing](../methodologies/waterfall.md) - Phase gate approval documentation
 
 ---
 

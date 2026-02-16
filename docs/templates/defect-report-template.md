@@ -701,16 +701,20 @@
 
 ---
 
-## Related Templates and Documents
+## Related Documentation
 
-**Related Templates:**
-- [Test Case Template](test-case-template.md) - For creating test cases that may discover defects
-- [Test Execution Report Template](test-execution-report-template.md) - For reporting defect statistics and trends
-- [Test Summary Report Template](test-summary-report-template.md) - For executive-level defect reporting
+### Phase Documentation
+- [Phase 4: Test Execution](../phases/04-test-execution.md) - Defect management during test execution
+- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analyze defect trends
 
-**Related Phase Documentation:**
-- [Phase 4: Test Execution](../phases/04-test-execution.md) - Guidance on defect discovery during test execution
-- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md) - Analyzing defect patterns and trends
+### Related Templates
+- [Test Case Template](test-case-template.md) - Link defects to test cases
+- [Test Execution Report Template](test-execution-report-template.md) - Report defect status
+- [Traceability Matrix Template](traceability-matrix-template.md) - Track defects to requirements
+
+### Methodology Guides
+- [Agile Testing](../methodologies/agile.md) - Sprint-based defect management
+- [Scrum Testing](../methodologies/scrum.md) - Defect workflow in Scrum
 
 ---
 
