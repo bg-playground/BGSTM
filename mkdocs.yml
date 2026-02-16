@@ -1,4 +1,4 @@
-site_name: BGSTM - Better Global Software Testing Methodology
+site_name: BGSTM - Professional Software Testing Framework
 site_description: A comprehensive, professional software testing framework adaptable to Agile, Scrum, and Waterfall methodologies
 site_author: BGSTM Project
 site_url: https://bg-playground.github.io/BGSTM/
@@ -17,15 +17,15 @@ theme:
   palette:
     # Light mode
     - scheme: default
-      primary: indigo
-      accent: blue
+      primary: blue
+      accent: light-blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     # Dark mode
     - scheme: slate
-      primary: indigo
-      accent: blue
+      primary: blue
+      accent: light-blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -38,11 +38,15 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.footer
+    - navigation.indexes
     - search.suggest
     - search.highlight
     - search.share
     - content.code.copy
+    - content.code.annotate
     - content.action.edit
+    - content.action.view
     - toc.follow
   
   icon:
@@ -50,15 +54,17 @@ theme:
     edit: material/pencil
     view: material/eye
 
-  # Uncomment and add custom logo and favicon files to docs/assets/
-  # favicon: assets/favicon.png
-  # logo: assets/logo.png
+  # Custom logo and favicon
+  favicon: assets/favicon.png
+  logo: assets/logo.png
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/bg-playground/BGSTM
       name: BGSTM on GitHub
+  
+  generator: false  # Remove "Made with Material for MkDocs" footer
   
   version:
     provider: mike
