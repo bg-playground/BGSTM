@@ -121,6 +121,11 @@ Test Planning is the foundational phase where the testing strategy, scope, objec
 ## Templates
 - [Test Plan Template](../templates/test-plan-template.md)
 
+## Examples
+- [Test Plan Example](../examples/test-plan-example.md) - Complete test plan for an e-commerce checkout system showing Agile sprint-based approach with comprehensive strategy, resource allocation, risk assessment, and schedule. Includes Waterfall variation in appendix.
+- [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Risk identification and mitigation strategies
+- [Testing Schedule Example](../examples/testing-schedule-example.md) - Agile sprint schedule with Waterfall comparison
+
 ## Previous Phase
 This is the first phase in the BGSTM framework.
 
