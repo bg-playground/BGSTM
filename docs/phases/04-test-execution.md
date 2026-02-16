@@ -156,24 +156,23 @@ Each defect report should include:
 - Used when time is constrained
 
 ## Deliverables
-1. **Test Execution Report**: Summary of executed tests
-2. **Defect Reports**: Documented issues
-3. **Test Logs**: Detailed execution logs
-4. **Test Evidence**: Screenshots, videos, recordings
-5. **Traceability Matrix**: Updated with execution status
-6. **Test Metrics Dashboard**: Real-time progress tracking
+Enumerate all key outputs produced in this phase:
+- Test execution logs
+- Completed test cases with results
+- Defect reports
+- Test metrics and KPIs
+- Environment logs
+- Screenshots/evidence
 
 ## Best Practices
-- Execute high-priority test cases first
-- Document all findings immediately
-- Maintain clear communication with development team
-- Don't assume - verify everything
-- Test in production-like conditions
-- Perform exploratory testing alongside scripted tests
-- Keep stakeholders informed of progress
-- Handle test data responsibly
-- Report defects promptly and accurately
-- Maintain test environment stability
+Include tips, pitfalls to avoid, and recommendations:
+- Execute tests in a consistent order
+- Document all deviations from test cases
+- Log defects immediately when found
+- Maintain traceability between tests and requirements
+- Communicate blockers quickly
+- Follow the defect management workflow
+- Keep test data organized and version-controlled
 
 ## Common Challenges and Solutions
 
@@ -204,22 +203,10 @@ Each defect report should include:
 - Defect resolution time
 
 ## Methodology-Specific Considerations
-
-### Agile/Scrum
-- Test execution happens throughout sprint
-- Daily testing activities
-- Quick feedback loops
-- Automated regression testing
-- Exploratory testing sessions
-- Continuous integration and testing
-
-### Waterfall
-- Formal test execution phase
-- Complete test cycle execution
-- Detailed test execution reports
-- Formal defect triage meetings
-- Multiple test cycles (Alpha, Beta, etc.)
-- Comprehensive regression testing
+Explain how Agile, Scrum, Waterfall, etc. impact this phase:
+- **Agile/Scrum**: Daily standup updates, sprint-based execution, continuous testing
+- **Waterfall**: Formal test execution phase, gate criteria, comprehensive reporting
+- **DevOps/Continuous**: Automated execution in CI/CD pipelines
 
 ## Tools and Technologies
 - **Test Management**: TestRail, Zephyr, qTest
@@ -230,8 +217,10 @@ Each defect report should include:
 - **API Testing**: Postman, REST Assured, SoapUI
 
 ## Templates
-- [Test Execution Report Template](../templates/test-execution-report-template.md)
+Link to relevant templates in `docs/templates/`:
 - [Defect Report Template](../templates/defect-report-template.md)
+- [Test Execution Report Template](../templates/test-execution-report-template.md)
+- Test Results Summary Template
 
 ## Examples
 - [Defect Report Example](../examples/defect-report-example.md) - Comprehensive defect report examples showing 10 realistic defects across all severity levels (Critical to Low). Includes complete defect lifecycle from identification through closure, with root cause analysis, reproduction steps, verification procedures, and best practices for defect documentation.
@@ -240,4 +229,4 @@ Each defect report should include:
 [Test Environment Preparation](03-test-environment-preparation.md)
 
 ## Next Phase
-Proceed to [Test Results Analysis](05-test-results-analysis.md) after test execution is complete.
+→ [Phase 5: Test Results Analysis](05-test-results-analysis.md)
