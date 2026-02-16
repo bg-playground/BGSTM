@@ -1,0 +1,56 @@
+name: 📝 Documentation Improvement
+description: Suggest improvements to existing documentation
+title: "[Docs] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us improve the BGSTM documentation! Please fill out the form below with your suggestion.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What improvement do you suggest?
+      placeholder: Describe the improvement you'd like to see...
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-docs
+    attributes:
+      label: Affected Document(s)
+      description: Which file(s) need updating?
+      placeholder: |
+        e.g., docs/phases/01-test-planning.md
+        docs/templates/test-plan-template.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content
+      description: What does it currently say? (optional)
+      placeholder: Paste the current content that needs improvement...
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed-content
+    attributes:
+      label: Proposed Content
+      description: What should it say instead? (optional)
+      placeholder: Provide your suggested content...
+    validations:
+      required: false
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason for Change
+      description: Why is this improvement needed?
+      placeholder: Explain why this change would improve the documentation...
+    validations:
+      required: true

@@ -1,0 +1,69 @@
+name: 📋 Template Contribution
+description: Propose a new template or example
+title: "[Template] "
+labels: ["templates"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing to BGSTM! Please fill out the form below to propose a new template or example.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What template or example are you proposing?
+      placeholder: Provide a clear description of your proposed template or example...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: Is this a template or an example?
+      options:
+        - Template
+        - Example
+    validations:
+      required: true
+
+  - type: dropdown
+    id: related-phase
+    attributes:
+      label: Related Phase
+      description: Which phase does this support?
+      options:
+        - Phase 1 - Test Planning
+        - Phase 2 - Test Case Development
+        - Phase 3 - Test Environment Preparation
+        - Phase 4 - Test Execution
+        - Phase 5 - Test Results Analysis
+        - Phase 6 - Test Results Reporting
+        - Multiple phases
+    validations:
+      required: true
+
+  - type: textarea
+    id: content-outline
+    attributes:
+      label: Content Outline
+      description: Brief outline of what the template/example would contain
+      placeholder: |
+        Provide an outline, for example:
+        - Section 1: Overview
+        - Section 2: Details
+        - Section 3: Examples
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: methodology
+    attributes:
+      label: Methodology
+      description: Which methodology is this for?
+      options:
+        - label: Agile
+        - label: Scrum
+        - label: Waterfall
+        - label: All methodologies

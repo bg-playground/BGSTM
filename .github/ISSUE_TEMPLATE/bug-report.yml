@@ -1,0 +1,60 @@
+name: 🐛 Bug Report
+description: Report a bug or error in documentation or templates
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below to help us understand and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's the issue? Please provide a clear and concise description.
+      placeholder: Describe the bug you found...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Location
+      description: Which file or section is affected?
+      options:
+        - docs/phases/
+        - docs/templates/
+        - docs/examples/
+        - docs/methodologies/
+        - docs/integration/
+        - Other (please specify in description)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should it say or do?
+      placeholder: Describe what you expected to see...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What does it currently say or do?
+      placeholder: Describe what you actually see...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here, including screenshots, links, or related issues.
+      placeholder: Paste screenshots, links, or any additional information...
+    validations:
+      required: false

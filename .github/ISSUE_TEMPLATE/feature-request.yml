@@ -1,0 +1,60 @@
+name: ✨ Feature Request
+description: Request a new feature or enhancement
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please fill out the form below to help us understand your request.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the feature or enhancement you'd like to see
+      placeholder: Provide a clear and concise description of the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Why is this feature needed? What problem does it solve?
+      placeholder: Describe the problem or use case this feature addresses...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How would you implement it? (optional)
+      placeholder: Describe your proposed implementation...
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any other approaches? (optional)
+      placeholder: Describe alternative solutions you've considered...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: related-phases
+    attributes:
+      label: Related Phase(s)
+      description: Which BGSTM phase(s) does this relate to?
+      options:
+        - label: Phase 1 - Test Planning
+        - label: Phase 2 - Test Case Development
+        - label: Phase 3 - Test Environment Preparation
+        - label: Phase 4 - Test Execution
+        - label: Phase 5 - Test Results Analysis
+        - label: Phase 6 - Test Results Reporting
+        - label: All phases
+        - label: Not phase-specific
