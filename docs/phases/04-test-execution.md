@@ -216,9 +216,29 @@ Explain how Agile, Scrum, Waterfall, etc. impact this phase:
 - **Security Testing**: OWASP ZAP, Burp Suite
 - **API Testing**: Postman, REST Assured, SoapUI
 
-## Templates
-- [Defect Report Template](../templates/defect-report-template.md)
-- [Test Execution Report Template](../templates/test-execution-report-template.md)
+## Related Templates
+
+The following templates support Test Execution activities:
+
+### Primary Templates
+- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Regular testing progress reports
+  - Use this template for daily, weekly, sprint, or phase-level test execution reporting
+  - Includes test execution statistics, defect summary, coverage metrics, and risk/issue tracking
+  - Provides detailed guidance on metrics calculation and interpretation
+  
+- **[Defect Report Template](../templates/defect-report-template.md)** - Comprehensive defect documentation
+  - Use this template to document defects discovered during test execution
+  - Includes defect classification, reproduction steps, impact analysis, and resolution tracking
+  - Provides severity/priority definitions and best practices for effective defect reporting
+
+### Supporting Templates
+- **[Test Case Template](../templates/test-case-template.md)** - Reference for test case execution
+  - Use during execution to record actual results and status
+  - Link defects back to test cases for traceability
+  
+- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Track execution status by requirement
+  - Update execution status as test cases are executed
+  - Monitor requirement coverage progress
 
 ## Examples
 - [Defect Report Example](../examples/defect-report-example.md) - Comprehensive defect report examples showing 10 realistic defects across all severity levels (Critical to Low). Includes complete defect lifecycle from identification through closure, with root cause analysis, reproduction steps, verification procedures, and best practices for defect documentation.
