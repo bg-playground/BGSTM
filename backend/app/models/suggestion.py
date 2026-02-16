@@ -1,0 +1,45 @@
+import enum
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Text, Enum, Float, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.orm import relationship
+from .base import Base
+
+
+class SuggestionMethod(str, enum.Enum):
+    SEMANTIC_SIMILARITY = "semantic_similarity"
+    KEYWORD_MATCH = "keyword_match"
+    HEURISTIC = "heuristic"
+    HYBRID = "hybrid"
+
+
+class SuggestionStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class LinkSuggestion(Base):
+    __tablename__ = "link_suggestions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    requirement_id = Column(UUID(as_uuid=True), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
+    test_case_id = Column(UUID(as_uuid=True), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
+    similarity_score = Column(Float, nullable=False)
+    suggestion_method = Column(Enum(SuggestionMethod), nullable=False)
+    suggestion_reason = Column(Text, nullable=True)
+    suggestion_metadata = Column(JSONB, nullable=True)
+    status = Column(Enum(SuggestionStatus), nullable=False, default=SuggestionStatus.PENDING)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewed_by = Column(String(100), nullable=True)
+    feedback = Column(Text, nullable=True)
+
+    # Relationships
+    requirement = relationship("Requirement", back_populates="suggestions")
+    test_case = relationship("TestCase", back_populates="suggestions")
+
+    def __repr__(self):
+        return f"<Suggestion(req={self.requirement_id}, tc={self.test_case_id}, score={self.similarity_score:.2f})>"
