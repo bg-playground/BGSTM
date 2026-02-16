@@ -89,6 +89,9 @@ This guide provides a comprehensive framework for testing activities throughout 
 - [ ] Balance speed with comprehensiveness
 
 #### Test Automation Pyramid
+
+The test automation pyramid represents the ideal distribution of automated tests to maximize effectiveness while minimizing maintenance effort and execution time. The percentages indicate the proportion of your total automated test suite that should be at each level.
+
 ```
        /\
       /UI\         10% - End-to-end UI tests
@@ -102,6 +105,8 @@ This guide provides a comprehensive framework for testing activities throughout 
 /     Tests      \ (Fast, reliable, easy to maintain)
 /________________\
 ```
+
+This distribution ensures fast feedback (unit tests run in seconds), stable test suite (fewer UI tests to maintain), and comprehensive coverage at appropriate levels.
 
 ### Exploratory Testing Sessions
 

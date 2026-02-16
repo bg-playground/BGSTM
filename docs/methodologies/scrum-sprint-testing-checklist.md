@@ -59,6 +59,7 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [ ] Request clarifications from team members
 
 #### Continuous Integration Testing
+*Monitor and maintain CI/CD pipeline health continuously throughout the sprint:*
 - [ ] Monitor CI/CD pipeline for build failures
 - [ ] Investigate and report failed automated tests
 - [ ] Verify automated smoke tests pass on each commit
