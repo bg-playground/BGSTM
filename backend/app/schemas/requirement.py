@@ -14,7 +14,7 @@ class RequirementBase(BaseModel):
     status: RequirementStatus = RequirementStatus.DRAFT
     module: Optional[str] = Field(None, max_length=100)
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    custom_metadata: Optional[Dict[str, Any]] = None
     source_system: Optional[str] = Field(None, max_length=50)
     source_url: Optional[str] = None
     created_by: Optional[str] = Field(None, max_length=100)
@@ -34,7 +34,7 @@ class RequirementUpdate(BaseModel):
     status: Optional[RequirementStatus] = None
     module: Optional[str] = Field(None, max_length=100)
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    custom_metadata: Optional[Dict[str, Any]] = None
     source_system: Optional[str] = Field(None, max_length=50)
     source_url: Optional[str] = None
 

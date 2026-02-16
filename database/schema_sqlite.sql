@@ -13,7 +13,7 @@ CREATE TABLE requirements (
     status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'approved', 'implemented', 'tested', 'closed')),
     module TEXT,
     tags TEXT,  -- JSON array as TEXT
-    metadata TEXT,  -- JSON object as TEXT
+    custom_metadata TEXT,  -- JSON object as TEXT
     source_system TEXT,
     source_url TEXT,
     created_by TEXT,
@@ -39,7 +39,7 @@ CREATE TABLE test_cases (
     tags TEXT,  -- JSON array as TEXT
     automation_status TEXT DEFAULT 'manual' CHECK(automation_status IN ('manual', 'automated', 'automatable')),
     execution_time_minutes INTEGER,
-    metadata TEXT,  -- JSON object as TEXT
+    custom_metadata TEXT,  -- JSON object as TEXT
     source_system TEXT,
     source_url TEXT,
     created_by TEXT,

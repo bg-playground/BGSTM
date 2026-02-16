@@ -2,9 +2,9 @@ import enum
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, Enum, Float, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from .base import Base
+from .requirement import GUID, JSON  # Import cross-platform types
 
 
 class SuggestionMethod(str, enum.Enum):
@@ -24,13 +24,13 @@ class SuggestionStatus(str, enum.Enum):
 class LinkSuggestion(Base):
     __tablename__ = "link_suggestions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    requirement_id = Column(UUID(as_uuid=True), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
-    test_case_id = Column(UUID(as_uuid=True), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    requirement_id = Column(GUID(), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
+    test_case_id = Column(GUID(), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
     similarity_score = Column(Float, nullable=False)
     suggestion_method = Column(Enum(SuggestionMethod), nullable=False)
     suggestion_reason = Column(Text, nullable=True)
-    suggestion_metadata = Column(JSONB, nullable=True)
+    suggestion_metadata = Column(JSON(), nullable=True)
     status = Column(Enum(SuggestionStatus), nullable=False, default=SuggestionStatus.PENDING)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     reviewed_at = Column(DateTime, nullable=True)

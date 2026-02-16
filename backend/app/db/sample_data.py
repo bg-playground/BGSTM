@@ -37,7 +37,7 @@ async def load_sample_data():
             status=RequirementStatus.APPROVED,
             module="Authentication",
             tags=["security", "user-management", "login"],
-            metadata={"complexity": "high", "estimated_hours": 40},
+            custom_metadata={"complexity": "high", "estimated_hours": 40},
             source_system="Jira",
             created_by="product_manager"
         )
@@ -52,7 +52,7 @@ async def load_sample_data():
             status=RequirementStatus.APPROVED,
             module="Product",
             tags=["search", "filtering", "user-experience"],
-            metadata={"complexity": "medium", "estimated_hours": 24},
+            custom_metadata={"complexity": "medium", "estimated_hours": 24},
             source_system="Jira",
             created_by="product_manager"
         )
@@ -67,7 +67,7 @@ async def load_sample_data():
             status=RequirementStatus.IMPLEMENTED,
             module="Cart",
             tags=["shopping-cart", "user-experience", "persistence"],
-            metadata={"complexity": "medium", "estimated_hours": 20},
+            custom_metadata={"complexity": "medium", "estimated_hours": 20},
             source_system="Jira",
             created_by="product_manager"
         )
@@ -82,7 +82,7 @@ async def load_sample_data():
             status=RequirementStatus.TESTED,
             module="Checkout",
             tags=["payment", "security", "checkout"],
-            metadata={"complexity": "high", "estimated_hours": 50},
+            custom_metadata={"complexity": "high", "estimated_hours": 50},
             source_system="Jira",
             created_by="product_manager"
         )
@@ -97,7 +97,7 @@ async def load_sample_data():
             status=RequirementStatus.DRAFT,
             module="Orders",
             tags=["order-management", "tracking", "user-experience"],
-            metadata={"complexity": "medium", "estimated_hours": 30},
+            custom_metadata={"complexity": "medium", "estimated_hours": 30},
             source_system="Jira",
             created_by="product_manager"
         )

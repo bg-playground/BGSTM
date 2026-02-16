@@ -1,10 +1,9 @@
 import enum
 import uuid
-from sqlalchemy import Column, String, Text, Enum, Integer, ARRAY
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, Text, Enum, Integer
 from sqlalchemy.orm import relationship
 from .base import Base, TimestampMixin
-from .requirement import PriorityLevel  # Reuse
+from .requirement import PriorityLevel, GUID, JSON, ArrayType  # Reuse and import common types
 
 
 class TestCaseType(str, enum.Enum):
@@ -35,22 +34,22 @@ class AutomationStatus(str, enum.Enum):
 class TestCase(Base, TimestampMixin):
     __tablename__ = "test_cases"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     external_id = Column(String(100), unique=True, nullable=True, index=True)
     title = Column(String(500), nullable=False, index=True)
     description = Column(Text, nullable=False)
     type = Column(Enum(TestCaseType), nullable=False)
     priority = Column(Enum(PriorityLevel), nullable=False)
     status = Column(Enum(TestCaseStatus), nullable=False, default=TestCaseStatus.DRAFT)
-    steps = Column(JSONB, nullable=True)
+    steps = Column(JSON(), nullable=True)
     preconditions = Column(Text, nullable=True)
     postconditions = Column(Text, nullable=True)
-    test_data = Column(JSONB, nullable=True)
+    test_data = Column(JSON(), nullable=True)
     module = Column(String(100), nullable=True)
-    tags = Column(ARRAY(String), nullable=True)
+    tags = Column(ArrayType(), nullable=True)
     automation_status = Column(Enum(AutomationStatus), default=AutomationStatus.MANUAL)
     execution_time_minutes = Column(Integer, nullable=True)
-    metadata = Column(JSONB, nullable=True)
+    custom_metadata = Column(JSON(), nullable=True)
     source_system = Column(String(50), nullable=True)
     source_url = Column(Text, nullable=True)
     created_by = Column(String(100), nullable=True)

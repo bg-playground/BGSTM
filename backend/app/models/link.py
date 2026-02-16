@@ -2,9 +2,9 @@ import enum
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, Enum, Float, ForeignKey, DateTime, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from .base import Base
+from .requirement import GUID  # Import cross-platform GUID type
 
 
 class LinkType(str, enum.Enum):
@@ -24,9 +24,9 @@ class LinkSource(str, enum.Enum):
 class RequirementTestCaseLink(Base):
     __tablename__ = "requirement_test_case_links"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    requirement_id = Column(UUID(as_uuid=True), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
-    test_case_id = Column(UUID(as_uuid=True), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    requirement_id = Column(GUID(), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
+    test_case_id = Column(GUID(), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
     link_type = Column(Enum(LinkType), nullable=False, default=LinkType.COVERS)
     confidence_score = Column(Float, nullable=True)
     link_source = Column(Enum(LinkSource), nullable=False)
