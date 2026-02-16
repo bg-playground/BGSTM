@@ -189,8 +189,21 @@ Test Environment Preparation involves setting up the hardware, software, network
 - **Infrastructure as Code**: Terraform, CloudFormation, Pulumi
 - **Monitoring**: Nagios, Datadog, New Relic, Prometheus
 
-## Templates
-- [Test Plan Template](../templates/test-plan-template.md)
+## Related Templates
+
+The following templates support Test Environment Preparation activities:
+
+### Primary Templates
+- **[Test Plan Template](../templates/test-plan-template.md)** - Test environment section
+  - Refer to the test environment requirements section of your test plan
+  - Documents hardware, software, network, and tool requirements
+
+### Supporting Templates
+- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Environment status reporting
+  - Use the environment status section to track environment issues and availability
+  - Report on environment downtime and its impact on testing
+
+**Note:** Specific environment setup checklists and configuration templates are referenced in the Test Plan template and can be customized based on project needs.
 
 ## Examples
 - [Environment Setup Checklist Example](../examples/environment-setup-example.md) - Comprehensive environment setup checklist covering hardware infrastructure, software installation, application deployment, database configuration, third-party integrations (PayPal, Apple Pay, Google Pay, shipping APIs), test data preparation, security setup, and validation procedures with sign-off.

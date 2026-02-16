@@ -323,9 +323,29 @@ Different stakeholders need different information:
 - **Version Control**: Git, SVN for documentation
 - **PDF Generation**: Adobe Acrobat, PDFKit, Pandoc
 
-## Templates
-- [Test Execution Report Template](../templates/test-execution-report-template.md)
-- [Defect Report Template](../templates/defect-report-template.md)
+## Related Templates
+
+The following templates support Test Results Reporting activities:
+
+### Primary Templates
+- **[Test Summary Report Template](../templates/test-summary-report-template.md)** - Final comprehensive test report
+  - Use this template as the primary deliverable for final test reporting
+  - Includes executive summary, complete test results, quality assessment, and release recommendation
+  - Designed for stakeholder review and formal sign-off
+  
+- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Final coverage verification
+  - Include as supporting documentation to demonstrate complete requirement coverage
+  - Shows final execution status and defect resolution for all requirements
+
+### Supporting Templates  
+- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Supporting execution data
+  - Provide as appendices or supporting detail for comprehensive reporting
+  
+- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Final risk status
+  - Include final risk assessment and residual risks in reporting package
+  
+- **[Defect Report Template](../templates/defect-report-template.md)** - Defect summaries
+  - Reference for detailed defect information in final reports
 
 ## Examples
 - [Traceability Matrix Example](../examples/traceability-matrix-example.md) - Complete requirements traceability matrix linking 64 requirements to 350 test cases. Shows bidirectional traceability with test execution status, defect linkage, coverage analysis (100% achieved), gap analysis, and compliance validation (PCI-DSS, WCAG 2.1 AA). Includes final QA sign-off.

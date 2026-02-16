@@ -150,8 +150,22 @@ Each test case should include:
 - **Automation Frameworks**: Selenium, Cypress, Playwright, Appium
 - **API Testing**: Postman, SoapUI, REST Assured
 
-## Templates
-- [Test Case Template](../templates/test-case-template.md)
+## Related Templates
+
+The following templates support Test Case Development activities:
+
+### Primary Templates
+- **[Test Case Template](../templates/test-case-template.md)** - Standardized test case documentation format
+  - Use this template for documenting individual test cases with detailed steps, expected results, and execution tracking
+  - Includes sections for test objectives, preconditions, test steps, expected/actual results, and defect linkage
+  
+- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Requirements-to-test cases mapping
+  - Use this template to establish and maintain traceability between requirements and test cases
+  - Ensures complete test coverage and enables impact analysis when requirements change
+
+### Supporting Templates
+- **[Test Plan Template](../templates/test-plan-template.md)** - Reference for test strategy and approach
+- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Consider risks when prioritizing test case development
 
 ## Examples
 - [Test Case Suite Example](../examples/test-case-suite-example.md) - Complete test case suite with 12 detailed test cases covering guest checkout, payment processing (PayPal, Apple Pay, Google Pay), promotional codes, mobile testing, and error handling. Includes functional, integration, and negative test scenarios.

@@ -240,9 +240,29 @@ Explain how Agile, Scrum, Waterfall, etc. impact this phase:
 - Document known limitations
 - Plan for post-release fixes if needed
 
-## Templates
-- [Test Execution Report Template](../templates/test-execution-report-template.md)
-- [Defect Report Template](../templates/defect-report-template.md)
+## Related Templates
+
+The following templates support Test Results Analysis activities:
+
+### Primary Templates
+- **[Test Summary Report Template](../templates/test-summary-report-template.md)** - Comprehensive final test report
+  - Use this template to create the executive-level summary of all testing activities and results
+  - Includes quality assessment, defect analysis, release recommendation, and stakeholder sign-off
+  - Essential for go/no-go decision making
+  
+- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Residual risk analysis
+  - Review and update risk assessment based on test results
+  - Document residual risks and their mitigation for release decision
+
+### Supporting Templates
+- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Source of execution data for analysis
+  - Aggregate data from multiple execution reports for comprehensive analysis
+  
+- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Coverage verification
+  - Use to verify complete requirement coverage and identify gaps
+  
+- **[Defect Report Template](../templates/defect-report-template.md)** - Defect details for analysis
+  - Analyze defect patterns, trends, and resolution status
 
 ## Examples
 - [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Comprehensive risk management document with 13 tracked risks using Impact × Likelihood scoring methodology. Includes risk heat map, mitigation strategies, weekly review process, and escalation procedures covering technical, resource, schedule, and compliance risks.
