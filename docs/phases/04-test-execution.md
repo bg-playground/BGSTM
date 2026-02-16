@@ -217,7 +217,6 @@ Explain how Agile, Scrum, Waterfall, etc. impact this phase:
 - **API Testing**: Postman, REST Assured, SoapUI
 
 ## Templates
-Link to relevant templates in `docs/templates/`:
 - [Defect Report Template](../templates/defect-report-template.md)
 - [Test Execution Report Template](../templates/test-execution-report-template.md)
 - Test Results Summary Template
