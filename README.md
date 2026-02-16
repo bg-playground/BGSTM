@@ -90,6 +90,19 @@ This framework can serve as the foundation for building comprehensive testing ma
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
 
+## 🗺️ Roadmap
+
+BGSTM is actively evolving. Here's our planned development path:
+
+| Milestone | Focus | Status |
+|-----------|-------|--------|
+| **v1.0 - Core Framework** | Standardize all phase documentation, ensure consistent structure | 🔄 In Progress |
+| **v1.1 - Templates & Examples** | Finalize all templates, add real-world examples, methodology checklists | ⬜ Planned |
+| **v2.0 - Traceability & AI Features** | AI-powered requirement-test case linking, traceability matrix | ⬜ Planned |
+| **v3.0 - App Integration** | Multi-platform app integration guide, architecture patterns | ⬜ Planned |
+
+See our [milestones](https://github.com/bg-playground/BGSTM/milestones) and [open issues](https://github.com/bg-playground/BGSTM/issues) for detailed tracking.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to:
@@ -99,11 +112,11 @@ Contributions are welcome! Whether you want to:
 - Report issues
 - Suggest features
 
-Please feel free to open issues or submit pull requests.
+Please see our **[Contributing Guide](CONTRIBUTING.md)** for guidelines on how to get started.
 
 ## 📄 License
 
-This project is open source and available for use in your projects and organizations.
+This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](LICENSE). You are free to share and adapt this material for any purpose, as long as appropriate credit is given.
 
 ## 🔗 Related Resources
 
