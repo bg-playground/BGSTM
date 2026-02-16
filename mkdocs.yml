@@ -50,8 +50,9 @@ theme:
     edit: material/pencil
     view: material/eye
 
-  favicon: assets/favicon.png
-  logo: assets/logo.png
+  # Uncomment and add custom logo and favicon files to docs/assets/
+  # favicon: assets/favicon.png
+  # logo: assets/logo.png
 
 extra:
   social:
