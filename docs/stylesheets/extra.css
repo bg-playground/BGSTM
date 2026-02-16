@@ -31,7 +31,7 @@
 /* Better table styling */
 .md-typeset table:not([class]) {
   border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 0.2rem;
+  border-radius: 0.3rem;
 }
 
 /* Enhance admonitions (callouts) */

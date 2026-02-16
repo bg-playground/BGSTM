@@ -66,14 +66,6 @@ extra:
   
   generator: false  # Remove "Made with Material for MkDocs" footer
   
-  # Social cards for better sharing
-  tags:
-    Testing: testing
-    QA: qa
-    Framework: framework
-    Agile: agile
-    Waterfall: waterfall
-  
   version:
     provider: mike
     default: latest
