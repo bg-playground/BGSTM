@@ -441,7 +441,14 @@ Clear, testable conditions that must be met:
 - Cross-team collaboration
 
 ## See Also
+
+### Practical Guides
+- [**Scrum Sprint Testing Checklist**](scrum-sprint-testing-checklist.md) - Comprehensive checklist for sprint testing activities
+
+### Related Methodologies
 - [Agile Testing Methodology](agile.md)
 - [Waterfall Testing Methodology](waterfall.md)
 - [Methodology Comparison](comparison.md)
+
+### Testing Phases
 - [Six Testing Phases](../phases/01-test-planning.md)
