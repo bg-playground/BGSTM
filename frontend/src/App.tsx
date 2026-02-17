@@ -7,6 +7,7 @@ import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
 import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
+import { AnalyticsDashboard } from './pages/AnalyticsDashboard';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/links" element={<ManualLinksPage />} />
             <Route path="/traceability" element={<TraceabilityMatrixPage />} />
             <Route path="/metrics" element={<MetricsDashboardPage />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
           </Routes>
         </div>
       </BrowserRouter>
