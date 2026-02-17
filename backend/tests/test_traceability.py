@@ -1,7 +1,6 @@
 """Tests for Traceability Matrix and Metrics endpoints"""
 
 import uuid
-from datetime import datetime
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
