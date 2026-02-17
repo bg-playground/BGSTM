@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { analyticsApi, AlgorithmComparison, AcceptanceRates, ReviewVelocity } from '../api/analytics';
+import { analyticsApi, type AlgorithmComparison, type AcceptanceRates, type ReviewVelocity } from '../api/analytics';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 

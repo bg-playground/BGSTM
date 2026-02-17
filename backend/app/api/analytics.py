@@ -19,12 +19,12 @@ async def get_acceptance_rates(
 ):
     """
     Get suggestion acceptance rates overall and by algorithm
-    
+
     Returns metrics on accepted, rejected, and pending suggestions
     """
     end_date = datetime.utcnow()
     start_date = end_date - timedelta(days=days) if days else None
-    
+
     return await SuggestionAnalytics.get_acceptance_rates(db, start_date, end_date)
 
 
@@ -35,7 +35,7 @@ async def get_confidence_distribution(
 ):
     """
     Get distribution of confidence scores in buckets
-    
+
     Shows how suggestions are distributed across confidence ranges
     """
     return await SuggestionAnalytics.get_confidence_distribution(db, algorithm)
@@ -48,7 +48,7 @@ async def get_generation_trends(
 ):
     """
     Get daily suggestion generation trends
-    
+
     Shows how many suggestions are being generated over time
     """
     return await SuggestionAnalytics.get_generation_trends(db, days)
@@ -61,7 +61,7 @@ async def get_review_velocity(
 ):
     """
     Get review velocity metrics
-    
+
     Shows how quickly suggestions are being reviewed
     """
     return await SuggestionAnalytics.get_review_velocity(db, days)
@@ -73,7 +73,7 @@ async def get_algorithm_comparison(
 ):
     """
     Compare all algorithms across multiple metrics
-    
+
     Returns comprehensive comparison to inform algorithm selection
     """
     return await SuggestionAnalytics.get_algorithm_comparison(db)
