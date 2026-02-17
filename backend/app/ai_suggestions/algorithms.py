@@ -339,12 +339,125 @@ class HybridSimilarity(SimilarityAlgorithm):
             return keyword_score
 
 
+class LLMEmbeddingSimilarity(SimilarityAlgorithm):
+    """LLM-based embedding similarity using OpenAI or HuggingFace"""
+
+    def __init__(self, provider: str = "openai", model: str = None, cache_embeddings: bool = True):
+        """
+        Args:
+            provider: 'openai' or 'huggingface'
+            model: Model name (e.g., 'text-embedding-3-small' for OpenAI, 'sentence-transformers/all-MiniLM-L6-v2' for HF)
+            cache_embeddings: Whether to cache embeddings in memory for performance
+        """
+        self.provider = provider.lower()
+        self.cache_embeddings = cache_embeddings
+        self._embedding_cache = {} if cache_embeddings else None
+
+        if self.provider == "openai":
+            self.model = model or "text-embedding-3-small"
+            self._init_openai()
+        elif self.provider == "huggingface":
+            self.model = model or "sentence-transformers/all-MiniLM-L6-v2"
+            self._init_huggingface()
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
+
+    def _init_openai(self):
+        """Initialize OpenAI client"""
+        try:
+            from openai import OpenAI
+            import os
+
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY environment variable not set")
+            self.client = OpenAI(api_key=api_key)
+        except ImportError:
+            raise ImportError("OpenAI library not installed. Run: pip install openai")
+
+    def _init_huggingface(self):
+        """Initialize HuggingFace model"""
+        try:
+            from sentence_transformers import SentenceTransformer
+
+            self.model_instance = SentenceTransformer(self.model)
+        except ImportError:
+            raise ImportError("sentence-transformers not installed. Run: pip install sentence-transformers")
+
+    def _get_embedding_openai(self, text: str) -> list[float]:
+        """Get embedding from OpenAI"""
+        if self.cache_embeddings and text in self._embedding_cache:
+            return self._embedding_cache[text]
+
+        response = self.client.embeddings.create(input=text, model=self.model)
+        embedding = response.data[0].embedding
+
+        if self.cache_embeddings:
+            self._embedding_cache[text] = embedding
+
+        return embedding
+
+    def _get_embedding_huggingface(self, text: str) -> list[float]:
+        """Get embedding from HuggingFace"""
+        if self.cache_embeddings and text in self._embedding_cache:
+            return self._embedding_cache[text]
+
+        embedding = self.model_instance.encode(text).tolist()
+
+        if self.cache_embeddings:
+            self._embedding_cache[text] = embedding
+
+        return embedding
+
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
+        """Compute cosine similarity between two vectors"""
+        import math
+
+        dot_product = sum(a * b for a, b in zip(vec1, vec2))
+        magnitude1 = math.sqrt(sum(a * a for a in vec1))
+        magnitude2 = math.sqrt(sum(b * b for b in vec2))
+
+        if magnitude1 == 0 or magnitude2 == 0:
+            return 0.0
+
+        return dot_product / (magnitude1 * magnitude2)
+
+    def compute_similarity(self, text1: str, text2: str) -> float:
+        """
+        Compute similarity using LLM embeddings
+
+        Returns:
+            Similarity score between 0.0 and 1.0
+        """
+        if not text1.strip() or not text2.strip():
+            return 0.0
+
+        try:
+            if self.provider == "openai":
+                emb1 = self._get_embedding_openai(text1)
+                emb2 = self._get_embedding_openai(text2)
+            else:  # huggingface
+                emb1 = self._get_embedding_huggingface(text1)
+                emb2 = self._get_embedding_huggingface(text2)
+
+            # Cosine similarity returns -1 to 1, normalize to 0 to 1
+            similarity = self._cosine_similarity(emb1, emb2)
+            return (similarity + 1.0) / 2.0
+
+        except Exception as e:
+            # Log error and return 0 to avoid breaking the entire generation process
+            import logging
+
+            logging.error(f"Error computing LLM similarity: {e}")
+            return 0.0
+
+
 def get_algorithm(algorithm_name: str, config=None) -> SimilarityAlgorithm:
     """
     Factory function to get a similarity algorithm by name
 
     Args:
-        algorithm_name: Name of the algorithm ('tfidf', 'keyword', or 'hybrid')
+        algorithm_name: Name of the algorithm ('tfidf', 'keyword', 'hybrid', or 'llm')
         config: Optional SuggestionConfig object
 
     Returns:
@@ -352,7 +465,17 @@ def get_algorithm(algorithm_name: str, config=None) -> SimilarityAlgorithm:
     """
     algorithm_name = algorithm_name.lower()
 
-    if algorithm_name == "tfidf":
+    if algorithm_name == "llm":
+        kwargs = {}
+        if config:
+            kwargs = {
+                "provider": getattr(config, "llm_provider", "openai"),
+                "model": getattr(config, "llm_model", None),
+                "cache_embeddings": getattr(config, "llm_cache_embeddings", True),
+            }
+        return LLMEmbeddingSimilarity(**kwargs)
+
+    elif algorithm_name == "tfidf":
         kwargs = {}
         if config:
             kwargs = {"max_features": config.tfidf_max_features, "ngram_range": config.tfidf_ngram_range}

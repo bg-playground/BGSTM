@@ -15,7 +15,7 @@ router = APIRouter()
 @router.post("/suggestions/generate", response_model=Dict[str, Any])
 async def generate_suggestions(
     algorithm: Optional[str] = Query(
-        None, description="Algorithm to use: 'tfidf', 'keyword', or 'hybrid'. Uses default if not specified."
+        None, description="Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'. Uses default if not specified."
     ),
     threshold: Optional[float] = Query(
         None, ge=0.0, le=1.0, description="Minimum confidence threshold (0.0-1.0). Uses default if not specified."
@@ -44,10 +44,10 @@ async def generate_suggestions(
         # Create config with optional overrides
         config = SuggestionConfig()
         if algorithm:
-            if algorithm.lower() not in ["tfidf", "keyword", "hybrid"]:
+            if algorithm.lower() not in ["tfidf", "keyword", "hybrid", "llm"]:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid algorithm: {algorithm}. Must be 'tfidf', 'keyword', or 'hybrid'.",
+                    detail=f"Invalid algorithm: {algorithm}. Must be 'tfidf', 'keyword', 'hybrid', or 'llm'.",
                 )
             config.default_algorithm = algorithm.lower()
 
