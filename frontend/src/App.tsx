@@ -5,6 +5,8 @@ import { SuggestionDashboard } from './pages/SuggestionDashboard';
 import { RequirementsPage } from './pages/RequirementsPage';
 import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
+import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
+import MetricsDashboardPage from './pages/MetricsDashboardPage';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
             <Route path="/requirements" element={<RequirementsPage />} />
             <Route path="/test-cases" element={<TestCasesPage />} />
             <Route path="/links" element={<ManualLinksPage />} />
+            <Route path="/traceability" element={<TraceabilityMatrixPage />} />
+            <Route path="/metrics" element={<MetricsDashboardPage />} />
           </Routes>
         </div>
       </BrowserRouter>

@@ -9,6 +9,8 @@ export const Navigation: React.FC = () => {
     { path: '/requirements', label: 'Requirements' },
     { path: '/test-cases', label: 'Test Cases' },
     { path: '/links', label: 'Manual Links' },
+    { path: '/traceability', label: 'Traceability Matrix' },
+    { path: '/metrics', label: 'Metrics' },
   ];
 
   return (

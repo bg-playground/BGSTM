@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import links, requirements, suggestions, test_cases
+from app.api import links, requirements, suggestions, test_cases, traceability
 from app.config import settings
 from app.db.session import init_db
 
@@ -21,6 +21,7 @@ app.include_router(requirements.router, prefix=settings.API_V1_PREFIX, tags=["re
 app.include_router(test_cases.router, prefix=settings.API_V1_PREFIX, tags=["test_cases"])
 app.include_router(links.router, prefix=settings.API_V1_PREFIX, tags=["links"])
 app.include_router(suggestions.router, prefix=settings.API_V1_PREFIX, tags=["suggestions"])
+app.include_router(traceability.router, prefix=settings.API_V1_PREFIX, tags=["traceability"])
 
 
 @app.on_event("startup")
