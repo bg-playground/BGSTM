@@ -3,9 +3,11 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.ai_suggestions.event_driven import generate_suggestions_for_requirement
+from app.config import settings
 from app.crud import requirement as crud
 from app.db.session import get_db
 from app.schemas.requirement import (
@@ -18,7 +20,11 @@ router = APIRouter()
 
 
 @router.post("/requirements", response_model=RequirementResponse, status_code=status.HTTP_201_CREATED)
-async def create_requirement(requirement: RequirementCreate, db: AsyncSession = Depends(get_db)):
+async def create_requirement(
+    requirement: RequirementCreate,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
     """Create a new requirement"""
     # Check if external_id already exists
     if requirement.external_id:
@@ -29,7 +35,17 @@ async def create_requirement(requirement: RequirementCreate, db: AsyncSession = 
                 detail=f"Requirement with external_id '{requirement.external_id}' already exists",
             )
 
-    return await crud.create_requirement(db, requirement)
+    new_requirement = await crud.create_requirement(db, requirement)
+
+    # Trigger auto-suggestion generation in background if enabled
+    if settings.AUTO_SUGGESTIONS_ENABLED:
+        background_tasks.add_task(
+            generate_suggestions_for_requirement,
+            new_requirement.id,
+            db,
+        )
+
+    return new_requirement
 
 
 @router.get("/requirements", response_model=List[RequirementResponse])
@@ -48,11 +64,25 @@ async def get_requirement(requirement_id: UUID, db: AsyncSession = Depends(get_d
 
 
 @router.put("/requirements/{requirement_id}", response_model=RequirementResponse)
-async def update_requirement(requirement_id: UUID, requirement: RequirementUpdate, db: AsyncSession = Depends(get_db)):
+async def update_requirement(
+    requirement_id: UUID,
+    requirement: RequirementUpdate,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
     """Update a requirement"""
     updated = await crud.update_requirement(db, requirement_id, requirement)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Requirement {requirement_id} not found")
+
+    # Trigger auto-suggestion generation in background if enabled
+    if settings.AUTO_SUGGESTIONS_ENABLED:
+        background_tasks.add_task(
+            generate_suggestions_for_requirement,
+            requirement_id,
+            db,
+        )
+
     return updated
 
 

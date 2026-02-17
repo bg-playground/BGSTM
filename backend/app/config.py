@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
 
+    # Auto-Suggestions
+    AUTO_SUGGESTIONS_ENABLED: bool = True
+    AUTO_SUGGESTIONS_ALGORITHM: str = "tfidf"  # 'tfidf', 'keyword', or 'hybrid'
+    AUTO_SUGGESTIONS_THRESHOLD: float = 0.3  # Minimum confidence threshold (0.0-1.0)
+
     class Config:
         env_file = ".env"
 
