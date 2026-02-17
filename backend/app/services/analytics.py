@@ -96,6 +96,8 @@ class SuggestionAnalytics:
 
         if algorithm:
             # Map algorithm name to enum
+            # Note: 'tfidf' maps to SEMANTIC_SIMILARITY as TF-IDF is the implementation
+            # used for semantic similarity in this system
             method_map = {
                 "tfidf": SuggestionMethod.SEMANTIC_SIMILARITY,
                 "keyword": SuggestionMethod.KEYWORD_MATCH,
