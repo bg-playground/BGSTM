@@ -1,28 +1,28 @@
 // TypeScript interfaces for API models
 
 export enum RequirementType {
-  FUNCTIONAL = 'FUNCTIONAL',
-  NON_FUNCTIONAL = 'NON_FUNCTIONAL',
-  TECHNICAL = 'TECHNICAL',
-  BUSINESS = 'BUSINESS',
-  SECURITY = 'SECURITY',
-  PERFORMANCE = 'PERFORMANCE',
-  USABILITY = 'USABILITY',
+  FUNCTIONAL = 'functional',
+  NON_FUNCTIONAL = 'non_functional',
+  TECHNICAL = 'technical',
+  BUSINESS = 'business',
+  SECURITY = 'security',
+  PERFORMANCE = 'performance',
+  USABILITY = 'usability',
 }
 
 export enum PriorityLevel {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
 }
 
 export enum RequirementStatus {
-  DRAFT = 'DRAFT',
-  APPROVED = 'APPROVED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  DEPRECATED = 'DEPRECATED',
+  DRAFT = 'draft',
+  APPROVED = 'approved',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  DEPRECATED = 'deprecated',
 }
 
 export interface Requirement {
@@ -73,27 +73,29 @@ export interface RequirementUpdate {
 }
 
 export enum TestCaseType {
-  FUNCTIONAL = 'FUNCTIONAL',
-  INTEGRATION = 'INTEGRATION',
-  SYSTEM = 'SYSTEM',
-  ACCEPTANCE = 'ACCEPTANCE',
-  REGRESSION = 'REGRESSION',
-  SMOKE = 'SMOKE',
-  PERFORMANCE = 'PERFORMANCE',
-  SECURITY = 'SECURITY',
-  USABILITY = 'USABILITY',
-  API = 'API',
+  FUNCTIONAL = 'functional',
+  INTEGRATION = 'integration',
+  SYSTEM = 'system',
+  ACCEPTANCE = 'acceptance',
+  REGRESSION = 'regression',
+  SMOKE = 'smoke',
+  PERFORMANCE = 'performance',
+  SECURITY = 'security',
+  USABILITY = 'usability',
+  API = 'api',
+  UI = 'ui',
 }
 
 export enum TestCaseStatus {
-  DRAFT = 'DRAFT',
-  READY = 'READY',
-  IN_PROGRESS = 'IN_PROGRESS',
-  PASSED = 'PASSED',
-  FAILED = 'FAILED',
-  BLOCKED = 'BLOCKED',
-  SKIPPED = 'SKIPPED',
-  DEPRECATED = 'DEPRECATED',
+  DRAFT = 'draft',
+  READY = 'ready',
+  IN_PROGRESS = 'in_progress',
+  EXECUTING = 'executing',
+  PASSED = 'passed',
+  FAILED = 'failed',
+  BLOCKED = 'blocked',
+  SKIPPED = 'skipped',
+  DEPRECATED = 'deprecated',
 }
 
 export interface TestCase {
@@ -159,16 +161,17 @@ export interface TestCaseUpdate {
 }
 
 export enum LinkType {
-  COVERS = 'COVERS',
-  VERIFIES = 'VERIFIES',
-  VALIDATES = 'VALIDATES',
-  RELATED_TO = 'RELATED_TO',
+  COVERS = 'covers',
+  VERIFIES = 'verifies',
+  VALIDATES = 'validates',
+  RELATED_TO = 'related',
 }
 
 export enum LinkSource {
-  MANUAL = 'MANUAL',
-  AI_SUGGESTED = 'AI_SUGGESTED',
-  IMPORTED = 'IMPORTED',
+  MANUAL = 'manual',
+  AI_SUGGESTED = 'ai_suggested',
+  AI_CONFIRMED = 'ai_confirmed',
+  IMPORTED = 'imported',
 }
 
 export interface Link {
@@ -196,15 +199,18 @@ export interface LinkCreate {
 }
 
 export enum SuggestionMethod {
-  TFIDF = 'TFIDF',
-  KEYWORD = 'KEYWORD',
-  HYBRID = 'HYBRID',
+  TFIDF = 'tfidf',
+  KEYWORD = 'keyword',
+  SEMANTIC_SIMILARITY = 'semantic_similarity',
+  KEYWORD_MATCH = 'keyword_match',
+  HEURISTIC = 'heuristic',
+  HYBRID = 'hybrid',
 }
 
 export enum SuggestionStatus {
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
 }
 
 export interface Suggestion {

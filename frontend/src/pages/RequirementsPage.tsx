@@ -134,9 +134,9 @@ export const RequirementsPage: React.FC = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">{req.title}</h3>
                     <span className={`px-2 py-1 text-xs font-medium rounded ${
-                      req.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                      req.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                      req.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                      req.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                      req.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                      req.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
                       {req.priority}

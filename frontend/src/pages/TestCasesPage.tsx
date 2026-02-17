@@ -140,9 +140,9 @@ export const TestCasesPage: React.FC = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">{tc.title}</h3>
                     <span className={`px-2 py-1 text-xs font-medium rounded ${
-                      tc.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                      tc.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                      tc.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                      tc.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                      tc.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                      tc.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
                       {tc.priority}
