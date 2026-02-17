@@ -90,6 +90,69 @@ This framework can serve as the foundation for building comprehensive testing ma
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
 
+## 🚀 Running the Application
+
+### Frontend + Backend (Docker Compose - Recommended)
+
+The easiest way to run the complete application is using Docker Compose:
+
+```bash
+# Clone the repository
+git clone https://github.com/bg-playground/BGSTM.git
+cd BGSTM
+
+# Copy environment file
+cp .env.example .env
+
+# Start all services (database, backend, frontend)
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost
+# Backend API: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
+```
+
+### Frontend Development
+
+To run the frontend locally for development:
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Access at http://localhost:3000
+```
+
+### Backend Development
+
+To run the backend locally:
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up database (PostgreSQL)
+# Update DATABASE_URL in .env file
+
+# Run migrations
+alembic upgrade head
+
+# Start server
+uvicorn app.main:app --reload --port 8000
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to:

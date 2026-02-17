@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- React + TypeScript frontend with suggestion review dashboard, CRUD views, and manual link management (#43)
 - Dockerfile and docker-compose.yml for containerized backend deployment (#42)
 - GitHub Actions CI/CD pipeline for automated testing, linting, and type checking (#40)
 
