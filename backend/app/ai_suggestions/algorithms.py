@@ -283,8 +283,7 @@ class KeywordSimilarity(SimilarityAlgorithm):
 class HybridSimilarity(SimilarityAlgorithm):
     """Hybrid approach combining multiple algorithms"""
 
-    def __init__(
-        self,
+    def __init__(self,
         tfidf_weight: float = 0.6,
         keyword_weight: float = 0.4,
         tfidf_kwargs: Dict = None,
@@ -390,25 +389,25 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
 
     def _get_embedding_openai(self, text: str) -> list[float]:
         """Get embedding from OpenAI"""
-        if self.cache_embeddings and text in self._embedding_cache:
+        if self.cache_embeddings and self._embedding_cache is not None and text in self._embedding_cache:
             return self._embedding_cache[text]
 
         response = self.client.embeddings.create(input=text, model=self.model)
         embedding = response.data[0].embedding
 
-        if self.cache_embeddings:
+        if self.cache_embeddings and self._embedding_cache is not None:
             self._embedding_cache[text] = embedding
 
         return embedding
 
     def _get_embedding_huggingface(self, text: str) -> list[float]:
         """Get embedding from HuggingFace"""
-        if self.cache_embeddings and text in self._embedding_cache:
+        if self.cache_embeddings and self._embedding_cache is not None and text in self._embedding_cache:
             return self._embedding_cache[text]
 
         embedding = self.model_instance.encode(text).tolist()
 
-        if self.cache_embeddings:
+        if self.cache_embeddings and self._embedding_cache is not None:
             self._embedding_cache[text] = embedding
 
         return embedding
