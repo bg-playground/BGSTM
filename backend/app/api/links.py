@@ -1,14 +1,17 @@
 """API endpoints for Links and Suggestions"""
 
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import link as crud
 from app.db.session import get_db
 from app.schemas.link import (
+    BatchReviewResult,
+    BatchSuggestionReview,
     LinkCreate,
     LinkResponse,
     SuggestionResponse,
@@ -77,9 +80,33 @@ async def list_suggestions(skip: int = 0, limit: int = 100, db: AsyncSession = D
 
 
 @router.get("/suggestions/pending", response_model=List[SuggestionResponse])
-async def list_pending_suggestions(db: AsyncSession = Depends(get_db)):
-    """List all pending link suggestions"""
-    return await crud.get_pending_suggestions(db)
+async def list_pending_suggestions(
+    min_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum confidence score"),
+    max_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Maximum confidence score"),
+    algorithm: Optional[str] = Query(None, description="Filter by algorithm"),
+    created_after: Optional[datetime] = Query(None, description="Filter by creation date (after)"),
+    created_before: Optional[datetime] = Query(None, description="Filter by creation date (before)"),
+    search: Optional[str] = Query(None, description="Search in requirement/test case titles"),
+    sort_by: Optional[str] = Query("similarity_score", regex="^(similarity_score|created_at)$"),
+    sort_order: Optional[str] = Query("desc", regex="^(asc|desc)$"),
+    limit: Optional[int] = Query(100, le=500, description="Maximum number of results"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
+    db: AsyncSession = Depends(get_db),
+):
+    """List pending suggestions with advanced filtering and sorting"""
+    return await crud.get_pending_suggestions(
+        db=db,
+        min_score=min_score,
+        max_score=max_score,
+        algorithm=algorithm,
+        created_after=created_after,
+        created_before=created_before,
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/suggestions/{suggestion_id}", response_model=SuggestionResponse)
@@ -98,3 +125,47 @@ async def review_suggestion(suggestion_id: UUID, review: SuggestionReview, db: A
     if not reviewed:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Suggestion {suggestion_id} not found")
     return reviewed
+
+
+@router.post("/suggestions/batch-review", response_model=BatchReviewResult)
+async def batch_review_suggestions(
+    batch_review: BatchSuggestionReview,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Review multiple suggestions at once
+    
+    Request body:
+    {
+        "suggestion_ids": ["uuid1", "uuid2", ...],
+        "status": "accepted" | "rejected",
+        "reviewed_by": "user@example.com",
+        "feedback": "Optional batch feedback"
+    }
+    
+    Returns:
+    {
+        "total": 10,
+        "accepted": 10,
+        "rejected": 0,
+        "failed": 0,
+        "errors": []
+    }
+    """
+    review = SuggestionReview(
+        status=batch_review.status,
+        reviewed_by=batch_review.reviewed_by,
+        feedback=batch_review.feedback,
+    )
+    
+    total, accepted, rejected, errors = await crud.batch_review_suggestions(
+        db, batch_review.suggestion_ids, review
+    )
+    
+    return BatchReviewResult(
+        total=total,
+        accepted=accepted,
+        rejected=rejected,
+        failed=len(errors),
+        errors=errors,
+    )

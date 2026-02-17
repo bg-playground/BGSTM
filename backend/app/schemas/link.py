@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -74,3 +74,22 @@ class SuggestionReview(BaseModel):
     status: SuggestionStatus
     feedback: Optional[str] = None
     reviewed_by: Optional[str] = Field(None, max_length=100)
+
+
+class BatchSuggestionReview(BaseModel):
+    """Schema for batch reviewing suggestions"""
+
+    suggestion_ids: List[UUID]
+    status: SuggestionStatus
+    reviewed_by: Optional[str] = Field(None, max_length=100)
+    feedback: Optional[str] = None
+
+
+class BatchReviewResult(BaseModel):
+    """Schema for batch review result"""
+
+    total: int
+    accepted: int
+    rejected: int
+    failed: int
+    errors: List[str] = []
