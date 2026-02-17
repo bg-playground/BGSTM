@@ -11,7 +11,7 @@ export const AnalyticsDashboard: React.FC = () => {
   const [reviewVelocity, setReviewVelocity] = useState<ReviewVelocity | null>(null);
   const { showToast } = useToast();
 
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     try {
       setLoading(true);
       const [comparison, rates, velocity] = await Promise.all([
@@ -29,11 +29,11 @@ export const AnalyticsDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, showToast]);
 
   useEffect(() => {
     loadData();
-  }, [timeRange]);
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -155,10 +155,10 @@ export const AnalyticsDashboard: React.FC = () => {
                     {(algo.avg_confidence * 100).toFixed(1)}%
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {algo.acceptance_rate > 0.8 && '✅ Excellent - Use for critical items'}
-                    {algo.acceptance_rate > 0.6 && algo.acceptance_rate <= 0.8 && '✔️ Good - General use'}
-                    {algo.acceptance_rate > 0.4 && algo.acceptance_rate <= 0.6 && '⚠️ Fair - Needs tuning'}
-                    {algo.acceptance_rate <= 0.4 && '❌ Poor - Avoid or increase threshold'}
+                    {algo.acceptance_rate > 0.8 ? '✅ Excellent - Use for critical items' :
+                     algo.acceptance_rate > 0.6 ? '✔️ Good - General use' :
+                     algo.acceptance_rate > 0.4 ? '⚠️ Fair - Needs tuning' :
+                     '❌ Poor - Avoid or increase threshold'}
                   </td>
                 </tr>
               ))}
