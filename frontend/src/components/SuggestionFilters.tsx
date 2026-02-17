@@ -1,5 +1,5 @@
 import React from 'react';
-import { SuggestionMethod, SuggestionFilters as FilterType } from '../types/api';
+import { SuggestionMethod, type SuggestionFilters as FilterType } from '../types/api';
 
 interface SuggestionFiltersProps {
   filters: FilterType;

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { suggestionsApi } from '../api/suggestions';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
-import { SuggestionStatus, SuggestionFilters as FilterType } from '../types/api';
+import { SuggestionStatus, type SuggestionFilters as FilterType } from '../types/api';
 import type { Suggestion, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
@@ -101,7 +101,7 @@ export const SuggestionDashboard: React.FC = () => {
     try {
       await suggestionsApi.review(id, { status });
       showToast(
-        \`Suggestion \${status === SuggestionStatus.ACCEPTED ? 'accepted' : 'rejected'}\`,
+        `Suggestion ${status === SuggestionStatus.ACCEPTED ? 'accepted' : 'rejected'}`,
         status === SuggestionStatus.ACCEPTED ? 'success' : 'info'
       );
       setSuggestions((prev) => prev.filter((s) => s.id !== id));
@@ -127,7 +127,7 @@ export const SuggestionDashboard: React.FC = () => {
       });
 
       showToast(
-        \`Batch review complete: \${result.accepted + result.rejected} processed, \${result.failed} failed\`,
+        `Batch review complete: ${result.accepted + result.rejected} processed, ${result.failed} failed`,
         result.failed > 0 ? 'warning' : 'success'
       );
 
@@ -147,7 +147,7 @@ export const SuggestionDashboard: React.FC = () => {
       setGenerating(true);
       const response = await suggestionsApi.generate();
       showToast(
-        \`Generated \${response.results.suggestions_created} new suggestions\`,
+        `Generated ${response.results.suggestions_created} new suggestions`,
         'success'
       );
       await loadData();
@@ -425,7 +425,7 @@ export const SuggestionDashboard: React.FC = () => {
                 onSelect={toggleSelection}
                 onAccept={(id) => handleReview(id, SuggestionStatus.ACCEPTED)}
                 onReject={(id) => handleReview(id, SuggestionStatus.REJECTED)}
-                onClick={(id) => setPreviewSuggestion(suggestion)}
+                onClick={() => setPreviewSuggestion(suggestion)}
               />
             );
           })}

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Suggestion, Requirement, TestCase, SuggestionStatus } from '../types/api';
+import type { Suggestion, Requirement, TestCase } from '../types/api';
 
 interface SuggestionCardProps {
   suggestion: Suggestion;
