@@ -335,7 +335,7 @@ async def test_metrics_algorithm_breakdown():
         metrics = await get_metrics(session)
 
         # Check algorithm breakdown
-        assert len(metrics.algorithm_breakdown) == 4  # All enum values
+        assert len(metrics.algorithm_breakdown) == 5  # All enum values (including llm_embedding)
 
         # Create lookup by algorithm name
         algo_metrics = {algo.algorithm: algo for algo in metrics.algorithm_breakdown}
