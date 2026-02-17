@@ -32,7 +32,7 @@ async def create_test_case(
             )
 
     new_test_case = await crud.create_test_case(db, test_case)
-    
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(
@@ -70,7 +70,7 @@ async def update_test_case(
     updated = await crud.update_test_case(db, test_case_id, test_case)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Test case {test_case_id} not found")
-    
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(

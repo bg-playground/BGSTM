@@ -25,9 +25,9 @@ async def generate_suggestions_for_requirement(
 ) -> None:
     """
     Generate suggestions for a specific requirement against all test cases.
-    
+
     This function is designed to be run as a background task.
-    
+
     Args:
         requirement_id: ID of the requirement to generate suggestions for
         db: Database session
@@ -70,9 +70,9 @@ async def generate_suggestions_for_test_case(
 ) -> None:
     """
     Generate suggestions for a specific test case against all requirements.
-    
+
     This function is designed to be run as a background task.
-    
+
     Args:
         test_case_id: ID of the test case to generate suggestions for
         db: Database session

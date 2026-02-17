@@ -36,7 +36,7 @@ async def create_requirement(
             )
 
     new_requirement = await crud.create_requirement(db, requirement)
-    
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(
@@ -74,7 +74,7 @@ async def update_requirement(
     updated = await crud.update_requirement(db, requirement_id, requirement)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Requirement {requirement_id} not found")
-    
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(
