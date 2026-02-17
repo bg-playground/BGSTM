@@ -89,7 +89,13 @@ async def list_pending_suggestions(
 ):
     """List pending suggestions with filtering and sorting"""
     return await crud.get_pending_suggestions(
-        db, min_score=min_score, max_score=max_score, algorithm=algorithm, sort_by=sort_by, sort_order=sort_order, limit=limit
+        db,
+        min_score=min_score,
+        max_score=max_score,
+        algorithm=algorithm,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=limit,
     )
 
 

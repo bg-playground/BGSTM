@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { suggestionsApi } from '../api/suggestions';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
@@ -6,6 +6,14 @@ import { SuggestionStatus } from '../types/api';
 import type { Suggestion, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
+
+const DEFAULT_FILTERS = {
+  minScore: 0,
+  maxScore: 1,
+  algorithm: 'all',
+  sortBy: 'score',
+  sortOrder: 'desc'
+};
 
 export const SuggestionDashboard: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -18,15 +26,9 @@ export const SuggestionDashboard: React.FC = () => {
   const { showToast } = useToast();
 
   // Filters state
-  const [filters, setFilters] = useState({
-    minScore: 0,
-    maxScore: 1,
-    algorithm: 'all',
-    sortBy: 'score',
-    sortOrder: 'desc'
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [suggestionData, reqData, tcData] = await Promise.all([
@@ -50,11 +52,11 @@ export const SuggestionDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, showToast]);
 
   useEffect(() => {
     loadData();
-  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadData]);
 
   const handleReview = async (id: string, status: SuggestionStatus) => {
     try {
@@ -71,7 +73,7 @@ export const SuggestionDashboard: React.FC = () => {
     }
   };
 
-  const handleBulkAccept = async () => {
+  const handleBulkAccept = useCallback(async () => {
     try {
       await suggestionsApi.bulkReview(Array.from(selectedIds), SuggestionStatus.ACCEPTED);
       showToast(`Accepted ${selectedIds.size} suggestions`, 'success');
@@ -80,9 +82,9 @@ export const SuggestionDashboard: React.FC = () => {
     } catch {
       showToast('Failed to accept suggestions', 'error');
     }
-  };
+  }, [selectedIds, showToast, loadData]);
 
-  const handleBulkReject = async () => {
+  const handleBulkReject = useCallback(async () => {
     try {
       await suggestionsApi.bulkReview(Array.from(selectedIds), SuggestionStatus.REJECTED);
       showToast(`Rejected ${selectedIds.size} suggestions`, 'success');
@@ -91,7 +93,7 @@ export const SuggestionDashboard: React.FC = () => {
     } catch {
       showToast('Failed to reject suggestions', 'error');
     }
-  };
+  }, [selectedIds, showToast, loadData]);
 
   const handleGenerate = async () => {
     try {
@@ -146,7 +148,7 @@ export const SuggestionDashboard: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [suggestions, selectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [suggestions, selectedIds, handleBulkAccept, handleBulkReject]);
 
   if (loading) {
     return (
@@ -257,7 +259,7 @@ export const SuggestionDashboard: React.FC = () => {
           {/* Reset Filters */}
           <div className="flex items-end">
             <button
-              onClick={() => setFilters({minScore: 0, maxScore: 1, algorithm: 'all', sortBy: 'score', sortOrder: 'desc'})}
+              onClick={() => setFilters(DEFAULT_FILTERS)}
               className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
             >
               Reset

@@ -95,6 +95,7 @@ async def get_pending_suggestions(
         query = query.where(LinkSuggestion.similarity_score <= max_score)
     if algorithm:
         # Map algorithm name to enum value
+        # Note: 'tfidf' maps to SEMANTIC_SIMILARITY as TF-IDF is the core semantic similarity algorithm
         method_map = {
             "tfidf": SuggestionMethod.SEMANTIC_SIMILARITY,
             "keyword": SuggestionMethod.KEYWORD_MATCH,
