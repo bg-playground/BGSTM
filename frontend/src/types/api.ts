@@ -235,6 +235,34 @@ export interface SuggestionReview {
   reviewed_by?: string;
 }
 
+export interface BatchSuggestionReview {
+  suggestion_ids: string[];
+  status: SuggestionStatus;
+  reviewed_by?: string;
+  feedback?: string;
+}
+
+export interface BatchReviewResult {
+  total: number;
+  accepted: number;
+  rejected: number;
+  failed: number;
+  errors: string[];
+}
+
+export interface SuggestionFilters {
+  min_score?: number;
+  max_score?: number;
+  algorithm?: SuggestionMethod;
+  created_after?: string;
+  created_before?: string;
+  search?: string;
+  sort_by?: 'similarity_score' | 'created_at';
+  sort_order?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
 export interface GenerateSuggestionsResponse {
   message: string;
   results: {
