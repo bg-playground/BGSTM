@@ -43,7 +43,8 @@ async def get_confidence_distribution(
 
 @router.get("/analytics/generation-trends", response_model=list[dict[str, Any]])
 async def get_generation_trends(
-    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"), db: AsyncSession = Depends(get_db)
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    db: AsyncSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
     """
     Get daily suggestion generation trends
@@ -55,7 +56,8 @@ async def get_generation_trends(
 
 @router.get("/analytics/review-velocity", response_model=dict[str, Any])
 async def get_review_velocity(
-    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"), db: AsyncSession = Depends(get_db)
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Get review velocity metrics
