@@ -1,7 +1,7 @@
 """CRUD operations for Links and Suggestions"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
 from uuid import UUID
 
 from sqlalchemy import select, or_, and_
@@ -12,6 +12,14 @@ from app.models.suggestion import LinkSuggestion, SuggestionStatus
 from app.models.requirement import Requirement
 from app.models.test_case import TestCase
 from app.schemas.link import LinkCreate, SuggestionCreate, SuggestionReview
+
+
+class BatchReviewResult(NamedTuple):
+    """Result of batch review operation"""
+    total: int
+    accepted: int
+    rejected: int
+    errors: List[str]
 
 
 # Link operations
@@ -141,10 +149,10 @@ async def get_pending_suggestions(
 
 async def batch_review_suggestions(
     db: AsyncSession, suggestion_ids: List[UUID], review: SuggestionReview
-) -> tuple[int, int, int, List[str]]:
+) -> BatchReviewResult:
     """
     Batch review multiple suggestions
-    Returns: (total_processed, accepted_count, rejected_count, errors)
+    Returns: BatchReviewResult with total, accepted, rejected counts and errors
     """
     errors = []
     accepted = 0
@@ -163,7 +171,12 @@ async def batch_review_suggestions(
         except Exception as e:
             errors.append(f"Error reviewing {suggestion_id}: {str(e)}")
     
-    return len(suggestion_ids), accepted, rejected, errors
+    return BatchReviewResult(
+        total=len(suggestion_ids),
+        accepted=accepted,
+        rejected=rejected,
+        errors=errors
+    )
 
 
 async def create_suggestion(db: AsyncSession, suggestion: SuggestionCreate) -> LinkSuggestion:

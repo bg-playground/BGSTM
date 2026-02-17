@@ -101,8 +101,8 @@ export const SuggestionStats: React.FC<SuggestionStatsProps> = ({ suggestions })
             .slice(0, 3)
             .map(([algorithm, count]) => (
               <div key={algorithm} className="flex justify-between items-center text-sm">
-                <span className="text-gray-600 truncate">
-                  {algorithm.replace(/_/g, ' ').substring(0, 15)}
+                <span className="text-gray-600 truncate max-w-[120px]" title={algorithm.replace(/_/g, ' ')}>
+                  {algorithm.replace(/_/g, ' ')}
                 </span>
                 <span className="font-semibold text-gray-900">{count}</span>
               </div>

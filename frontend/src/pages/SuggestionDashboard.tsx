@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { suggestionsApi } from '../api/suggestions';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
-import { SuggestionStatus, type SuggestionFilters as FilterType } from '../types/api';
+import { SuggestionStatus, SuggestionMethod, type SuggestionFilters as FilterType } from '../types/api';
 import type { Suggestion, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
@@ -34,11 +34,17 @@ export const SuggestionDashboard: React.FC = () => {
   const getInitialFilters = (): FilterType => {
     // Try URL params first
     const urlFilters: FilterType = {};
-    if (searchParams.get('min_score'))
-      urlFilters.min_score = parseFloat(searchParams.get('min_score')!);
-    if (searchParams.get('max_score'))
-      urlFilters.max_score = parseFloat(searchParams.get('max_score')!);
-    if (searchParams.get('algorithm')) urlFilters.algorithm = searchParams.get('algorithm') as any;
+    const minScoreParam = searchParams.get('min_score');
+    if (minScoreParam) urlFilters.min_score = parseFloat(minScoreParam);
+    
+    const maxScoreParam = searchParams.get('max_score');
+    if (maxScoreParam) urlFilters.max_score = parseFloat(maxScoreParam);
+    
+    const algorithmParam = searchParams.get('algorithm');
+    if (algorithmParam && Object.values(SuggestionMethod).includes(algorithmParam as SuggestionMethod)) {
+      urlFilters.algorithm = algorithmParam as SuggestionMethod;
+    }
+    
     if (searchParams.get('search')) urlFilters.search = searchParams.get('search')!;
     if (searchParams.get('sort_by')) urlFilters.sort_by = searchParams.get('sort_by') as any;
     if (searchParams.get('sort_order')) urlFilters.sort_order = searchParams.get('sort_order') as any;
@@ -265,7 +271,7 @@ export const SuggestionDashboard: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [suggestions, focusedIndex, previewSuggestion, selectedIds]);
+  }, [suggestions, focusedIndex, previewSuggestion]);
 
   if (loading) {
     return (

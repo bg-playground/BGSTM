@@ -158,14 +158,14 @@ async def batch_review_suggestions(
         feedback=batch_review.feedback,
     )
     
-    total, accepted, rejected, errors = await crud.batch_review_suggestions(
+    result = await crud.batch_review_suggestions(
         db, batch_review.suggestion_ids, review
     )
     
     return BatchReviewResult(
-        total=total,
-        accepted=accepted,
-        rejected=rejected,
-        failed=len(errors),
-        errors=errors,
+        total=result.total,
+        accepted=result.accepted,
+        rejected=result.rejected,
+        failed=len(result.errors),
+        errors=result.errors,
     )

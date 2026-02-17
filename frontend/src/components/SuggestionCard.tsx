@@ -10,7 +10,7 @@ interface SuggestionCardProps {
   onSelect: (id: string) => void;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
-  onClick: (id: string) => void;
+  onClick: () => void;
 }
 
 const getConfidenceColor = (score: number): string => {
@@ -69,7 +69,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({
       className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all cursor-pointer ${
         isFocused ? 'ring-2 ring-primary-500 ring-offset-2' : ''
       } ${isSelected ? 'border-2 border-primary-500' : 'border border-transparent'}`}
-      onClick={() => onClick(suggestion.id)}
+      onClick={onClick}
     >
       {/* Header with checkbox and metadata */}
       <div className="flex items-start justify-between mb-4">
