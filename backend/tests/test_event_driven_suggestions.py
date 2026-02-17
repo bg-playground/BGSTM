@@ -1,30 +1,24 @@
 """Tests for Event-Driven Suggestion Generation"""
 
-import uuid
-
 import pytest
 import pytest_asyncio
-from fastapi import BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.ai_suggestions.event_driven import (
     generate_suggestions_for_requirement,
     generate_suggestions_for_test_case,
 )
-from app.config import settings
 from app.crud import requirement as req_crud
 from app.crud import test_case as tc_crud
 from app.models.base import Base
 from app.models.requirement import (
     PriorityLevel,
-    Requirement,
     RequirementStatus,
     RequirementType,
 )
 from app.models.suggestion import LinkSuggestion, SuggestionStatus
 from app.models.test_case import (
     AutomationStatus,
-    TestCase,
     TestCaseStatus,
     TestCaseType,
 )
@@ -273,9 +267,7 @@ async def test_auto_suggestion_with_multiple_items(async_db: AsyncSession):
     # Verify suggestions were created for both related requirements
     from sqlalchemy import select
 
-    result = await async_db.execute(
-        select(LinkSuggestion).where(LinkSuggestion.test_case_id == test_case.id)
-    )
+    result = await async_db.execute(select(LinkSuggestion).where(LinkSuggestion.test_case_id == test_case.id))
     suggestions = result.scalars().all()
 
     # Should have suggestions for both requirements
@@ -309,9 +301,7 @@ async def test_auto_suggestion_uses_configured_algorithm(async_db: AsyncSession)
     test_case = await tc_crud.create_test_case(async_db, tc_data)
 
     # Generate suggestions using keyword algorithm with lower threshold
-    await generate_suggestions_for_requirement(
-        requirement.id, async_db, algorithm="keyword", threshold=0.1
-    )
+    await generate_suggestions_for_requirement(requirement.id, async_db, algorithm="keyword", threshold=0.1)
 
     # Verify suggestion was created with keyword method
     from sqlalchemy import select

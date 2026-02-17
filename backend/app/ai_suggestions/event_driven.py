@@ -36,28 +36,28 @@ async def generate_suggestions_for_requirement(
     """
     try:
         logger.info(f"Starting auto-suggestion generation for requirement {requirement_id}")
-        
+
         # Create config with overrides from settings or parameters
         config = SuggestionConfig(
             default_algorithm=algorithm or settings.AUTO_SUGGESTIONS_ALGORITHM,
             min_confidence_threshold=threshold or settings.AUTO_SUGGESTIONS_THRESHOLD,
         )
-        
+
         # Initialize engine
         engine = SuggestionEngine(config=config)
-        
+
         # Generate suggestions for this specific requirement
         result = await engine.generate_suggestions(
             db,
             requirement_ids=[requirement_id],
             test_case_ids=None,  # All test cases
         )
-        
+
         logger.info(
             f"Auto-suggestion completed for requirement {requirement_id}: "
             f"{result['suggestions_created']} created, {result['suggestions_skipped']} skipped"
         )
-        
+
     except Exception as e:
         logger.error(f"Error generating suggestions for requirement {requirement_id}: {str(e)}")
 
@@ -81,27 +81,27 @@ async def generate_suggestions_for_test_case(
     """
     try:
         logger.info(f"Starting auto-suggestion generation for test case {test_case_id}")
-        
+
         # Create config with overrides from settings or parameters
         config = SuggestionConfig(
             default_algorithm=algorithm or settings.AUTO_SUGGESTIONS_ALGORITHM,
             min_confidence_threshold=threshold or settings.AUTO_SUGGESTIONS_THRESHOLD,
         )
-        
+
         # Initialize engine
         engine = SuggestionEngine(config=config)
-        
+
         # Generate suggestions for this specific test case
         result = await engine.generate_suggestions(
             db,
             requirement_ids=None,  # All requirements
             test_case_ids=[test_case_id],
         )
-        
+
         logger.info(
             f"Auto-suggestion completed for test case {test_case_id}: "
             f"{result['suggestions_created']} created, {result['suggestions_skipped']} skipped"
         )
-        
+
     except Exception as e:
         logger.error(f"Error generating suggestions for test case {test_case_id}: {str(e)}")
