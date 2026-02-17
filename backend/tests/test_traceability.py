@@ -193,7 +193,7 @@ async def test_traceability_matrix_basic():
         assert matrix.total_requirements == 3
         assert matrix.total_test_cases == 4
         assert matrix.covered_requirements == 2  # req1 (manual) and req3 (AI-confirmed)
-        assert matrix.uncovered_requirements == 1  # req2 has only pending link
+        assert matrix.uncovered_requirements == 0  # No requirements are truly uncovered (req2 is partially_covered)
         assert matrix.orphan_test_cases == 1  # tc4 has no links
 
         # Coverage percentage: 2/3 = 66.67%

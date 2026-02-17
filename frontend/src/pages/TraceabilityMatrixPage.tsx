@@ -30,8 +30,8 @@ export default function TraceabilityMatrixPage() {
     try {
       setExporting(true);
       const blob = await traceabilityApi.exportMatrix(format);
-      const filename = `traceability_matrix_${new Date().toISOString().split("T")[0]}.${format}`;
-      traceabilityApi.downloadExport(blob, filename);
+      const exportFilename = `traceability_matrix_${new Date().toISOString().split("T")[0]}.${format}`;
+      traceabilityApi.downloadExport(blob, exportFilename);
       showToast(`Exported traceability matrix as ${format.toUpperCase()}`, "success");
     } catch (error) {
       console.error(`Failed to export as ${format}:`, error);
@@ -163,7 +163,7 @@ export default function TraceabilityMatrixPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 text-xs font-medium rounded-full ${getCoverageColor(req.coverage_status)}`}>
-                      {req.coverage_status.replace("_", " ").toUpperCase()}
+                      {req.coverage_status.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4">

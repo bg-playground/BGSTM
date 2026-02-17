@@ -192,7 +192,7 @@ export default function MetricsDashboardPage() {
                 <tr key={algo.algorithm} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 text-sm font-medium rounded ${getAlgorithmColor(algo.algorithm)}`}>
-                      {algo.algorithm.replace("_", " ").toUpperCase()}
+                      {algo.algorithm.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-gray-900">{algo.total_suggestions}</td>

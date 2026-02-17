@@ -104,7 +104,7 @@ async def get_traceability_matrix(db: AsyncSession) -> TraceabilityMatrixRespons
 
     # Calculate metrics
     total_requirements = len(requirements)
-    uncovered_count = total_requirements - covered_count
+    uncovered_count = sum(1 for req_coverage in matrix if req_coverage.coverage_status == "uncovered")
     coverage_percentage = (covered_count / total_requirements * 100) if total_requirements > 0 else 0.0
 
     return TraceabilityMatrixResponse(
