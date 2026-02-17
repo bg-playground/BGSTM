@@ -3,6 +3,12 @@ import { analyticsApi, type AlgorithmComparison, type AcceptanceRates, type Revi
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
+// Recommendation thresholds
+const EXCELLENT_THRESHOLD = 0.8;
+const GOOD_THRESHOLD = 0.6;
+const FAIR_THRESHOLD = 0.4;
+const HIGH_BACKLOG_THRESHOLD = 50;
+
 export const AnalyticsDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
@@ -155,9 +161,9 @@ export const AnalyticsDashboard: React.FC = () => {
                     {(algo.avg_confidence * 100).toFixed(1)}%
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {algo.acceptance_rate > 0.8 ? '✅ Excellent - Use for critical items' :
-                     algo.acceptance_rate > 0.6 ? '✔️ Good - General use' :
-                     algo.acceptance_rate > 0.4 ? '⚠️ Fair - Needs tuning' :
+                    {algo.acceptance_rate > EXCELLENT_THRESHOLD ? '✅ Excellent - Use for critical items' :
+                     algo.acceptance_rate > GOOD_THRESHOLD ? '✔️ Good - General use' :
+                     algo.acceptance_rate > FAIR_THRESHOLD ? '⚠️ Fair - Needs tuning' :
                      '❌ Poor - Avoid or increase threshold'}
                   </td>
                 </tr>
@@ -171,15 +177,15 @@ export const AnalyticsDashboard: React.FC = () => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="text-lg font-bold text-blue-900 mb-4">💡 Recommendations</h3>
         <ul className="space-y-2">
-          {bestAlgo && bestAlgo.acceptance_rate > 0.8 && (
+          {bestAlgo && bestAlgo.acceptance_rate > EXCELLENT_THRESHOLD && (
             <li className="text-blue-900">
-              • <strong>{bestAlgo.algorithm.toUpperCase()}</strong> has excellent accuracy ({(bestAlgo.acceptance_rate * 100).toFixed(1)}%). 
+              • <strong>{bestAlgo.algorithm.toUpperCase()}</strong> has excellent accuracy ({(bestAlgo.acceptance_rate * 100).toFixed(1)}%).
               Consider using it as your default algorithm.
             </li>
           )}
-          {reviewVelocity && reviewVelocity.pending_backlog > 50 && (
+          {reviewVelocity && reviewVelocity.pending_backlog > HIGH_BACKLOG_THRESHOLD && (
             <li className="text-blue-900">
-              • You have {reviewVelocity.pending_backlog} pending suggestions. Consider enabling notifications or 
+              • You have {reviewVelocity.pending_backlog} pending suggestions. Consider enabling notifications or
               scheduling regular review sessions.
             </li>
           )}
