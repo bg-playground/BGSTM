@@ -283,7 +283,8 @@ class KeywordSimilarity(SimilarityAlgorithm):
 class HybridSimilarity(SimilarityAlgorithm):
     """Hybrid approach combining multiple algorithms"""
 
-    def __init__(self,
+    def __init__(
+        self,
         tfidf_weight: float = 0.6,
         keyword_weight: float = 0.4,
         tfidf_kwargs: Dict = None,
