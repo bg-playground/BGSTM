@@ -155,6 +155,10 @@ nav:
   - Integration:
     - integration/multi-platform-guide.md
   
+  - Architecture:
+    - architecture/index.md
+    - Data Model: architecture/data-model-diagram.md
+  
   - About:
     - License: LICENSE.md
     - Contributing: CONTRIBUTING.md
