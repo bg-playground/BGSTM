@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.link import RequirementTestCaseLink
@@ -74,11 +74,55 @@ async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> 
     return list(result.scalars().all())
 
 
-async def get_pending_suggestions(db: AsyncSession) -> List[LinkSuggestion]:
-    """Get all pending suggestions"""
-    from app.models.suggestion import SuggestionStatus
+async def get_pending_suggestions(
+    db: AsyncSession,
+    min_score: Optional[float] = None,
+    max_score: Optional[float] = None,
+    algorithm: Optional[str] = None,
+    sort_by: str = "score",
+    sort_order: str = "desc",
+    limit: int = 100,
+) -> List[LinkSuggestion]:
+    """Get pending suggestions with filters and sorting"""
+    from app.models.suggestion import SuggestionMethod, SuggestionStatus
 
-    result = await db.execute(select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING))
+    query = select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
+
+    # Apply filters
+    if min_score is not None:
+        query = query.where(LinkSuggestion.similarity_score >= min_score)
+    if max_score is not None:
+        query = query.where(LinkSuggestion.similarity_score <= max_score)
+    if algorithm:
+        # Map algorithm name to enum value
+        # Note: 'tfidf' maps to SEMANTIC_SIMILARITY as TF-IDF is the core semantic similarity algorithm
+        method_map = {
+            "tfidf": SuggestionMethod.SEMANTIC_SIMILARITY,
+            "keyword": SuggestionMethod.KEYWORD_MATCH,
+            "hybrid": SuggestionMethod.HYBRID,
+            "llm": SuggestionMethod.LLM_EMBEDDING,
+        }
+        if algorithm in method_map:
+            query = query.where(LinkSuggestion.suggestion_method == method_map[algorithm])
+
+    # Apply sorting
+    if sort_by == "score":
+        order_col = LinkSuggestion.similarity_score
+    elif sort_by == "date":
+        order_col = LinkSuggestion.created_at
+    elif sort_by == "algorithm":
+        order_col = LinkSuggestion.suggestion_method
+    else:
+        order_col = LinkSuggestion.similarity_score
+
+    if sort_order == "asc":
+        query = query.order_by(order_col.asc())
+    else:
+        query = query.order_by(order_col.desc())
+
+    query = query.limit(limit)
+
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 
@@ -107,3 +151,25 @@ async def review_suggestion(
     await db.commit()
     await db.refresh(db_suggestion)
     return db_suggestion
+
+
+async def bulk_review_suggestions(
+    db: AsyncSession,
+    suggestion_ids: List[UUID],
+    status,
+    feedback: Optional[str] = None,
+    reviewed_by: Optional[str] = None,
+) -> int:
+    """Review multiple suggestions at once"""
+    from app.models.suggestion import SuggestionStatus
+
+    stmt = (
+        update(LinkSuggestion)
+        .where(LinkSuggestion.id.in_(suggestion_ids))
+        .where(LinkSuggestion.status == SuggestionStatus.PENDING)
+        .values(status=status, feedback=feedback, reviewed_by=reviewed_by, reviewed_at=datetime.utcnow())
+    )
+
+    result = await db.execute(stmt)
+    await db.commit()
+    return result.rowcount
