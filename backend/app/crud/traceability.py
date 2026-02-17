@@ -1,7 +1,5 @@
 """CRUD operations for traceability matrix and metrics"""
 
-from typing import Dict, List
-
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -18,7 +16,6 @@ from app.schemas.traceability import (
     RequirementCoverage,
     TraceabilityMatrixResponse,
 )
-
 
 async def get_traceability_matrix(db: AsyncSession) -> TraceabilityMatrixResponse:
     """
