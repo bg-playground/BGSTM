@@ -1,7 +1,7 @@
 """Analytics API endpoints"""
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,10 +12,10 @@ from app.services.analytics import SuggestionAnalytics
 router = APIRouter()
 
 
-@router.get("/analytics/acceptance-rates", response_model=Dict[str, Any])
+@router.get("/analytics/acceptance-rates", response_model=dict[str, Any])
 async def get_acceptance_rates(
-    days: Optional[int] = Query(None, ge=1, le=365, description="Filter to last N days"),
-    db: AsyncSession = Depends(get_db)
+    days: int | None = Query(None, ge=1, le=365, description="Filter to last N days"),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get suggestion acceptance rates overall and by algorithm
@@ -28,10 +28,10 @@ async def get_acceptance_rates(
     return await SuggestionAnalytics.get_acceptance_rates(db, start_date, end_date)
 
 
-@router.get("/analytics/confidence-distribution", response_model=Dict[str, Any])
+@router.get("/analytics/confidence-distribution", response_model=dict[str, Any])
 async def get_confidence_distribution(
-    algorithm: Optional[str] = Query(None, description="Filter by algorithm: tfidf, keyword, hybrid, llm"),
-    db: AsyncSession = Depends(get_db)
+    algorithm: str | None = Query(None, description="Filter by algorithm: tfidf, keyword, hybrid, llm"),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get distribution of confidence scores in buckets
@@ -41,10 +41,9 @@ async def get_confidence_distribution(
     return await SuggestionAnalytics.get_confidence_distribution(db, algorithm)
 
 
-@router.get("/analytics/generation-trends", response_model=List[Dict[str, Any]])
+@router.get("/analytics/generation-trends", response_model=list[dict[str, Any]])
 async def get_generation_trends(
-    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
-    db: AsyncSession = Depends(get_db)
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"), db: AsyncSession = Depends(get_db)
 ):
     """
     Get daily suggestion generation trends
@@ -54,10 +53,9 @@ async def get_generation_trends(
     return await SuggestionAnalytics.get_generation_trends(db, days)
 
 
-@router.get("/analytics/review-velocity", response_model=Dict[str, Any])
+@router.get("/analytics/review-velocity", response_model=dict[str, Any])
 async def get_review_velocity(
-    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
-    db: AsyncSession = Depends(get_db)
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"), db: AsyncSession = Depends(get_db)
 ):
     """
     Get review velocity metrics
@@ -67,10 +65,8 @@ async def get_review_velocity(
     return await SuggestionAnalytics.get_review_velocity(db, days)
 
 
-@router.get("/analytics/algorithm-comparison", response_model=List[Dict[str, Any]])
-async def get_algorithm_comparison(
-    db: AsyncSession = Depends(get_db)
-):
+@router.get("/analytics/algorithm-comparison", response_model=list[dict[str, Any]])
+async def get_algorithm_comparison(db: AsyncSession = Depends(get_db)):
     """
     Compare all algorithms across multiple metrics
 
