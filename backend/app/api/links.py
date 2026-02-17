@@ -1,14 +1,15 @@
 """API endpoints for Links and Suggestions"""
 
-from typing import List
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import link as crud
 from app.db.session import get_db
 from app.schemas.link import (
+    BulkReviewRequest,
     LinkCreate,
     LinkResponse,
     SuggestionResponse,
@@ -77,9 +78,19 @@ async def list_suggestions(skip: int = 0, limit: int = 100, db: AsyncSession = D
 
 
 @router.get("/suggestions/pending", response_model=List[SuggestionResponse])
-async def list_pending_suggestions(db: AsyncSession = Depends(get_db)):
-    """List all pending link suggestions"""
-    return await crud.get_pending_suggestions(db)
+async def list_pending_suggestions(
+    min_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum similarity score"),
+    max_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Maximum similarity score"),
+    algorithm: Optional[str] = Query(None, description="Filter by algorithm (tfidf, keyword, hybrid, llm)"),
+    sort_by: Optional[str] = Query("score", description="Sort field: 'score', 'date', 'algorithm'"),
+    sort_order: Optional[str] = Query("desc", description="Sort order: 'asc' or 'desc'"),
+    limit: Optional[int] = Query(100, le=500, description="Maximum results to return"),
+    db: AsyncSession = Depends(get_db),
+):
+    """List pending suggestions with filtering and sorting"""
+    return await crud.get_pending_suggestions(
+        db, min_score=min_score, max_score=max_score, algorithm=algorithm, sort_by=sort_by, sort_order=sort_order, limit=limit
+    )
 
 
 @router.get("/suggestions/{suggestion_id}", response_model=SuggestionResponse)
@@ -98,3 +109,13 @@ async def review_suggestion(suggestion_id: UUID, review: SuggestionReview, db: A
     if not reviewed:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Suggestion {suggestion_id} not found")
     return reviewed
+
+
+@router.post("/suggestions/bulk-review", response_model=Dict[str, Any])
+async def bulk_review_suggestions(request: BulkReviewRequest, db: AsyncSession = Depends(get_db)):
+    """Review multiple suggestions at once"""
+    reviewed = await crud.bulk_review_suggestions(
+        db, request.suggestion_ids, request.status, request.feedback, request.reviewed_by
+    )
+
+    return {"message": f"Reviewed {reviewed} suggestions", "count": reviewed, "status": request.status}

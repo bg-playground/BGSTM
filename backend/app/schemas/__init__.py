@@ -1,6 +1,7 @@
 """Pydantic schemas for BGSTM AI Traceability"""
 
 from .link import (
+    BulkReviewRequest,
     LinkCreate,
     LinkResponse,
     SuggestionCreate,
@@ -22,4 +23,5 @@ __all__ = [
     "SuggestionCreate",
     "SuggestionResponse",
     "SuggestionReview",
+    "BulkReviewRequest",
 ]

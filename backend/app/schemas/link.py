@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -71,6 +71,15 @@ class SuggestionResponse(SuggestionBase):
 class SuggestionReview(BaseModel):
     """Schema for reviewing a suggestion"""
 
+    status: SuggestionStatus
+    feedback: Optional[str] = None
+    reviewed_by: Optional[str] = Field(None, max_length=100)
+
+
+class BulkReviewRequest(BaseModel):
+    """Schema for bulk suggestion review"""
+
+    suggestion_ids: List[UUID] = Field(..., min_length=1, max_length=100)
     status: SuggestionStatus
     feedback: Optional[str] = None
     reviewed_by: Optional[str] = Field(None, max_length=100)
