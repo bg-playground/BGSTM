@@ -26,9 +26,7 @@ async def get_traceability_matrix(db: AsyncSession) -> TraceabilityMatrixRespons
         TraceabilityMatrixResponse with requirements, links, coverage status, and orphans
     """
     # Get all requirements with their links
-    query = select(Requirement).options(
-        selectinload(Requirement.links).selectinload(RequirementTestCaseLink.test_case)
-    )
+    query = select(Requirement).options(selectinload(Requirement.links).selectinload(RequirementTestCaseLink.test_case))
     result = await db.execute(query)
     requirements = result.scalars().all()
 
@@ -162,38 +160,28 @@ async def get_metrics(db: AsyncSession) -> MetricsResponse:
     total_suggestions = sugg_result.scalar() or 0
 
     accepted_query = (
-        select(func.count())
-        .select_from(LinkSuggestion)
-        .where(LinkSuggestion.status == SuggestionStatus.ACCEPTED)
+        select(func.count()).select_from(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.ACCEPTED)
     )
     accepted_result = await db.execute(accepted_query)
     accepted_suggestions = accepted_result.scalar() or 0
 
     rejected_query = (
-        select(func.count())
-        .select_from(LinkSuggestion)
-        .where(LinkSuggestion.status == SuggestionStatus.REJECTED)
+        select(func.count()).select_from(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.REJECTED)
     )
     rejected_result = await db.execute(rejected_query)
     rejected_suggestions = rejected_result.scalar() or 0
 
     pending_query = (
-        select(func.count())
-        .select_from(LinkSuggestion)
-        .where(LinkSuggestion.status == SuggestionStatus.PENDING)
+        select(func.count()).select_from(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
     )
     pending_result = await db.execute(pending_query)
     pending_suggestions = pending_result.scalar() or 0
 
     # Calculate acceptance rate
-    suggestion_acceptance_rate = (
-        (accepted_suggestions / total_suggestions * 100) if total_suggestions > 0 else 0.0
-    )
+    suggestion_acceptance_rate = (accepted_suggestions / total_suggestions * 100) if total_suggestions > 0 else 0.0
 
     # Get requirements with at least one accepted link for coverage
-    accepted_sources = [
-        LinkSource.MANUAL, LinkSource.AI_CONFIRMED, LinkSource.IMPORTED
-    ]
+    accepted_sources = [LinkSource.MANUAL, LinkSource.AI_CONFIRMED, LinkSource.IMPORTED]
     covered_reqs_query = (
         select(func.count(func.distinct(RequirementTestCaseLink.requirement_id)))
         .select_from(RequirementTestCaseLink)
@@ -209,9 +197,7 @@ async def get_metrics(db: AsyncSession) -> MetricsResponse:
     for method in SuggestionMethod:
         # Total for this method
         method_total_query = (
-            select(func.count())
-            .select_from(LinkSuggestion)
-            .where(LinkSuggestion.suggestion_method == method)
+            select(func.count()).select_from(LinkSuggestion).where(LinkSuggestion.suggestion_method == method)
         )
         method_total_result = await db.execute(method_total_query)
         method_total = method_total_result.scalar() or 0
