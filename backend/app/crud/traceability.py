@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.link import LinkSource, RequirementTestCaseLink
 from app.models.requirement import Requirement
-from app.models.suggestion import LinkSuggestion, SuggestionStatus, SuggestionMethod
+from app.models.suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
 from app.models.test_case import TestCase
 from app.schemas.traceability import (
     AlgorithmMetrics,
@@ -16,6 +16,7 @@ from app.schemas.traceability import (
     RequirementCoverage,
     TraceabilityMatrixResponse,
 )
+
 
 async def get_traceability_matrix(db: AsyncSession) -> TraceabilityMatrixResponse:
     """
