@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Suggestion, SuggestionReview, GenerateSuggestionsResponse } from '../types/api';
+import type { Suggestion, SuggestionReview, GenerateSuggestionsResponse, SuggestionStatus } from '../types/api';
 
 export const suggestionsApi = {
   list: async (): Promise<Suggestion[]> => {
@@ -7,8 +7,21 @@ export const suggestionsApi = {
     return response.data;
   },
 
-  listPending: async (): Promise<Suggestion[]> => {
-    const response = await apiClient.get<Suggestion[]>('/suggestions/pending');
+  listPending: async (params?: {
+    minScore?: number;
+    maxScore?: number;
+    algorithm?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }): Promise<Suggestion[]> => {
+    const searchParams = new URLSearchParams();
+    if (params?.minScore !== undefined) searchParams.append('min_score', params.minScore.toString());
+    if (params?.maxScore !== undefined) searchParams.append('max_score', params.maxScore.toString());
+    if (params?.algorithm) searchParams.append('algorithm', params.algorithm);
+    if (params?.sortBy) searchParams.append('sort_by', params.sortBy);
+    if (params?.sortOrder) searchParams.append('sort_order', params.sortOrder);
+    
+    const response = await apiClient.get<Suggestion[]>(`/suggestions/pending?${searchParams}`);
     return response.data;
   },
 
@@ -19,6 +32,15 @@ export const suggestionsApi = {
 
   review: async (id: string, review: SuggestionReview): Promise<Suggestion> => {
     const response = await apiClient.post<Suggestion>(`/suggestions/${id}/review`, review);
+    return response.data;
+  },
+
+  bulkReview: async (ids: string[], status: SuggestionStatus, feedback?: string): Promise<any> => {
+    const response = await apiClient.post('/suggestions/bulk-review', {
+      suggestion_ids: ids,
+      status,
+      feedback
+    });
     return response.data;
   },
 
