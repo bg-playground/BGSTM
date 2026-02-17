@@ -54,7 +54,7 @@ export const SuggestionDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [filters]);
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReview = async (id: string, status: SuggestionStatus) => {
     try {
@@ -77,7 +77,7 @@ export const SuggestionDashboard: React.FC = () => {
       showToast(`Accepted ${selectedIds.size} suggestions`, 'success');
       setSelectedIds(new Set());
       await loadData();
-    } catch (error) {
+    } catch {
       showToast('Failed to accept suggestions', 'error');
     }
   };
@@ -88,7 +88,7 @@ export const SuggestionDashboard: React.FC = () => {
       showToast(`Rejected ${selectedIds.size} suggestions`, 'success');
       setSelectedIds(new Set());
       await loadData();
-    } catch (error) {
+    } catch {
       showToast('Failed to reject suggestions', 'error');
     }
   };
@@ -146,7 +146,7 @@ export const SuggestionDashboard: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [suggestions, selectedIds]);
+  }, [suggestions, selectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (

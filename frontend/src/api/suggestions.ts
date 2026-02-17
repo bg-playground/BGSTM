@@ -35,8 +35,8 @@ export const suggestionsApi = {
     return response.data;
   },
 
-  bulkReview: async (ids: string[], status: SuggestionStatus, feedback?: string): Promise<any> => {
-    const response = await apiClient.post('/suggestions/bulk-review', {
+  bulkReview: async (ids: string[], status: SuggestionStatus, feedback?: string): Promise<{ message: string; count: number; status: SuggestionStatus }> => {
+    const response = await apiClient.post<{ message: string; count: number; status: SuggestionStatus }>('/suggestions/bulk-review', {
       suggestion_ids: ids,
       status,
       feedback
