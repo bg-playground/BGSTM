@@ -1,4 +1,4 @@
-import client from "./client";
+import { apiClient } from "./client";
 
 export interface LinkedTestCase {
   test_case_id: string;
@@ -60,17 +60,17 @@ export interface Metrics {
 
 const traceabilityApi = {
   async getMatrix(): Promise<TraceabilityMatrix> {
-    const response = await client.get<TraceabilityMatrix>("/traceability-matrix");
+    const response = await apiClient.get<TraceabilityMatrix>("/traceability-matrix");
     return response.data;
   },
 
   async getMetrics(): Promise<Metrics> {
-    const response = await client.get<Metrics>("/metrics");
+    const response = await apiClient.get<Metrics>("/metrics");
     return response.data;
   },
 
   async exportMatrix(format: "csv" | "json"): Promise<Blob> {
-    const response = await client.get(`/traceability-matrix/export?format=${format}`, {
+    const response = await apiClient.get(`/traceability-matrix/export?format=${format}`, {
       responseType: "blob",
     });
     return response.data;

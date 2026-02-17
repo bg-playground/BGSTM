@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import traceabilityApi, { TraceabilityMatrix } from "../api/traceability";
+import traceabilityApi, { type TraceabilityMatrix } from "../api/traceability";
 import { useToast } from "../components/Toast";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function TraceabilityMatrixPage() {
   const [matrix, setMatrix] = useState<TraceabilityMatrix | null>(null);
