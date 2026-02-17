@@ -14,6 +14,7 @@ class SuggestionMethod(str, enum.Enum):
     KEYWORD_MATCH = "keyword_match"
     HEURISTIC = "heuristic"
     HYBRID = "hybrid"
+    LLM_EMBEDDING = "llm_embedding"
 
 
 class SuggestionStatus(str, enum.Enum):

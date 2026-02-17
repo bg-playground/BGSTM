@@ -191,6 +191,7 @@ class SuggestionEngine:
             "tfidf": SuggestionMethod.SEMANTIC_SIMILARITY,
             "keyword": SuggestionMethod.KEYWORD_MATCH,
             "hybrid": SuggestionMethod.HYBRID,
+            "llm": SuggestionMethod.LLM_EMBEDDING,
         }
         suggestion_method = method_map.get(self.config.default_algorithm, SuggestionMethod.HEURISTIC)
 

@@ -205,6 +205,7 @@ export enum SuggestionMethod {
   KEYWORD_MATCH = 'keyword_match',
   HEURISTIC = 'heuristic',
   HYBRID = 'hybrid',
+  LLM_EMBEDDING = 'llm_embedding',
 }
 
 export enum SuggestionStatus {

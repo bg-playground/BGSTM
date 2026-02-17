@@ -39,6 +39,16 @@ class SuggestionConfig(BaseModel):
         default=0.4, ge=0.0, le=1.0, description="Weight for keyword score in hybrid approach"
     )
 
+    # LLM embedding settings
+    llm_provider: str = Field(default="openai", description="LLM provider: 'openai' or 'huggingface'")
+
+    llm_model: Optional[str] = Field(
+        default=None,
+        description="Model name (defaults: 'text-embedding-3-small' for OpenAI, 'all-MiniLM-L6-v2' for HF)",
+    )
+
+    llm_cache_embeddings: bool = Field(default=True, description="Cache embeddings in memory for performance")
+
     class Config:
         frozen = False
 
