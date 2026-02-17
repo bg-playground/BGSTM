@@ -346,7 +346,8 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
         """
         Args:
             provider: 'openai' or 'huggingface'
-            model: Model name (e.g., 'text-embedding-3-small' for OpenAI, 'sentence-transformers/all-MiniLM-L6-v2' for HF)
+            model: Model name (e.g., 'text-embedding-3-small' for OpenAI,
+                'sentence-transformers/all-MiniLM-L6-v2' for HF)
             cache_embeddings: Whether to cache embeddings in memory for performance
         """
         self.provider = provider.lower()
@@ -365,8 +366,9 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
     def _init_openai(self):
         """Initialize OpenAI client"""
         try:
-            from openai import OpenAI
             import os
+
+            from openai import OpenAI
 
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:

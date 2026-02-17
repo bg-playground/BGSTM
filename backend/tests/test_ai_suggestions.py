@@ -1,6 +1,7 @@
 """Simplified Tests for AI Suggestions Module"""
 
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.ai_suggestions.algorithms import (
     HybridSimilarity,
     KeywordSimilarity,
+    LLMEmbeddingSimilarity,
     TFIDFSimilarity,
 )
 from app.ai_suggestions.config import SuggestionConfig
@@ -91,6 +93,145 @@ def test_hybrid_similarity():
     similarity = algo.compute_similarity(text1, text2)
 
     assert 0.0 <= similarity <= 1.0
+
+
+def test_llm_embedding_similarity_openai_mock():
+    """Test LLM embedding with OpenAI (mocked)"""
+    # Mock the OpenAI module before creating the instance
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        # Mock at the module level
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        # Mock embedding response
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=[0.1] * 1536)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        # Inject the mock into sys.modules before creating instance
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            # Create algorithm and test
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=False)
+
+            text1 = "User authentication with password"
+            text2 = "Test user login with password"
+
+            similarity = algo.compute_similarity(text1, text2)
+
+            # Should return valid similarity score
+            assert 0.0 <= similarity <= 1.0
+            assert similarity == 1.0  # Normalized cosine similarity of identical vectors
+        finally:
+            # Clean up
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_embedding_similarity_caching():
+    """Test that LLM embedding caching works"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=[0.1] * 1536)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            # Create algorithm with caching enabled
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+
+            text = "Test text"
+
+            # First call should hit the API
+            algo.compute_similarity(text, text)
+            assert mock_client.embeddings.create.call_count == 1
+
+            # Second call should use cache
+            algo.compute_similarity(text, text)
+            assert mock_client.embeddings.create.call_count == 1  # Still 1, not 2
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_embedding_similarity_error_handling():
+    """Test graceful fallback when LLM fails"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        # Make the API call raise an exception
+        mock_client.embeddings.create.side_effect = Exception("API Error")
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=False)
+
+            text1 = "User authentication"
+            text2 = "Test login"
+
+            # Should return 0.0 on error, not raise exception
+            similarity = algo.compute_similarity(text1, text2)
+            assert similarity == 0.0
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_embedding_similarity_empty_text():
+    """Test LLM embedding with empty text"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_openai_module.OpenAI.return_value = MagicMock()
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            algo = LLMEmbeddingSimilarity(provider="openai")
+
+            # Empty text should return 0.0
+            assert algo.compute_similarity("", "test") == 0.0
+            assert algo.compute_similarity("test", "") == 0.0
+            assert algo.compute_similarity("", "") == 0.0
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_embedding_similarity_unsupported_provider():
+    """Test that unsupported provider raises error"""
+    with pytest.raises(ValueError, match="Unsupported provider"):
+        LLMEmbeddingSimilarity(provider="unsupported")
+
+
+def test_llm_embedding_similarity_missing_openai_library():
+    """Test that missing OpenAI library raises ImportError"""
+    import sys
+
+    # Make sure openai is not in sys.modules
+    if "openai" in sys.modules:
+        del sys.modules["openai"]
+
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        with pytest.raises(ImportError, match="OpenAI library not installed"):
+            LLMEmbeddingSimilarity(provider="openai")
 
 
 # Engine Tests (with DB)
