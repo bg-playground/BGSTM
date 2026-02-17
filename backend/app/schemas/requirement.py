@@ -1,12 +1,15 @@
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
-from app.models.requirement import RequirementType, PriorityLevel, RequirementStatus
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.models.requirement import PriorityLevel, RequirementStatus, RequirementType
 
 
 class RequirementBase(BaseModel):
     """Base schema for Requirement"""
+
     title: str = Field(..., max_length=500)
     description: str
     type: RequirementType
@@ -22,11 +25,13 @@ class RequirementBase(BaseModel):
 
 class RequirementCreate(RequirementBase):
     """Schema for creating a Requirement"""
+
     external_id: Optional[str] = Field(None, max_length=100)
 
 
 class RequirementUpdate(BaseModel):
     """Schema for updating a Requirement"""
+
     title: Optional[str] = Field(None, max_length=500)
     description: Optional[str] = None
     type: Optional[RequirementType] = None
@@ -41,10 +46,11 @@ class RequirementUpdate(BaseModel):
 
 class RequirementResponse(RequirementBase):
     """Schema for Requirement response"""
+
     id: UUID
     external_id: Optional[str]
     version: int
     created_at: datetime
     updated_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)

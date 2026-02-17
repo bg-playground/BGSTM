@@ -1,13 +1,16 @@
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
-from app.models.test_case import TestCaseType, TestCaseStatus, AutomationStatus
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.models.requirement import PriorityLevel
+from app.models.test_case import AutomationStatus, TestCaseStatus, TestCaseType
 
 
 class TestCaseBase(BaseModel):
     """Base schema for TestCase"""
+
     title: str = Field(..., max_length=500)
     description: str
     type: TestCaseType
@@ -29,11 +32,13 @@ class TestCaseBase(BaseModel):
 
 class TestCaseCreate(TestCaseBase):
     """Schema for creating a TestCase"""
+
     external_id: Optional[str] = Field(None, max_length=100)
 
 
 class TestCaseUpdate(BaseModel):
     """Schema for updating a TestCase"""
+
     title: Optional[str] = Field(None, max_length=500)
     description: Optional[str] = None
     type: Optional[TestCaseType] = None
@@ -54,10 +59,11 @@ class TestCaseUpdate(BaseModel):
 
 class TestCaseResponse(TestCaseBase):
     """Schema for TestCase response"""
+
     id: UUID
     external_id: Optional[str]
     version: int
     created_at: datetime
     updated_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)

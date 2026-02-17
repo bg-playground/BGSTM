@@ -1,6 +1,6 @@
 """API routers for BGSTM AI Traceability"""
 
-from . import requirements, test_cases, links
+from . import links, requirements, test_cases
 
 __all__ = [
     "requirements",

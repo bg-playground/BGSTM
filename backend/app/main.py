@@ -1,14 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api import links, requirements, suggestions, test_cases
 from app.config import settings
 from app.db.session import init_db
-from app.api import requirements, test_cases, links, suggestions
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="BGSTM AI-Powered Traceability System"
-)
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION, description="BGSTM AI-Powered Traceability System")
 
 # CORS
 app.add_middleware(
@@ -34,11 +31,7 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    return {
-        "message": "BGSTM AI Traceability API",
-        "version": settings.VERSION,
-        "docs": "/docs"
-    }
+    return {"message": "BGSTM AI Traceability API", "version": settings.VERSION, "docs": "/docs"}
 
 
 @app.get("/health")

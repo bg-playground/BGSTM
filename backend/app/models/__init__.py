@@ -1,10 +1,10 @@
 """Database models for BGSTM AI Traceability"""
 
 from .base import Base, TimestampMixin
-from .requirement import Requirement, RequirementType, PriorityLevel, RequirementStatus
-from .test_case import TestCase, TestCaseType, TestCaseStatus, AutomationStatus
-from .link import RequirementTestCaseLink, LinkType, LinkSource
+from .link import LinkSource, LinkType, RequirementTestCaseLink
+from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from .suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
+from .test_case import AutomationStatus, TestCase, TestCaseStatus, TestCaseType
 
 __all__ = [
     "Base",

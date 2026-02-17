@@ -2,8 +2,10 @@
 
 from typing import List, Optional
 from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.test_case import TestCase
 from app.schemas.test_case import TestCaseCreate, TestCaseUpdate
 
@@ -35,18 +37,16 @@ async def create_test_case(db: AsyncSession, test_case: TestCaseCreate) -> TestC
     return db_test_case
 
 
-async def update_test_case(
-    db: AsyncSession, test_case_id: UUID, test_case: TestCaseUpdate
-) -> Optional[TestCase]:
+async def update_test_case(db: AsyncSession, test_case_id: UUID, test_case: TestCaseUpdate) -> Optional[TestCase]:
     """Update a test case"""
     db_test_case = await get_test_case(db, test_case_id)
     if not db_test_case:
         return None
-    
+
     update_data = test_case.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_test_case, field, value)
-    
+
     await db.commit()
     await db.refresh(db_test_case)
     return db_test_case
@@ -57,7 +57,7 @@ async def delete_test_case(db: AsyncSession, test_case_id: UUID) -> bool:
     db_test_case = await get_test_case(db, test_case_id)
     if not db_test_case:
         return False
-    
+
     await db.delete(db_test_case)
     await db.commit()
     return True

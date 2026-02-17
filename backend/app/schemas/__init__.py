@@ -1,7 +1,5 @@
 """Pydantic schemas for BGSTM AI Traceability"""
 
-from .requirement import RequirementCreate, RequirementUpdate, RequirementResponse
-from .test_case import TestCaseCreate, TestCaseUpdate, TestCaseResponse
 from .link import (
     LinkCreate,
     LinkResponse,
@@ -9,6 +7,8 @@ from .link import (
     SuggestionResponse,
     SuggestionReview,
 )
+from .requirement import RequirementCreate, RequirementResponse, RequirementUpdate
+from .test_case import TestCaseCreate, TestCaseResponse, TestCaseUpdate
 
 __all__ = [
     "RequirementCreate",

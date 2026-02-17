@@ -2,8 +2,10 @@
 
 from typing import List, Optional
 from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.requirement import Requirement
 from app.schemas.requirement import RequirementCreate, RequirementUpdate
 
@@ -42,11 +44,11 @@ async def update_requirement(
     db_requirement = await get_requirement(db, requirement_id)
     if not db_requirement:
         return None
-    
+
     update_data = requirement.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_requirement, field, value)
-    
+
     await db.commit()
     await db.refresh(db_requirement)
     return db_requirement
@@ -57,7 +59,7 @@ async def delete_requirement(db: AsyncSession, requirement_id: UUID) -> bool:
     db_requirement = await get_requirement(db, requirement_id)
     if not db_requirement:
         return False
-    
+
     await db.delete(db_requirement)
     await db.commit()
     return True

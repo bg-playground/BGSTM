@@ -1,8 +1,10 @@
 import enum
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, Enum, Float, ForeignKey, DateTime
+
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
+
 from .base import Base
 from .requirement import GUID, JSON  # Import cross-platform types
 
