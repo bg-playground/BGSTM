@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Dockerfile and docker-compose.yml for containerized backend deployment (#42)
 - GitHub Actions CI/CD pipeline for automated testing, linting, and type checking (#40)
 
 ## [1.0.0] - 2026-02-17
