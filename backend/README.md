@@ -3,10 +3,54 @@
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- PostgreSQL 14+ (or SQLite for development)
+- **Docker & Docker Compose** (recommended) OR
+- Python 3.11+ and PostgreSQL 14+ (for local development)
 
-### Installation
+### Option 1: Run with Docker (Recommended)
+
+```bash
+# From project root directory
+# Copy environment file and customize if needed
+cp .env.example .env
+
+# Start all services (backend + PostgreSQL)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f backend
+
+# Stop services
+docker-compose down
+
+# Stop services and remove volumes
+docker-compose down -v
+```
+
+The backend API will be available at http://localhost:8000
+
+### Option 2: Run Locally with Docker Build
+
+```bash
+# Build the Docker image
+cd backend
+docker build -t bgstm-backend .
+
+# Run the container (requires PostgreSQL running separately)
+docker run -d \
+  -p 8000:8000 \
+  -e DATABASE_URL="postgresql+asyncpg://user:password@host/bgstm" \
+  -e PYTHONPATH=/app \
+  --name bgstm-backend \
+  bgstm-backend
+
+# View logs
+docker logs -f bgstm-backend
+
+# Stop and remove container
+docker stop bgstm-backend && docker rm bgstm-backend
+```
+
+### Option 3: Local Development (Without Docker)
 
 ```bash
 # Create virtual environment
@@ -19,11 +63,7 @@ pip install -r requirements.txt
 # Set up environment
 cp .env.example .env
 # Edit .env with your database settings
-```
 
-### Run Development Server
-
-```bash
 # Initialize database (tables will be created automatically on first run)
 # Or load sample data which also initializes the database
 python -m app.db.sample_data
@@ -142,16 +182,77 @@ Create a `.env` file from `.env.example` and customize:
 
 ```env
 DATABASE_URL=sqlite+aiosqlite:///./bgstm.db
+# For PostgreSQL (Docker): DATABASE_URL=postgresql+asyncpg://bgstm:bgstm@db:5432/bgstm
 API_V1_PREFIX=/api/v1
 PROJECT_NAME=BGSTM AI Traceability
 VERSION=2.0.0
 BACKEND_CORS_ORIGINS=["http://localhost:3000", "http://localhost:8000"]
+PYTHONPATH=/app
 ```
 
 ## Testing
 
+### Run Tests Locally
 ```bash
 pytest
+```
+
+### Run Tests Inside Docker Container
+```bash
+# Using docker-compose
+docker-compose exec backend pytest
+
+# Or build and run tests in a separate container
+docker build -f backend/Dockerfile -t bgstm-backend-test backend/
+docker run --rm bgstm-backend-test pytest
+```
+
+## Docker Configuration
+
+### Environment Variables for Docker
+
+When using Docker or docker-compose, configure these variables in your `.env` file:
+
+```env
+# Database (PostgreSQL for Docker)
+DATABASE_URL=postgresql+asyncpg://bgstm:bgstm@db:5432/bgstm
+POSTGRES_USER=bgstm
+POSTGRES_PASSWORD=bgstm
+POSTGRES_DB=bgstm
+POSTGRES_PORT=5432
+
+# Backend
+BACKEND_PORT=8000
+API_V1_PREFIX=/api/v1
+PROJECT_NAME=BGSTM AI Traceability
+VERSION=2.0.0
+BACKEND_CORS_ORIGINS=["http://localhost:3000", "http://localhost:8000"]
+PYTHONPATH=/app
+```
+
+### Docker Commands Reference
+
+```bash
+# Build backend image
+docker build -t bgstm-backend backend/
+
+# Run backend container (standalone)
+docker run -p 8000:8000 -e DATABASE_URL="..." bgstm-backend
+
+# Using docker-compose
+docker-compose up -d          # Start in background
+docker-compose up             # Start with logs
+docker-compose down           # Stop all services
+docker-compose logs -f        # View logs
+docker-compose ps             # List running services
+docker-compose exec backend bash  # Access backend shell
+```
+
+### Loading Sample Data with Docker
+
+```bash
+# Load ShopFlow sample data
+docker-compose exec backend python -m app.db.sample_data
 ```
 
 ## Architecture
