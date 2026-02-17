@@ -203,7 +203,7 @@ pytest
 docker-compose exec backend pytest
 
 # Or build and run tests in a separate container
-docker build -f backend/Dockerfile -t bgstm-backend-test backend/
+docker build -t bgstm-backend-test backend/
 docker run --rm bgstm-backend-test pytest
 ```
 
