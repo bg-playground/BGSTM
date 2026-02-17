@@ -44,7 +44,7 @@ async def create_requirement(
             new_requirement.id,
             db,
         )
-    
+
     return new_requirement
 
 
@@ -82,7 +82,7 @@ async def update_requirement(
             requirement_id,
             db,
         )
-    
+
     return updated
 
 

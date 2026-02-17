@@ -40,7 +40,7 @@ async def create_test_case(
             new_test_case.id,
             db,
         )
-    
+
     return new_test_case
 
 
@@ -78,7 +78,7 @@ async def update_test_case(
             test_case_id,
             db,
         )
-    
+
     return updated
 
 
