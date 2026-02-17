@@ -80,6 +80,72 @@ config = SuggestionConfig(
 )
 ```
 
+### 4. LLM Embeddings (`llm`) **NEW**
+
+**How it works:**
+- Uses large language model embeddings (OpenAI or HuggingFace) to capture deep semantic meaning
+- Computes cosine similarity between embedding vectors
+- Supports caching for improved performance
+- Best for: Highest accuracy semantic understanding, capturing context, synonyms, and conceptual relationships
+
+**Requirements:**
+- For OpenAI: `openai>=1.0.0` and `OPENAI_API_KEY` environment variable
+- For HuggingFace: `sentence-transformers>=2.2.0`
+
+**Pros:**
+- Superior semantic understanding compared to TF-IDF
+- Captures context, synonyms, and conceptual relationships
+- Understands complex language patterns
+- Works well with domain-specific terminology
+
+**Cons:**
+- OpenAI requires API key and has usage costs
+- HuggingFace models download on first use (slower initially)
+- Higher latency compared to keyword matching
+- Requires additional dependencies
+
+**Configuration:**
+```python
+# Using OpenAI (default)
+config = SuggestionConfig(
+    default_algorithm="llm",
+    llm_provider="openai",
+    llm_model="text-embedding-3-small",  # or "text-embedding-3-large"
+    llm_cache_embeddings=True
+)
+
+# Using HuggingFace (runs locally)
+config = SuggestionConfig(
+    default_algorithm="llm",
+    llm_provider="huggingface",
+    llm_model="sentence-transformers/all-MiniLM-L6-v2",
+    llm_cache_embeddings=True
+)
+```
+
+**Setup Instructions:**
+
+For **OpenAI**:
+1. Install the package: `pip install openai>=1.0.0`
+2. Set your API key: `export OPENAI_API_KEY="your-api-key"`
+3. Or add to `.env` file: `OPENAI_API_KEY=your-api-key`
+
+For **HuggingFace**:
+1. Install the package: `pip install sentence-transformers>=2.2.0`
+2. Models download automatically on first use
+3. No API key required (runs locally)
+
+**Performance Considerations:**
+- **Caching**: Embeddings are cached in memory by default to avoid redundant API calls/computations
+- **OpenAI Costs**: OpenAI charges per embedding (~$0.0001 per 1K tokens for text-embedding-3-small)
+- **HuggingFace**: First run downloads model (~90MB for all-MiniLM-L6-v2), subsequent runs are faster
+- **Batch Processing**: For large datasets, consider processing in batches during off-peak hours
+
+**When to Use:**
+- Use LLM for highest accuracy when API access is available
+- Use HuggingFace provider for local deployment without API dependencies
+- Keep TF-IDF as default for most users (no API key required, good balance of speed and accuracy)
+
 ## Configuration
 
 The engine is configured using the `SuggestionConfig` class:
@@ -89,13 +155,17 @@ from app.ai_suggestions.config import SuggestionConfig
 
 config = SuggestionConfig(
     min_confidence_threshold=0.3,   # Only create suggestions above this score (0.0-1.0)
-    default_algorithm="tfidf",      # Algorithm to use: 'tfidf', 'keyword', or 'hybrid'
+    default_algorithm="tfidf",      # Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'
     tfidf_max_features=100,
     tfidf_ngram_range=(1, 2),
     keyword_min_word_length=3,
     keyword_top_n=10,
     hybrid_tfidf_weight=0.6,
-    hybrid_keyword_weight=0.4
+    hybrid_keyword_weight=0.4,
+    # LLM settings (only needed if using 'llm' algorithm)
+    llm_provider="openai",          # 'openai' or 'huggingface'
+    llm_model=None,                 # Optional: model override
+    llm_cache_embeddings=True       # Cache embeddings for performance
 )
 ```
 
@@ -104,9 +174,10 @@ config = SuggestionConfig(
 - **min_confidence_threshold** (0.0-1.0, default: 0.3): Only pairs with similarity scores above this threshold will generate suggestions. Lower values create more suggestions but with lower confidence.
 
 - **default_algorithm** (default: "tfidf"): Which algorithm to use. Choose based on your needs:
-  - `tfidf`: Best semantic understanding
+  - `tfidf`: Best semantic understanding (traditional ML)
   - `keyword`: Fastest, no dependencies
   - `hybrid`: Balanced approach
+  - `llm`: Highest accuracy with LLM embeddings (requires API key or model download)
 
 ## API Usage
 
@@ -120,6 +191,9 @@ curl -X POST "http://localhost:8000/api/v1/suggestions/generate"
 
 # Override algorithm
 curl -X POST "http://localhost:8000/api/v1/suggestions/generate?algorithm=keyword"
+
+# Use LLM algorithm (requires OpenAI API key or HuggingFace model)
+curl -X POST "http://localhost:8000/api/v1/suggestions/generate?algorithm=llm"
 
 # Override threshold
 curl -X POST "http://localhost:8000/api/v1/suggestions/generate?threshold=0.5"
@@ -234,9 +308,12 @@ method_map = {
     'tfidf': SuggestionMethod.SEMANTIC_SIMILARITY,
     'keyword': SuggestionMethod.KEYWORD_MATCH,
     'hybrid': SuggestionMethod.HYBRID,
+    'llm': SuggestionMethod.LLM_EMBEDDING,
     'mycustom': SuggestionMethod.HEURISTIC  # or add new enum value
 }
 ```
+
+5. **Update the API endpoint** in `api/suggestions.py` to accept the new algorithm name.
 
 ## Testing
 
@@ -255,12 +332,14 @@ pytest tests/test_ai_suggestions.py -v
   - `keyword` is fastest
   - `tfidf` is slower but more accurate
   - `hybrid` is in between
+  - `llm` has the highest accuracy but also highest latency and potential costs
 
 For large datasets (>1000 requirements or test cases), consider:
 - Running generation during off-peak hours
 - Using the keyword algorithm for initial passes
 - Increasing the threshold to reduce suggestions
 - Implementing batch processing or incremental updates
+- For LLM: Enable caching and consider HuggingFace for cost-free local processing
 
 ## Troubleshooting
 
@@ -278,16 +357,42 @@ Or switch to the `keyword` algorithm which has no dependencies:
 curl -X POST "http://localhost:8000/api/v1/suggestions/generate?algorithm=keyword"
 ```
 
+### "OpenAI library not installed" or "OPENAI_API_KEY not set" errors
+
+If using `llm` algorithm with OpenAI provider:
+
+```bash
+# Install OpenAI library
+pip install openai>=1.0.0
+
+# Set API key in environment
+export OPENAI_API_KEY="your-api-key-here"
+
+# Or add to .env file
+echo "OPENAI_API_KEY=your-api-key-here" >> .env
+```
+
+Or use HuggingFace provider (no API key needed):
+
+```bash
+# Install sentence-transformers
+pip install sentence-transformers>=2.2.0
+
+# In your config, set provider to huggingface
+# Or use environment variable in .env:
+echo "LLM_PROVIDER=huggingface" >> .env
+```
+
 ### Low number of suggestions generated
 
 If you're getting fewer suggestions than expected:
 - Lower the `threshold` parameter (default is 0.3)
 - Check that requirements and test cases have sufficient text content
-- Try the `hybrid` algorithm for broader matching
+- Try the `hybrid` or `llm` algorithm for broader matching
 
 ### Too many low-quality suggestions
 
 If getting too many irrelevant suggestions:
 - Increase the `threshold` parameter (try 0.5 or 0.6)
-- Switch from `keyword` to `tfidf` for better semantic matching
+- Switch from `keyword` to `tfidf` or `llm` for better semantic matching
 - Review and tune algorithm-specific parameters
