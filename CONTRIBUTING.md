@@ -72,6 +72,7 @@ There are many ways to contribute to BGSTM:
 - A GitHub account
 - Basic knowledge of Git and Markdown
 - Familiarity with software testing concepts (helpful but not required)
+- Python 3.11+ (for backend development)
 
 ### Setting Up Your Development Environment
 
@@ -89,16 +90,38 @@ There are many ways to contribute to BGSTM:
    git checkout -b fix/your-fix-name
    ```
 
-3. **Make Your Changes**
+3. **Set Up Backend Development Environment** (if working on backend code)
+   ```bash
+   cd backend
+   
+   # Create and activate virtual environment
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install dependencies
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
+   ```
+
+4. **Make Your Changes**
    - Edit documentation files (`.md` files)
    - Add new templates in the `docs/templates/` directory
    - Add examples in the `docs/examples/` directory
+   - Edit backend code in the `backend/` directory
 
-4. **Test Your Changes**
+5. **Test Your Changes**
+   
+   **For Documentation:**
    - Preview Markdown files to ensure proper formatting
    - Check that all links work correctly
    - Verify that images display properly
    - Ensure consistency with existing documentation style
+   
+   **For Backend Code:**
+   - Run tests: `cd backend && pytest`
+   - Run linting: `cd backend && ruff check .`
+   - Check formatting: `cd backend && ruff format --check .`
+   - Run type checking: `cd backend && mypy .`
 
 ## 📝 Pull Request Process
 
@@ -140,9 +163,34 @@ There are many ways to contribute to BGSTM:
 
 4. **PR Review Process**
    - Maintainers will review your PR
-   - Address any requested changes
-   - Once approved, your PR will be merged
+   - Automated CI checks will run on your PR
+   - Address any requested changes or CI failures
+   - Once approved and all checks pass, your PR will be merged
    - Your contribution will be credited
+
+### Understanding CI Checks
+
+All pull requests automatically run continuous integration (CI) checks to ensure code quality:
+
+**Test Job**: Runs all unit and integration tests
+- Ensures your changes don't break existing functionality
+- If tests fail, review the error logs and fix the failing tests
+
+**Lint Job**: Checks code style and formatting
+- Ensures consistent code formatting across the project
+- If linting fails, run `ruff check .` locally to see issues
+- Fix issues manually or run `ruff check . --fix` to auto-fix
+
+**Type Check Job**: Validates type hints and type safety
+- Ensures proper type annotations in Python code
+- If type checking fails, run `mypy .` locally to see issues
+- Add proper type hints or fix type errors
+
+To view CI check results:
+1. Go to your pull request on GitHub
+2. Scroll to the bottom to see the "Checks" section
+3. Click on any failed check to view detailed logs
+4. Fix issues locally and push updates to your branch
 
 ### PR Requirements
 
@@ -152,6 +200,7 @@ There are many ways to contribute to BGSTM:
 - ✅ Consistent with existing content
 - ✅ Appropriate file/folder structure
 - ✅ Professional and accurate content
+- ✅ All CI checks passing (for backend changes)
 
 ## 📐 Style Guidelines
 

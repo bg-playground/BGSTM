@@ -1,6 +1,6 @@
 """CRUD operations for BGSTM AI Traceability"""
 
-from . import requirement, test_case, link
+from . import link, requirement, test_case
 
 __all__ = [
     "requirement",

@@ -3,8 +3,10 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.link import RequirementTestCaseLink
 from app.models.suggestion import LinkSuggestion
 from app.schemas.link import LinkCreate, SuggestionCreate, SuggestionReview
@@ -53,7 +55,7 @@ async def delete_link(db: AsyncSession, link_id: UUID) -> bool:
     db_link = await get_link(db, link_id)
     if not db_link:
         return False
-    
+
     await db.delete(db_link)
     await db.commit()
     return True
@@ -75,9 +77,8 @@ async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> 
 async def get_pending_suggestions(db: AsyncSession) -> List[LinkSuggestion]:
     """Get all pending suggestions"""
     from app.models.suggestion import SuggestionStatus
-    result = await db.execute(
-        select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
-    )
+
+    result = await db.execute(select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING))
     return list(result.scalars().all())
 
 
@@ -97,12 +98,12 @@ async def review_suggestion(
     db_suggestion = await get_suggestion(db, suggestion_id)
     if not db_suggestion:
         return None
-    
+
     db_suggestion.status = review.status
     db_suggestion.feedback = review.feedback
     db_suggestion.reviewed_by = review.reviewed_by
     db_suggestion.reviewed_at = datetime.utcnow()
-    
+
     await db.commit()
     await db.refresh(db_suggestion)
     return db_suggestion

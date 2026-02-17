@@ -1,8 +1,19 @@
 import enum
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, Enum, Float, ForeignKey, DateTime, UniqueConstraint
+
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
+
 from .base import Base
 from .requirement import GUID  # Import cross-platform GUID type
 
@@ -40,9 +51,7 @@ class RequirementTestCaseLink(Base):
     requirement = relationship("Requirement", back_populates="links")
     test_case = relationship("TestCase", back_populates="links")
 
-    __table_args__ = (
-        UniqueConstraint('requirement_id', 'test_case_id', name='uq_requirement_test_case'),
-    )
+    __table_args__ = (UniqueConstraint("requirement_id", "test_case_id", name="uq_requirement_test_case"),)
 
     def __repr__(self):
         return f"<Link(req={self.requirement_id}, tc={self.test_case_id}, source={self.link_source})>"

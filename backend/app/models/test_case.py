@@ -1,9 +1,16 @@
 import enum
 import uuid
-from sqlalchemy import Column, String, Text, Enum, Integer
+
+from sqlalchemy import Column, Enum, Integer, String, Text
 from sqlalchemy.orm import relationship
+
 from .base import Base, TimestampMixin
-from .requirement import PriorityLevel, GUID, JSON, ArrayType  # Reuse and import common types
+from .requirement import (  # Reuse and import common types
+    GUID,
+    JSON,
+    ArrayType,
+    PriorityLevel,
+)
 
 
 class TestCaseType(str, enum.Enum):
