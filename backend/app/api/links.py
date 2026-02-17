@@ -1,6 +1,6 @@
 """API endpoints for Links and Suggestions"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -35,7 +35,7 @@ async def create_link(link: LinkCreate, db: AsyncSession = Depends(get_db)):
         raise
 
 
-@router.get("/links", response_model=List[LinkResponse])
+@router.get("/links", response_model=list[LinkResponse])
 async def list_links(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """List all links"""
     return await crud.get_links(db, skip=skip, limit=limit)
@@ -50,13 +50,13 @@ async def get_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
     return link
 
 
-@router.get("/requirements/{requirement_id}/links", response_model=List[LinkResponse])
+@router.get("/requirements/{requirement_id}/links", response_model=list[LinkResponse])
 async def get_requirement_links(requirement_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get all links for a specific requirement"""
     return await crud.get_links_by_requirement(db, requirement_id)
 
 
-@router.get("/test-cases/{test_case_id}/links", response_model=List[LinkResponse])
+@router.get("/test-cases/{test_case_id}/links", response_model=list[LinkResponse])
 async def get_test_case_links(test_case_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get all links for a specific test case"""
     return await crud.get_links_by_test_case(db, test_case_id)
@@ -71,13 +71,13 @@ async def delete_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 # Suggestion endpoints
-@router.get("/suggestions", response_model=List[SuggestionResponse])
+@router.get("/suggestions", response_model=list[SuggestionResponse])
 async def list_suggestions(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """List all link suggestions"""
     return await crud.get_suggestions(db, skip=skip, limit=limit)
 
 
-@router.get("/suggestions/pending", response_model=List[SuggestionResponse])
+@router.get("/suggestions/pending", response_model=list[SuggestionResponse])
 async def list_pending_suggestions(
     min_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum similarity score"),
     max_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Maximum similarity score"),
@@ -117,7 +117,7 @@ async def review_suggestion(suggestion_id: UUID, review: SuggestionReview, db: A
     return reviewed
 
 
-@router.post("/suggestions/bulk-review", response_model=Dict[str, Any])
+@router.post("/suggestions/bulk-review", response_model=dict[str, Any])
 async def bulk_review_suggestions(request: BulkReviewRequest, db: AsyncSession = Depends(get_db)):
     """Review multiple suggestions at once"""
     reviewed = await crud.bulk_review_suggestions(

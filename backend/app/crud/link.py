@@ -1,7 +1,7 @@
 """CRUD operations for Links and Suggestions"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -19,13 +19,13 @@ async def get_link(db: AsyncSession, link_id: UUID) -> Optional[RequirementTestC
     return result.scalar_one_or_none()
 
 
-async def get_links(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[RequirementTestCaseLink]:
+async def get_links(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[RequirementTestCaseLink]:
     """Get all links with pagination"""
     result = await db.execute(select(RequirementTestCaseLink).offset(skip).limit(limit))
     return list(result.scalars().all())
 
 
-async def get_links_by_requirement(db: AsyncSession, requirement_id: UUID) -> List[RequirementTestCaseLink]:
+async def get_links_by_requirement(db: AsyncSession, requirement_id: UUID) -> list[RequirementTestCaseLink]:
     """Get all links for a requirement"""
     result = await db.execute(
         select(RequirementTestCaseLink).where(RequirementTestCaseLink.requirement_id == requirement_id)
@@ -33,7 +33,7 @@ async def get_links_by_requirement(db: AsyncSession, requirement_id: UUID) -> Li
     return list(result.scalars().all())
 
 
-async def get_links_by_test_case(db: AsyncSession, test_case_id: UUID) -> List[RequirementTestCaseLink]:
+async def get_links_by_test_case(db: AsyncSession, test_case_id: UUID) -> list[RequirementTestCaseLink]:
     """Get all links for a test case"""
     result = await db.execute(
         select(RequirementTestCaseLink).where(RequirementTestCaseLink.test_case_id == test_case_id)
@@ -68,7 +68,7 @@ async def get_suggestion(db: AsyncSession, suggestion_id: UUID) -> Optional[Link
     return result.scalar_one_or_none()
 
 
-async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[LinkSuggestion]:
+async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[LinkSuggestion]:
     """Get all suggestions with pagination"""
     result = await db.execute(select(LinkSuggestion).offset(skip).limit(limit))
     return list(result.scalars().all())
@@ -82,7 +82,7 @@ async def get_pending_suggestions(
     sort_by: str = "score",
     sort_order: str = "desc",
     limit: int = 100,
-) -> List[LinkSuggestion]:
+) -> list[LinkSuggestion]:
     """Get pending suggestions with filters and sorting"""
     from app.models.suggestion import SuggestionMethod, SuggestionStatus
 
@@ -155,7 +155,7 @@ async def review_suggestion(
 
 async def bulk_review_suggestions(
     db: AsyncSession,
-    suggestion_ids: List[UUID],
+    suggestion_ids: list[UUID],
     status,
     feedback: Optional[str] = None,
     reviewed_by: Optional[str] = None,
