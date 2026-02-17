@@ -358,7 +358,9 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
             self.model = model or "text-embedding-3-small"
             self._init_openai()
         elif self.provider == "huggingface":
-            self.model = model or "sentence-transformers/all-MiniLM-L6-v2"
+            # HuggingFace model: can use short name like 'all-MiniLM-L6-v2'
+            # or full path like 'sentence-transformers/all-MiniLM-L6-v2'
+            self.model = model or "all-MiniLM-L6-v2"
             self._init_huggingface()
         else:
             raise ValueError(f"Unsupported provider: {provider}")

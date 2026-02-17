@@ -118,7 +118,7 @@ config = SuggestionConfig(
 config = SuggestionConfig(
     default_algorithm="llm",
     llm_provider="huggingface",
-    llm_model="sentence-transformers/all-MiniLM-L6-v2",
+    llm_model="all-MiniLM-L6-v2",
     llm_cache_embeddings=True
 )
 ```
