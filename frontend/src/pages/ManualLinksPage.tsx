@@ -231,10 +231,10 @@ export const ManualLinksPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, link_type: e.target.value as LinkType })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                   >
-                    <option value="COVERS">Covers</option>
-                    <option value="VERIFIES">Verifies</option>
-                    <option value="VALIDATES">Validates</option>
-                    <option value="RELATED_TO">Related To</option>
+                    <option value={LinkType.COVERS}>Covers</option>
+                    <option value={LinkType.VERIFIES}>Verifies</option>
+                    <option value={LinkType.VALIDATES}>Validates</option>
+                    <option value={LinkType.RELATED_TO}>Related To</option>
                   </select>
                 </div>
 

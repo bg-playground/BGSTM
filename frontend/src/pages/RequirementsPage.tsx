@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { requirementsApi } from '../api/requirements';
-import type { Requirement, RequirementCreate, RequirementUpdate, PriorityLevel, RequirementStatus, RequirementType } from '../types/api';
+import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
+import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
@@ -12,9 +13,9 @@ export const RequirementsPage: React.FC = () => {
   const [formData, setFormData] = useState<RequirementCreate>({
     title: '',
     description: '',
-    type: 'FUNCTIONAL' as RequirementType,
-    priority: 'MEDIUM' as PriorityLevel,
-    status: 'DRAFT' as RequirementStatus,
+    type: RequirementType.FUNCTIONAL,
+    priority: PriorityLevel.MEDIUM,
+    status: RequirementStatus.DRAFT,
   });
   const { showToast } = useToast();
 
@@ -86,9 +87,9 @@ export const RequirementsPage: React.FC = () => {
     setFormData({
       title: '',
       description: '',
-      type: 'FUNCTIONAL' as RequirementType,
-      priority: 'MEDIUM' as PriorityLevel,
-      status: 'DRAFT' as RequirementStatus,
+      type: RequirementType.FUNCTIONAL,
+      priority: PriorityLevel.MEDIUM,
+      status: RequirementStatus.DRAFT,
     });
   };
 

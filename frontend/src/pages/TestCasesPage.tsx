@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { testCasesApi } from '../api/testCases';
-import type { TestCase, TestCaseCreate, TestCaseUpdate, PriorityLevel, TestCaseStatus, TestCaseType } from '../types/api';
+import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
+import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../components/Toast';
 
@@ -12,9 +13,9 @@ export const TestCasesPage: React.FC = () => {
   const [formData, setFormData] = useState<TestCaseCreate>({
     title: '',
     description: '',
-    type: 'FUNCTIONAL' as TestCaseType,
-    priority: 'MEDIUM' as PriorityLevel,
-    status: 'DRAFT' as TestCaseStatus,
+    type: TestCaseType.FUNCTIONAL,
+    priority: PriorityLevel.MEDIUM,
+    status: TestCaseStatus.DRAFT,
     automated: false,
   });
   const { showToast } = useToast();
@@ -91,9 +92,9 @@ export const TestCasesPage: React.FC = () => {
     setFormData({
       title: '',
       description: '',
-      type: 'FUNCTIONAL' as TestCaseType,
-      priority: 'MEDIUM' as PriorityLevel,
-      status: 'DRAFT' as TestCaseStatus,
+      type: TestCaseType.FUNCTIONAL,
+      priority: PriorityLevel.MEDIUM,
+      status: TestCaseStatus.DRAFT,
       automated: false,
     });
   };
