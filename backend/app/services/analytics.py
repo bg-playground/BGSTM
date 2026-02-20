@@ -99,7 +99,8 @@ class SuggestionAnalytics:
             count = sum(
                 1
                 for s in suggestions
-                if s.similarity_score is not None and _score_in_bin(s.similarity_score, low, high)
+                if s.similarity_score is not None
+                and _score_in_bin(s.similarity_score, low, high)
                 # For non-last bins exclude the upper boundary to avoid double-counting
                 and (is_last or s.similarity_score < high)
             )
@@ -198,9 +199,7 @@ class SuggestionAnalytics:
         for algorithm, data in algo_data.items():
             total = data["total"]
             acceptance_rate = round(data["accepted"] / total * 100, 2) if total > 0 else 0.0
-            avg_confidence = (
-                round(data["score_sum"] / data["score_count"], 4) if data["score_count"] > 0 else 0.0
-            )
+            avg_confidence = round(data["score_sum"] / data["score_count"], 4) if data["score_count"] > 0 else 0.0
             results.append(
                 {
                     "algorithm": algorithm,
