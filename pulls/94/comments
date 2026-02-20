@@ -1,7 +1,0 @@
-## 🧹 Closing — Superseded
-
-This lint-only fix (trailing newline + import sort for `test_analytics.py`) is superseded by **PR #92**, which includes the complete analytics service implementation with properly formatted files.
-
-Additionally, **PR #95** (merged) added a CI auto-fix step (`ruff check --fix && ruff format`) that prevents this class of lint issue from blocking future PRs.
-
-**Action:** Please close this PR and delete the `copilot/fix-linting-error-in-tests` branch.
