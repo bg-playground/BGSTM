@@ -155,11 +155,17 @@ nav:
   - Integration:
     - integration/multi-platform-guide.md
   
+  - Features:
+    - Enhanced Suggestion Review: features/enhanced-suggestion-review.md
+  
   - Architecture:
     - architecture/index.md
     - Data Model: architecture/data-model-diagram.md
+    - Implementation Summary: architecture/implementation-summary.md
+    - Templates Directory Note: architecture/templates-directory-rename.md
   
   - About:
     - License: LICENSE.md
     - Contributing: CONTRIBUTING.md
     - Changelog: CHANGELOG.md
+    - Custom Domain Setup: custom-domain-setup.md
