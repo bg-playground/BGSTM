@@ -11,7 +11,7 @@ pytest==9.0.2
 pytest-asyncio==1.3.0
 httpx==0.28.1
 aiosqlite==0.22.1
-scikit-learn==1.3.2
+scikit-learn==1.8.0
 
 # Optional dependencies for LLM embeddings
 # Uncomment the lines below if using LLM-based similarity
