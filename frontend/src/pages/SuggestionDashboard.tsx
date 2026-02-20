@@ -58,7 +58,7 @@ export const SuggestionDashboard: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const handleReview = async (id: string, status: SuggestionStatus) => {
+  const handleReview = useCallback(async (id: string, status: SuggestionStatus) => {
     try {
       await suggestionsApi.review(id, { status });
       showToast(
@@ -71,7 +71,7 @@ export const SuggestionDashboard: React.FC = () => {
       console.error('Error reviewing suggestion:', error);
       showToast('Failed to review suggestion', 'error');
     }
-  };
+  }, [showToast]);
 
   const handleBulkAccept = useCallback(async () => {
     try {
@@ -95,7 +95,7 @@ export const SuggestionDashboard: React.FC = () => {
     }
   }, [selectedIds, showToast, loadData]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     try {
       setGenerating(true);
       const response = await suggestionsApi.generate();
@@ -110,7 +110,7 @@ export const SuggestionDashboard: React.FC = () => {
     } finally {
       setGenerating(false);
     }
-  };
+  }, [showToast, loadData]);
 
   // Keyboard shortcuts
   useEffect(() => {
