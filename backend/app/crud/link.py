@@ -1,7 +1,6 @@
 """CRUD operations for Links and Suggestions"""
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -13,7 +12,7 @@ from app.schemas.link import LinkCreate, SuggestionCreate, SuggestionReview
 
 
 # Link operations
-async def get_link(db: AsyncSession, link_id: UUID) -> Optional[RequirementTestCaseLink]:
+async def get_link(db: AsyncSession, link_id: UUID) -> RequirementTestCaseLink | None:
     """Get a link by ID"""
     result = await db.execute(select(RequirementTestCaseLink).where(RequirementTestCaseLink.id == link_id))
     return result.scalar_one_or_none()
@@ -62,7 +61,7 @@ async def delete_link(db: AsyncSession, link_id: UUID) -> bool:
 
 
 # Suggestion operations
-async def get_suggestion(db: AsyncSession, suggestion_id: UUID) -> Optional[LinkSuggestion]:
+async def get_suggestion(db: AsyncSession, suggestion_id: UUID) -> LinkSuggestion | None:
     """Get a suggestion by ID"""
     result = await db.execute(select(LinkSuggestion).where(LinkSuggestion.id == suggestion_id))
     return result.scalar_one_or_none()
@@ -76,9 +75,9 @@ async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> 
 
 async def get_pending_suggestions(
     db: AsyncSession,
-    min_score: Optional[float] = None,
-    max_score: Optional[float] = None,
-    algorithm: Optional[str] = None,
+    min_score: float | None = None,
+    max_score: float | None = None,
+    algorithm: str | None = None,
     sort_by: str = "score",
     sort_order: str = "desc",
     limit: int = 100,
@@ -135,9 +134,7 @@ async def create_suggestion(db: AsyncSession, suggestion: SuggestionCreate) -> L
     return db_suggestion
 
 
-async def review_suggestion(
-    db: AsyncSession, suggestion_id: UUID, review: SuggestionReview
-) -> Optional[LinkSuggestion]:
+async def review_suggestion(db: AsyncSession, suggestion_id: UUID, review: SuggestionReview) -> LinkSuggestion | None:
     """Review a suggestion (accept/reject)"""
     db_suggestion = await get_suggestion(db, suggestion_id)
     if not db_suggestion:
@@ -157,8 +154,8 @@ async def bulk_review_suggestions(
     db: AsyncSession,
     suggestion_ids: list[UUID],
     status,
-    feedback: Optional[str] = None,
-    reviewed_by: Optional[str] = None,
+    feedback: str | None = None,
+    reviewed_by: str | None = None,
 ) -> int:
     """Review multiple suggestions at once"""
     from app.models.suggestion import SuggestionStatus
@@ -172,4 +169,4 @@ async def bulk_review_suggestions(
 
     result = await db.execute(stmt)
     await db.commit()
-    return result.rowcount
+    return result.rowcount  # type: ignore[attr-defined]

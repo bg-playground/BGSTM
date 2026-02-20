@@ -1,6 +1,6 @@
 """API endpoints for Links and Suggestions"""
 
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -79,12 +79,12 @@ async def list_suggestions(skip: int = 0, limit: int = 100, db: AsyncSession = D
 
 @router.get("/suggestions/pending", response_model=list[SuggestionResponse])
 async def list_pending_suggestions(
-    min_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum similarity score"),
-    max_score: Optional[float] = Query(None, ge=0.0, le=1.0, description="Maximum similarity score"),
-    algorithm: Optional[str] = Query(None, description="Filter by algorithm (tfidf, keyword, hybrid, llm)"),
-    sort_by: Optional[str] = Query("score", description="Sort field: 'score', 'date', 'algorithm'"),
-    sort_order: Optional[str] = Query("desc", description="Sort order: 'asc' or 'desc'"),
-    limit: Optional[int] = Query(100, le=500, description="Maximum results to return"),
+    min_score: float | None = Query(None, ge=0.0, le=1.0, description="Minimum similarity score"),
+    max_score: float | None = Query(None, ge=0.0, le=1.0, description="Maximum similarity score"),
+    algorithm: str | None = Query(None, description="Filter by algorithm (tfidf, keyword, hybrid, llm)"),
+    sort_by: str | None = Query("score", description="Sort field: 'score', 'date', 'algorithm'"),
+    sort_order: str | None = Query("desc", description="Sort order: 'asc' or 'desc'"),
+    limit: int | None = Query(100, le=500, description="Maximum results to return"),
     db: AsyncSession = Depends(get_db),
 ):
     """List pending suggestions with filtering and sorting"""
