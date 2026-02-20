@@ -1,6 +1,6 @@
 """Core Suggestion Engine"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -25,7 +25,7 @@ class SuggestionEngine:
     similarity algorithms to automatically suggest potential links.
     """
 
-    def __init__(self, config: Optional[SuggestionConfig] = None):
+    def __init__(self, config: SuggestionConfig | None = None):
         """
         Initialize the suggestion engine
 
@@ -144,8 +144,8 @@ class SuggestionEngine:
         return {(s.requirement_id, s.test_case_id) for s in suggestions}
 
     async def generate_suggestions(
-        self, db: AsyncSession, requirement_ids: Optional[List[UUID]] = None, test_case_ids: Optional[List[UUID]] = None
-    ) -> Dict[str, Any]:
+        self, db: AsyncSession, requirement_ids: list[UUID] | None = None, test_case_ids: list[UUID] | None = None
+    ) -> dict[str, Any]:
         """
         Generate link suggestions for requirements and test cases
 

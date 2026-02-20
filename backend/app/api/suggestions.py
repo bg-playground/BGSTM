@@ -1,6 +1,6 @@
 """API endpoints for AI Suggestion Generation"""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,12 +12,12 @@ from app.db.session import get_db
 router = APIRouter()
 
 
-@router.post("/suggestions/generate", response_model=Dict[str, Any])
+@router.post("/suggestions/generate", response_model=dict[str, Any])
 async def generate_suggestions(
-    algorithm: Optional[str] = Query(
+    algorithm: str | None = Query(
         None, description="Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'. Uses default if not specified."
     ),
-    threshold: Optional[float] = Query(
+    threshold: float | None = Query(
         None, ge=0.0, le=1.0, description="Minimum confidence threshold (0.0-1.0). Uses default if not specified."
     ),
     db: AsyncSession = Depends(get_db),

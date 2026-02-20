@@ -1,6 +1,5 @@
 """CRUD operations for Test Cases"""
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -10,19 +9,19 @@ from app.models.test_case import TestCase
 from app.schemas.test_case import TestCaseCreate, TestCaseUpdate
 
 
-async def get_test_case(db: AsyncSession, test_case_id: UUID) -> Optional[TestCase]:
+async def get_test_case(db: AsyncSession, test_case_id: UUID) -> TestCase | None:
     """Get a test case by ID"""
     result = await db.execute(select(TestCase).where(TestCase.id == test_case_id))
     return result.scalar_one_or_none()
 
 
-async def get_test_case_by_external_id(db: AsyncSession, external_id: str) -> Optional[TestCase]:
+async def get_test_case_by_external_id(db: AsyncSession, external_id: str) -> TestCase | None:
     """Get a test case by external ID"""
     result = await db.execute(select(TestCase).where(TestCase.external_id == external_id))
     return result.scalar_one_or_none()
 
 
-async def get_test_cases(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[TestCase]:
+async def get_test_cases(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[TestCase]:
     """Get all test cases with pagination"""
     result = await db.execute(select(TestCase).offset(skip).limit(limit))
     return list(result.scalars().all())
@@ -37,7 +36,7 @@ async def create_test_case(db: AsyncSession, test_case: TestCaseCreate) -> TestC
     return db_test_case
 
 
-async def update_test_case(db: AsyncSession, test_case_id: UUID, test_case: TestCaseUpdate) -> Optional[TestCase]:
+async def update_test_case(db: AsyncSession, test_case_id: UUID, test_case: TestCaseUpdate) -> TestCase | None:
     """Update a test case"""
     db_test_case = await get_test_case(db, test_case_id)
     if not db_test_case:

@@ -1,6 +1,5 @@
 """API endpoints for Requirements"""
 
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -48,7 +47,7 @@ async def create_requirement(
     return new_requirement
 
 
-@router.get("/requirements", response_model=List[RequirementResponse])
+@router.get("/requirements", response_model=list[RequirementResponse])
 async def list_requirements(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """List all requirements"""
     return await crud.get_requirements(db, skip=skip, limit=limit)

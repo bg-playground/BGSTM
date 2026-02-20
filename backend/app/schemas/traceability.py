@@ -1,6 +1,5 @@
 """Schemas for traceability matrix and metrics"""
 
-from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -14,7 +13,7 @@ class LinkedTestCase(BaseModel):
     link_status: str  # 'accepted', 'pending', 'rejected'
     link_id: UUID
     link_type: str
-    confidence_score: Optional[float] = None
+    confidence_score: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -24,8 +23,8 @@ class RequirementCoverage(BaseModel):
 
     requirement_id: UUID
     requirement_title: str
-    external_id: Optional[str] = None
-    linked_test_cases: List[LinkedTestCase]
+    external_id: str | None = None
+    linked_test_cases: list[LinkedTestCase]
     coverage_status: str  # 'covered', 'partially_covered', 'uncovered'
 
     model_config = ConfigDict(from_attributes=True)
@@ -36,7 +35,7 @@ class OrphanTestCase(BaseModel):
 
     test_case_id: UUID
     title: str
-    external_id: Optional[str] = None
+    external_id: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -50,8 +49,8 @@ class TraceabilityMatrixResponse(BaseModel):
     uncovered_requirements: int
     total_test_cases: int
     orphan_test_cases: int
-    matrix: List[RequirementCoverage]
-    orphans: List[OrphanTestCase]
+    matrix: list[RequirementCoverage]
+    orphans: list[OrphanTestCase]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -81,6 +80,6 @@ class MetricsResponse(BaseModel):
     pending_suggestions: int
     manual_links: int
     ai_suggested_links: int
-    algorithm_breakdown: List[AlgorithmMetrics]
+    algorithm_breakdown: list[AlgorithmMetrics]
 
     model_config = ConfigDict(from_attributes=True)
