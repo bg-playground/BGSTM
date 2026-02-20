@@ -2,7 +2,6 @@
 
 import re
 from collections import Counter
-from typing import Dict, List, Tuple
 
 
 class SimilarityAlgorithm:
@@ -16,7 +15,7 @@ class SimilarityAlgorithm:
 class TFIDFSimilarity(SimilarityAlgorithm):
     """TF-IDF based cosine similarity using scikit-learn"""
 
-    def __init__(self, max_features: int = 100, ngram_range: Tuple[int, int] = (1, 2)):
+    def __init__(self, max_features: int = 100, ngram_range: tuple[int, int] = (1, 2)):
         """
         Initialize TF-IDF vectorizer
 
@@ -65,7 +64,7 @@ class TFIDFSimilarity(SimilarityAlgorithm):
             # If vectorization fails (e.g., no valid tokens), return 0
             return 0.0
 
-    def batch_compute_similarity(self, texts: List[str]) -> List[List[float]]:
+    def batch_compute_similarity(self, texts: list[str]) -> list[list[float]]:
         """
         Compute pairwise similarities for a batch of texts
 
@@ -220,7 +219,7 @@ class KeywordSimilarity(SimilarityAlgorithm):
             "must",
         }
 
-    def extract_keywords(self, text: str) -> List[str]:
+    def extract_keywords(self, text: str) -> list[str]:
         """
         Extract keywords from text
 
@@ -287,8 +286,8 @@ class HybridSimilarity(SimilarityAlgorithm):
         self,
         tfidf_weight: float = 0.6,
         keyword_weight: float = 0.4,
-        tfidf_kwargs: Dict = None,
-        keyword_kwargs: Dict = None,
+        tfidf_kwargs: dict | None = None,
+        keyword_kwargs: dict | None = None,
     ):
         """
         Initialize hybrid algorithm

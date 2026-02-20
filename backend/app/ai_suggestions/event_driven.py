@@ -5,7 +5,6 @@ when requirements or test cases are created or updated.
 """
 
 import logging
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,8 +19,8 @@ logger = logging.getLogger(__name__)
 async def generate_suggestions_for_requirement(
     requirement_id: UUID,
     db: AsyncSession,
-    algorithm: Optional[str] = None,
-    threshold: Optional[float] = None,
+    algorithm: str | None = None,
+    threshold: float | None = None,
 ) -> None:
     """
     Generate suggestions for a specific requirement against all test cases.
@@ -65,8 +64,8 @@ async def generate_suggestions_for_requirement(
 async def generate_suggestions_for_test_case(
     test_case_id: UUID,
     db: AsyncSession,
-    algorithm: Optional[str] = None,
-    threshold: Optional[float] = None,
+    algorithm: str | None = None,
+    threshold: float | None = None,
 ) -> None:
     """
     Generate suggestions for a specific test case against all requirements.
