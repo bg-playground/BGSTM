@@ -1,6 +1,5 @@
 """API endpoints for Test Cases"""
 
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -44,7 +43,7 @@ async def create_test_case(
     return new_test_case
 
 
-@router.get("/test-cases", response_model=List[TestCaseResponse])
+@router.get("/test-cases", response_model=list[TestCaseResponse])
 async def list_test_cases(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     """List all test cases"""
     return await crud.get_test_cases(db, skip=skip, limit=limit)

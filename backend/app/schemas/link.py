@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,15 +14,15 @@ class LinkBase(BaseModel):
     requirement_id: UUID
     test_case_id: UUID
     link_type: LinkType = LinkType.COVERS
-    confidence_score: Optional[float] = None
-    notes: Optional[str] = None
+    confidence_score: float | None = None
+    notes: str | None = None
 
 
 class LinkCreate(LinkBase):
     """Schema for creating a Link"""
 
     link_source: LinkSource = LinkSource.MANUAL
-    created_by: Optional[str] = Field(None, max_length=100)
+    created_by: str | None = Field(None, max_length=100)
 
 
 class LinkResponse(LinkBase):
@@ -31,9 +31,9 @@ class LinkResponse(LinkBase):
     id: UUID
     link_source: LinkSource
     created_at: datetime
-    created_by: Optional[str]
-    confirmed_at: Optional[datetime]
-    confirmed_by: Optional[str]
+    created_by: str | None
+    confirmed_at: datetime | None
+    confirmed_by: str | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,8 +45,8 @@ class SuggestionBase(BaseModel):
     test_case_id: UUID
     similarity_score: float = Field(..., ge=0.0, le=1.0)
     suggestion_method: SuggestionMethod
-    suggestion_reason: Optional[str] = None
-    suggestion_metadata: Optional[dict[str, Any]] = None
+    suggestion_reason: str | None = None
+    suggestion_metadata: dict[str, Any] | None = None
 
 
 class SuggestionCreate(SuggestionBase):
@@ -61,9 +61,9 @@ class SuggestionResponse(SuggestionBase):
     id: UUID
     status: SuggestionStatus
     created_at: datetime
-    reviewed_at: Optional[datetime]
-    reviewed_by: Optional[str]
-    feedback: Optional[str]
+    reviewed_at: datetime | None
+    reviewed_by: str | None
+    feedback: str | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -72,8 +72,8 @@ class SuggestionReview(BaseModel):
     """Schema for reviewing a suggestion"""
 
     status: SuggestionStatus
-    feedback: Optional[str] = None
-    reviewed_by: Optional[str] = Field(None, max_length=100)
+    feedback: str | None = None
+    reviewed_by: str | None = Field(None, max_length=100)
 
 
 class BulkReviewRequest(BaseModel):
@@ -81,5 +81,5 @@ class BulkReviewRequest(BaseModel):
 
     suggestion_ids: list[UUID] = Field(..., min_length=1, max_length=100)
     status: SuggestionStatus
-    feedback: Optional[str] = None
-    reviewed_by: Optional[str] = Field(None, max_length=100)
+    feedback: str | None = None
+    reviewed_by: str | None = Field(None, max_length=100)

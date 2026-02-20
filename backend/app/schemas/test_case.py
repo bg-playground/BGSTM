@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,52 +16,52 @@ class TestCaseBase(BaseModel):
     type: TestCaseType
     priority: PriorityLevel
     status: TestCaseStatus = TestCaseStatus.DRAFT
-    steps: Optional[Dict[str, Any]] = None
-    preconditions: Optional[str] = None
-    postconditions: Optional[str] = None
-    test_data: Optional[Dict[str, Any]] = None
-    module: Optional[str] = Field(None, max_length=100)
-    tags: Optional[List[str]] = None
+    steps: dict[str, Any] | None = None
+    preconditions: str | None = None
+    postconditions: str | None = None
+    test_data: dict[str, Any] | None = None
+    module: str | None = Field(None, max_length=100)
+    tags: list[str] | None = None
     automation_status: AutomationStatus = AutomationStatus.MANUAL
-    execution_time_minutes: Optional[int] = None
-    custom_metadata: Optional[Dict[str, Any]] = None
-    source_system: Optional[str] = Field(None, max_length=50)
-    source_url: Optional[str] = None
-    created_by: Optional[str] = Field(None, max_length=100)
+    execution_time_minutes: int | None = None
+    custom_metadata: dict[str, Any] | None = None
+    source_system: str | None = Field(None, max_length=50)
+    source_url: str | None = None
+    created_by: str | None = Field(None, max_length=100)
 
 
 class TestCaseCreate(TestCaseBase):
     """Schema for creating a TestCase"""
 
-    external_id: Optional[str] = Field(None, max_length=100)
+    external_id: str | None = Field(None, max_length=100)
 
 
 class TestCaseUpdate(BaseModel):
     """Schema for updating a TestCase"""
 
-    title: Optional[str] = Field(None, max_length=500)
-    description: Optional[str] = None
-    type: Optional[TestCaseType] = None
-    priority: Optional[PriorityLevel] = None
-    status: Optional[TestCaseStatus] = None
-    steps: Optional[Dict[str, Any]] = None
-    preconditions: Optional[str] = None
-    postconditions: Optional[str] = None
-    test_data: Optional[Dict[str, Any]] = None
-    module: Optional[str] = Field(None, max_length=100)
-    tags: Optional[List[str]] = None
-    automation_status: Optional[AutomationStatus] = None
-    execution_time_minutes: Optional[int] = None
-    custom_metadata: Optional[Dict[str, Any]] = None
-    source_system: Optional[str] = Field(None, max_length=50)
-    source_url: Optional[str] = None
+    title: str | None = Field(None, max_length=500)
+    description: str | None = None
+    type: TestCaseType | None = None
+    priority: PriorityLevel | None = None
+    status: TestCaseStatus | None = None
+    steps: dict[str, Any] | None = None
+    preconditions: str | None = None
+    postconditions: str | None = None
+    test_data: dict[str, Any] | None = None
+    module: str | None = Field(None, max_length=100)
+    tags: list[str] | None = None
+    automation_status: AutomationStatus | None = None
+    execution_time_minutes: int | None = None
+    custom_metadata: dict[str, Any] | None = None
+    source_system: str | None = Field(None, max_length=50)
+    source_url: str | None = None
 
 
 class TestCaseResponse(TestCaseBase):
     """Schema for TestCase response"""
 
     id: UUID
-    external_id: Optional[str]
+    external_id: str | None
     version: int
     created_at: datetime
     updated_at: datetime

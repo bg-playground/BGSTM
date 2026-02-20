@@ -1,7 +1,5 @@
 """Configuration for AI Suggestion Engine"""
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -19,9 +17,7 @@ class SuggestionConfig(BaseModel):
     )
 
     # TF-IDF specific settings
-    tfidf_max_features: Optional[int] = Field(
-        default=100, description="Maximum number of features for TF-IDF vectorizer"
-    )
+    tfidf_max_features: int | None = Field(default=100, description="Maximum number of features for TF-IDF vectorizer")
 
     tfidf_ngram_range: tuple[int, int] = Field(default=(1, 2), description="N-gram range for TF-IDF (min, max)")
 
@@ -42,7 +38,7 @@ class SuggestionConfig(BaseModel):
     # LLM embedding settings
     llm_provider: str = Field(default="openai", description="LLM provider: 'openai' or 'huggingface'")
 
-    llm_model: Optional[str] = Field(
+    llm_model: str | None = Field(
         default=None,
         description="Model name (defaults: 'text-embedding-3-small' for OpenAI, 'all-MiniLM-L6-v2' for HF)",
     )
