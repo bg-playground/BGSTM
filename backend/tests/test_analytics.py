@@ -1,7 +1,7 @@
 """Tests for SuggestionAnalytics service"""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
