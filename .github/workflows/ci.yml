@@ -9,7 +9,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -53,6 +53,19 @@ jobs:
         run: |
           cd backend
           pip install -r requirements-dev.txt
+      
+      - name: Auto-fix lint and format issues
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          cd backend
+          ruff check --fix .
+          ruff format .
+      
+      - name: Commit auto-fixed changes
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci: auto-fix lint issues"
       
       - name: Run ruff linting
         run: |
