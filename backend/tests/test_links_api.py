@@ -7,8 +7,8 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.main import app
 from app.db.session import get_db
+from app.main import app
 from app.models.base import Base
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
 from app.models.requirement import (
@@ -25,7 +25,6 @@ from app.models.test_case import (
     TestCaseType,
 )
 
-
 # ── Shared test engine / session factory ──────────────────────────────────────
 
 
@@ -39,6 +38,7 @@ async def db_session():
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with factory() as session:
+
         async def override_get_db():
             yield session
 
@@ -50,6 +50,7 @@ async def db_session():
 
 
 # ── Sample data helpers ────────────────────────────────────────────────────────
+
 
 async def _add_req_tc(session: AsyncSession):
     req = Requirement(
@@ -77,6 +78,7 @@ async def _add_req_tc(session: AsyncSession):
 
 
 # ── Link endpoint tests ────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_link_endpoint(db_session):
@@ -232,6 +234,7 @@ async def test_get_test_case_links_endpoint(db_session):
 
 
 # ── Suggestion endpoint tests ──────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_list_suggestions_endpoint(db_session):

@@ -72,6 +72,7 @@ async def _create_req_and_test_case(session: AsyncSession):
 
 # ── Link CRUD ─────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_create_link():
     engine, factory = await _make_engine_and_session_factory()
@@ -317,6 +318,7 @@ async def test_delete_link_not_found():
 
 
 # ── Suggestion CRUD ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_suggestion():
@@ -659,9 +661,7 @@ async def test_bulk_review_skips_non_pending():
         session.add(already_accepted)
         await session.commit()
 
-        count = await bulk_review_suggestions(
-            session, [already_accepted.id], SuggestionStatus.REJECTED
-        )
+        count = await bulk_review_suggestions(session, [already_accepted.id], SuggestionStatus.REJECTED)
         # Already-accepted suggestion should not be updated
         assert count == 0
 
