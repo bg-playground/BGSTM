@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 export const DEFAULT_FILTERS = {
   minScore: 0,
@@ -6,6 +6,7 @@ export const DEFAULT_FILTERS = {
   algorithm: 'all',
   sortBy: 'score',
   sortOrder: 'desc',
+  search: '',
 };
 
 export type Filters = typeof DEFAULT_FILTERS;
@@ -13,11 +14,58 @@ export type Filters = typeof DEFAULT_FILTERS;
 interface SuggestionFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
+  onReset?: () => void;
 }
 
-export const SuggestionFilters: React.FC<SuggestionFiltersProps> = ({ filters, onFiltersChange }) => {
+export const SuggestionFilters: React.FC<SuggestionFiltersProps> = ({ filters, onFiltersChange, onReset }) => {
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  // Sync searchInput when filters.search is reset externally (e.g. Reset button)
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onFiltersChange({ ...filters, search: value });
+      }, 300);
+    },
+    [filters, onFiltersChange]
+  );
+
+  const handleReset = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (onReset) {
+      onReset();
+    } else {
+      onFiltersChange(DEFAULT_FILTERS);
+    }
+  }, [onReset, onFiltersChange]);
+
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-6">
+      {/* Search input - full width at top */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder="Search requirements or test cases..."
+          className="w-full border rounded px-3 py-2"
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Min Score */}
         <div>
@@ -80,7 +128,7 @@ export const SuggestionFilters: React.FC<SuggestionFiltersProps> = ({ filters, o
         {/* Reset Filters */}
         <div className="flex items-end">
           <button
-            onClick={() => onFiltersChange(DEFAULT_FILTERS)}
+            onClick={handleReset}
             className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
           >
             Reset

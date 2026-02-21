@@ -668,3 +668,173 @@ async def test_bulk_review_skips_non_pending():
         s = await get_suggestion(session, already_accepted.id)
         assert s.status == SuggestionStatus.ACCEPTED
     await engine.dispose()
+
+
+# ── Search filter tests ───────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_get_pending_suggestions_search_by_requirement_title():
+    engine, factory = await _make_engine_and_session_factory()
+    async with factory() as session:
+        req_match = Requirement(
+            id=uuid.uuid4(),
+            external_id="REQ-SEARCH01",
+            title="Login Authentication Requirement",
+            description="Handles login flow",
+            type=RequirementType.FUNCTIONAL,
+            priority=PriorityLevel.HIGH,
+            status=RequirementStatus.APPROVED,
+        )
+        req_no_match = Requirement(
+            id=uuid.uuid4(),
+            external_id="REQ-SEARCH02",
+            title="Export Data Requirement",
+            description="Handles data export",
+            type=RequirementType.FUNCTIONAL,
+            priority=PriorityLevel.LOW,
+            status=RequirementStatus.APPROVED,
+        )
+        tc = TestCase(
+            id=uuid.uuid4(),
+            external_id="TC-SEARCH01",
+            title="Generic Test Case",
+            description="Generic description",
+            type=TestCaseType.FUNCTIONAL,
+            priority=PriorityLevel.HIGH,
+            status=TestCaseStatus.READY,
+            automation_status=AutomationStatus.MANUAL,
+        )
+        session.add_all([req_match, req_no_match, tc])
+        await session.flush()
+
+        sugg_match = LinkSuggestion(
+            id=uuid.uuid4(),
+            requirement_id=req_match.id,
+            test_case_id=tc.id,
+            similarity_score=0.80,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+        )
+        sugg_no_match = LinkSuggestion(
+            id=uuid.uuid4(),
+            requirement_id=req_no_match.id,
+            test_case_id=tc.id,
+            similarity_score=0.70,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+        )
+        session.add_all([sugg_match, sugg_no_match])
+        await session.commit()
+
+        results = await get_pending_suggestions(session, search="login")
+        assert len(results) == 1
+        assert results[0].requirement_id == req_match.id
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_get_pending_suggestions_search_by_test_case_title():
+    engine, factory = await _make_engine_and_session_factory()
+    async with factory() as session:
+        req = Requirement(
+            id=uuid.uuid4(),
+            external_id="REQ-SEARCH03",
+            title="Generic Requirement",
+            description="Generic requirement description",
+            type=RequirementType.FUNCTIONAL,
+            priority=PriorityLevel.HIGH,
+            status=RequirementStatus.APPROVED,
+        )
+        tc_match = TestCase(
+            id=uuid.uuid4(),
+            external_id="TC-SEARCH02",
+            title="Password Reset Verification",
+            description="Verifies password reset",
+            type=TestCaseType.FUNCTIONAL,
+            priority=PriorityLevel.HIGH,
+            status=TestCaseStatus.READY,
+            automation_status=AutomationStatus.MANUAL,
+        )
+        tc_no_match = TestCase(
+            id=uuid.uuid4(),
+            external_id="TC-SEARCH03",
+            title="Performance Benchmark",
+            description="Benchmarks performance",
+            type=TestCaseType.PERFORMANCE,
+            priority=PriorityLevel.LOW,
+            status=TestCaseStatus.DRAFT,
+            automation_status=AutomationStatus.MANUAL,
+        )
+        session.add_all([req, tc_match, tc_no_match])
+        await session.flush()
+
+        sugg_match = LinkSuggestion(
+            id=uuid.uuid4(),
+            requirement_id=req.id,
+            test_case_id=tc_match.id,
+            similarity_score=0.80,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+        )
+        sugg_no_match = LinkSuggestion(
+            id=uuid.uuid4(),
+            requirement_id=req.id,
+            test_case_id=tc_no_match.id,
+            similarity_score=0.70,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+        )
+        session.add_all([sugg_match, sugg_no_match])
+        await session.commit()
+
+        results = await get_pending_suggestions(session, search="password")
+        assert len(results) == 1
+        assert results[0].test_case_id == tc_match.id
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_get_pending_suggestions_search_no_match():
+    engine, factory = await _make_engine_and_session_factory()
+    async with factory() as session:
+        req, tc = await _create_req_and_test_case(session)
+        sugg = LinkSuggestion(
+            id=uuid.uuid4(),
+            requirement_id=req.id,
+            test_case_id=tc.id,
+            similarity_score=0.75,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+        )
+        session.add(sugg)
+        await session.commit()
+
+        results = await get_pending_suggestions(session, search="nonexistentterm12345")
+        assert len(results) == 0
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_get_pending_suggestions_search_empty_returns_all():
+    engine, factory = await _make_engine_and_session_factory()
+    async with factory() as session:
+        req, tc = await _create_req_and_test_case(session)
+        for score in [0.9, 0.7]:
+            sugg = LinkSuggestion(
+                id=uuid.uuid4(),
+                requirement_id=req.id,
+                test_case_id=tc.id,
+                similarity_score=score,
+                suggestion_method=SuggestionMethod.HYBRID,
+                status=SuggestionStatus.PENDING,
+            )
+            session.add(sugg)
+        await session.commit()
+
+        results = await get_pending_suggestions(session, search=None)
+        assert len(results) == 2
+
+        results_empty = await get_pending_suggestions(session, search="")
+        assert len(results_empty) == 2
+    await engine.dispose()
