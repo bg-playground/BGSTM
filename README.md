@@ -1,5 +1,9 @@
 # BGSTM - Professional Software Testing Framework
 
+[![Backend CI](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml)
+[![Frontend CI](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml)
+[![Docker Build](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml)
+
 **BGSTM** (Better Global Software Testing Methodology) is a comprehensive, professional software testing framework adaptable to various software development methodologies including Agile, Scrum, and Waterfall.
 
 ## 🎯 Overview
