@@ -113,9 +113,51 @@ backend/
 └── README.md               # This file
 ```
 
+## Database Migrations
+
+This project uses [Alembic](https://alembic.sqlalchemy.org/) for versioned, repeatable database migrations.
+
+### Apply Migrations
+
+```bash
+# Apply all pending migrations (run from backend/ directory)
+alembic upgrade head
+
+# Rollback one migration
+alembic downgrade -1
+
+# Rollback all migrations
+alembic downgrade base
+```
+
+### Create a New Migration
+
+```bash
+# Auto-generate a migration from model changes (requires DATABASE_URL to be set)
+alembic revision --autogenerate -m "description of change"
+
+# Create a blank migration to write manually
+alembic revision -m "description of change"
+```
+
+### Migrations in Docker
+
+When using Docker or docker-compose, `alembic upgrade head` runs automatically before the server starts via `entrypoint.sh`. No manual migration step is needed.
+
+### Migration History
+
+```bash
+# Show current revision
+alembic current
+
+# Show migration history
+alembic history
+```
+
 ## Database
 
 ### PostgreSQL (Production)
+
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@localhost/bgstm
 ```
@@ -125,7 +167,7 @@ DATABASE_URL=postgresql+asyncpg://user:password@localhost/bgstm
 DATABASE_URL=sqlite+aiosqlite:///./bgstm.db
 ```
 
-The application automatically creates tables on startup using SQLAlchemy's `create_all()`.
+Schema management is handled by Alembic migrations. The `create_all()` fallback is only used for SQLite (development/testing).
 
 ## Sample Data
 
