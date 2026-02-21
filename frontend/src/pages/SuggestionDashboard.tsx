@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { suggestionsApi } from '../api/suggestions';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
@@ -20,6 +20,8 @@ export const SuggestionDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [previewSuggestion, setPreviewSuggestion] = useState<Suggestion | null>(null);
   const { showToast } = useToast();
 
@@ -55,6 +57,18 @@ export const SuggestionDashboard: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Reset focus when suggestion list changes
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [suggestions]);
+
+  // Scroll focused card into view
+  useEffect(() => {
+    if (focusedIndex >= 0 && cardRefs.current[focusedIndex]) {
+      cardRefs.current[focusedIndex]?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [focusedIndex]);
 
   const handleReview = useCallback(async (id: string, status: SuggestionStatus) => {
     try {
@@ -119,17 +133,59 @@ export const SuggestionDashboard: React.FC = () => {
       }
 
       switch(e.key) {
-        case 'a':
-          // Select all visible
-          setSelectedIds(new Set(suggestions.map(s => s.id)));
+        case 'ArrowDown':
+          e.preventDefault();
+          if (suggestions.length > 0) {
+            setFocusedIndex((prev) => Math.min(Math.max(prev, -1) + 1, suggestions.length - 1));
+          }
           break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+          break;
+        case 'a': {
+          const hasFocusedCard = selectedIds.size === 0 && focusedIndex >= 0;
+          if (hasFocusedCard) {
+            // Accept focused card
+            handleReview(suggestions[focusedIndex].id, SuggestionStatus.ACCEPTED);
+          } else {
+            // Select all visible
+            setSelectedIds(new Set(suggestions.map(s => s.id)));
+          }
+          break;
+        }
+        case 'r': {
+          const hasFocusedCard = selectedIds.size === 0 && focusedIndex >= 0;
+          if (hasFocusedCard) {
+            handleReview(suggestions[focusedIndex].id, SuggestionStatus.REJECTED);
+          }
+          break;
+        }
         case 'c':
           // Clear selection
           setSelectedIds(new Set());
           break;
+        case ' ':
+          if (focusedIndex >= 0) {
+            e.preventDefault();
+            const focusedId = suggestions[focusedIndex].id;
+            setSelectedIds((prev) => {
+              const next = new Set(prev);
+              if (next.has(focusedId)) {
+                next.delete(focusedId);
+              } else {
+                next.add(focusedId);
+              }
+              return next;
+            });
+          }
+          break;
         case 'Enter':
-          // Accept selected
-          if (selectedIds.size > 0) {
+          if (focusedIndex >= 0 && selectedIds.size === 0) {
+            // Open preview for focused suggestion
+            setPreviewSuggestion(suggestions[focusedIndex]);
+          } else if (selectedIds.size > 0) {
+            // Accept selected
             handleBulkAccept();
           }
           break;
@@ -146,7 +202,7 @@ export const SuggestionDashboard: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [suggestions, selectedIds, handleBulkAccept, handleBulkReject]);
+  }, [suggestions, selectedIds, focusedIndex, handleBulkAccept, handleBulkReject, handleReview]);
 
   const handleToggleSelect = useCallback((id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -203,13 +259,15 @@ export const SuggestionDashboard: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {suggestions.map((suggestion) => (
+          {suggestions.map((suggestion, index) => (
             <SuggestionCard
               key={suggestion.id}
+              ref={(el) => { cardRefs.current[index] = el; }}
               suggestion={suggestion}
               requirement={requirements.get(suggestion.requirement_id)}
               testCase={testCases.get(suggestion.test_case_id)}
               isSelected={selectedIds.has(suggestion.id)}
+              isFocused={focusedIndex === index}
               onToggleSelect={handleToggleSelect}
               onReview={handleReview}
               onPreview={setPreviewSuggestion}

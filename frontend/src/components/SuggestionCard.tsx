@@ -7,22 +7,35 @@ interface SuggestionCardProps {
   requirement: Requirement | undefined;
   testCase: TestCase | undefined;
   isSelected: boolean;
+  isFocused?: boolean;
   onToggleSelect: (id: string, checked: boolean) => void;
   onReview: (id: string, status: SuggestionStatus) => void;
   onPreview: (suggestion: Suggestion) => void;
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({
+const getConfidenceBadge = (score: number): { label: string; className: string } => {
+  if (score >= 0.85) return { label: 'High Confidence', className: 'bg-green-100 text-green-800 border border-green-300' };
+  if (score >= 0.70) return { label: 'Medium-High', className: 'bg-yellow-100 text-yellow-800 border border-yellow-300' };
+  if (score >= 0.55) return { label: 'Medium', className: 'bg-orange-100 text-orange-800 border border-orange-300' };
+  return { label: 'Low Confidence', className: 'bg-red-100 text-red-800 border border-red-300' };
+};
+
+export const SuggestionCard = React.forwardRef<HTMLDivElement, SuggestionCardProps>(({
   suggestion,
   requirement,
   testCase,
   isSelected,
+  isFocused = false,
   onToggleSelect,
   onReview,
   onPreview,
-}) => {
+}, ref) => {
+  const badge = getConfidenceBadge(suggestion.similarity_score);
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+    <div
+      ref={ref}
+      className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow${isFocused ? ' ring-2 ring-blue-500' : ''}`}
+    >
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
@@ -73,8 +86,8 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-700">Similarity:</span>
-                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded font-semibold">
-                  {(suggestion.similarity_score * 100).toFixed(1)}%
+                <span className={`px-2 py-1 rounded font-semibold text-xs ${badge.className}`}>
+                  {(suggestion.similarity_score * 100).toFixed(1)}% — {badge.label}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -108,4 +121,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+SuggestionCard.displayName = 'SuggestionCard';
+
