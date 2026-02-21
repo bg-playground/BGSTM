@@ -1,0 +1,29 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - 'Dockerfile*'
+      - '.github/workflows/docker.yml'
+
+jobs:
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend Docker image
+        run: docker build ./backend
+
+      - name: Build frontend Docker image
+        run: docker build ./frontend
