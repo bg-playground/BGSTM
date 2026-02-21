@@ -27,8 +27,9 @@ app.include_router(analytics.router, prefix=settings.API_V1_PREFIX, tags=["analy
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database on startup"""
-    await init_db()
+    """Initialize database on startup (only for non-PostgreSQL, e.g. SQLite in tests)."""
+    if not settings.DATABASE_URL.startswith("postgresql"):
+        await init_db()
 
 
 @app.get("/")
