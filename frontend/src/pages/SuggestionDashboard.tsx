@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { suggestionsApi } from '../api/suggestions';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
@@ -13,7 +14,76 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 
+const STORAGE_KEY = 'bgstm-suggestion-filters';
+
+const VALID_ALGORITHMS = new Set(['all', 'tfidf', 'keyword', 'hybrid', 'llm']);
+const VALID_SORT_BY = new Set(['score', 'date', 'algorithm']);
+const VALID_SORT_ORDER = new Set(['asc', 'desc']);
+
+function readFromStorage(): Partial<Filters> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Partial<Filters>;
+  } catch {
+    return {};
+  }
+}
+
+function writeToStorage(filters: Filters): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+  } catch {
+    // Ignore (e.g. private browsing)
+  }
+}
+
+function clearStorage(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore
+  }
+}
+
+function parseFiltersFromParams(params: URLSearchParams, stored: Partial<Filters>): Filters {
+  const minScoreRaw = params.get('min_score');
+  const maxScoreRaw = params.get('max_score');
+  const algorithmRaw = params.get('algorithm');
+  const sortByRaw = params.get('sort_by');
+  const sortOrderRaw = params.get('sort_order');
+  const searchRaw = params.get('search');
+
+  const minScore = minScoreRaw !== null ? parseFloat(minScoreRaw) : null;
+  const maxScore = maxScoreRaw !== null ? parseFloat(maxScoreRaw) : null;
+
+  return {
+    minScore:
+      minScore !== null && !isNaN(minScore) && minScore >= 0 && minScore <= 1
+        ? minScore
+        : (stored.minScore ?? DEFAULT_FILTERS.minScore),
+    maxScore:
+      maxScore !== null && !isNaN(maxScore) && maxScore >= 0 && maxScore <= 1
+        ? maxScore
+        : (stored.maxScore ?? DEFAULT_FILTERS.maxScore),
+    algorithm:
+      algorithmRaw && VALID_ALGORITHMS.has(algorithmRaw)
+        ? algorithmRaw
+        : (stored.algorithm ?? DEFAULT_FILTERS.algorithm),
+    sortBy:
+      sortByRaw && VALID_SORT_BY.has(sortByRaw)
+        ? sortByRaw
+        : (stored.sortBy ?? DEFAULT_FILTERS.sortBy),
+    sortOrder:
+      sortOrderRaw && VALID_SORT_ORDER.has(sortOrderRaw)
+        ? sortOrderRaw
+        : (stored.sortOrder ?? DEFAULT_FILTERS.sortOrder),
+    search: searchRaw !== null ? searchRaw : (stored.search ?? DEFAULT_FILTERS.search),
+  };
+}
+
 export const SuggestionDashboard: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [requirements, setRequirements] = useState<Map<string, Requirement>>(new Map());
   const [testCases, setTestCases] = useState<Map<string, TestCase>>(new Map());
@@ -25,8 +95,40 @@ export const SuggestionDashboard: React.FC = () => {
   const [previewSuggestion, setPreviewSuggestion] = useState<Suggestion | null>(null);
   const { showToast } = useToast();
 
-  // Filters state
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  // Filters state: priority URL params > localStorage > defaults
+  const [filters, setFilters] = useState<Filters>(() =>
+    parseFiltersFromParams(searchParams, readFromStorage())
+  );
+
+  // Sync URL params when filters change
+  const syncFiltersToUrl = useCallback(
+    (f: Filters) => {
+      const params = new URLSearchParams();
+      if (f.minScore !== DEFAULT_FILTERS.minScore) params.set('min_score', f.minScore.toString());
+      if (f.maxScore !== DEFAULT_FILTERS.maxScore) params.set('max_score', f.maxScore.toString());
+      if (f.algorithm !== DEFAULT_FILTERS.algorithm) params.set('algorithm', f.algorithm);
+      if (f.sortBy !== DEFAULT_FILTERS.sortBy) params.set('sort_by', f.sortBy);
+      if (f.sortOrder !== DEFAULT_FILTERS.sortOrder) params.set('sort_order', f.sortOrder);
+      if (f.search) params.set('search', f.search);
+      setSearchParams(params, { replace: true });
+    },
+    [setSearchParams]
+  );
+
+  const handleFiltersChange = useCallback(
+    (newFilters: Filters) => {
+      setFilters(newFilters);
+      writeToStorage(newFilters);
+      syncFiltersToUrl(newFilters);
+    },
+    [syncFiltersToUrl]
+  );
+
+  const handleReset = useCallback(() => {
+    clearStorage();
+    setFilters(DEFAULT_FILTERS);
+    setSearchParams({}, { replace: true });
+  }, [setSearchParams]);
 
   const loadData = useCallback(async () => {
     try {
@@ -37,7 +139,8 @@ export const SuggestionDashboard: React.FC = () => {
           maxScore: filters.maxScore,
           algorithm: filters.algorithm === 'all' ? undefined : filters.algorithm,
           sortBy: filters.sortBy,
-          sortOrder: filters.sortOrder
+          sortOrder: filters.sortOrder,
+          search: filters.search || undefined,
         }),
         requirementsApi.list(),
         testCasesApi.list(),
@@ -246,7 +349,7 @@ export const SuggestionDashboard: React.FC = () => {
 
       <KeyboardShortcutsHelp />
 
-      <SuggestionFilters filters={filters} onFiltersChange={setFilters} />
+      <SuggestionFilters filters={filters} onFiltersChange={handleFiltersChange} onReset={handleReset} />
 
       <SuggestionStats suggestions={suggestions} />
 

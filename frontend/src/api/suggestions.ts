@@ -13,6 +13,7 @@ export const suggestionsApi = {
     algorithm?: string;
     sortBy?: string;
     sortOrder?: string;
+    search?: string;
   }): Promise<Suggestion[]> => {
     const searchParams = new URLSearchParams();
     if (params?.minScore !== undefined) searchParams.append('min_score', params.minScore.toString());
@@ -20,6 +21,7 @@ export const suggestionsApi = {
     if (params?.algorithm) searchParams.append('algorithm', params.algorithm);
     if (params?.sortBy) searchParams.append('sort_by', params.sortBy);
     if (params?.sortOrder) searchParams.append('sort_order', params.sortOrder);
+    if (params?.search) searchParams.append('search', params.search);
     
     const response = await apiClient.get<Suggestion[]>(`/suggestions/pending?${searchParams}`);
     return response.data;

@@ -85,6 +85,7 @@ async def list_pending_suggestions(
     sort_by: str | None = Query("score", description="Sort field: 'score', 'date', 'algorithm'"),
     sort_order: str | None = Query("desc", description="Sort order: 'asc' or 'desc'"),
     limit: int | None = Query(100, le=500, description="Maximum results to return"),
+    search: str | None = Query(None, description="Search term to filter by requirement/test case title or description"),
     db: AsyncSession = Depends(get_db),
 ):
     """List pending suggestions with filtering and sorting"""
@@ -96,6 +97,7 @@ async def list_pending_suggestions(
         sort_by=sort_by,
         sort_order=sort_order,
         limit=limit,
+        search=search,
     )
 
 

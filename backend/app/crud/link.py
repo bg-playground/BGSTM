@@ -81,11 +81,29 @@ async def get_pending_suggestions(
     sort_by: str = "score",
     sort_order: str = "desc",
     limit: int = 100,
+    search: str | None = None,
 ) -> list[LinkSuggestion]:
     """Get pending suggestions with filters and sorting"""
+    from app.models.requirement import Requirement
     from app.models.suggestion import SuggestionMethod, SuggestionStatus
+    from app.models.test_case import TestCase
 
     query = select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
+
+    # Apply search filter by joining with Requirement and TestCase
+    if search:
+        escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        search_term = f"%{escaped}%"
+        query = (
+            query.join(Requirement, LinkSuggestion.requirement_id == Requirement.id)
+            .join(TestCase, LinkSuggestion.test_case_id == TestCase.id)
+            .where(
+                Requirement.title.ilike(search_term)
+                | TestCase.title.ilike(search_term)
+                | Requirement.description.ilike(search_term)
+                | TestCase.description.ilike(search_term)
+            )
+        )
 
     # Apply filters
     if min_score is not None:
