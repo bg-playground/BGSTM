@@ -7,6 +7,7 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.auth.dependencies import get_current_user
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
@@ -24,6 +25,7 @@ from app.models.test_case import (
     TestCaseStatus,
     TestCaseType,
 )
+from app.models.user import User, UserRole
 
 # ── Shared test engine / session factory ──────────────────────────────────────
 
@@ -42,7 +44,20 @@ async def db_session():
         async def override_get_db():
             yield session
 
+        mock_user = User(
+            id=uuid.uuid4(),
+            email="test@example.com",
+            hashed_password="hashed",
+            full_name="Test User",
+            role=UserRole.admin,
+            is_active=True,
+        )
+
+        async def override_get_current_user():
+            return mock_user
+
         app.dependency_overrides[get_db] = override_get_db
+        app.dependency_overrides[get_current_user] = override_get_current_user
         yield session
         app.dependency_overrides.clear()
 

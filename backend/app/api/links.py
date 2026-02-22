@@ -6,8 +6,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.dependencies import get_current_user
 from app.crud import link as crud
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.link import (
     BulkReviewRequest,
     LinkCreate,
@@ -21,7 +23,11 @@ router = APIRouter()
 
 # Link endpoints
 @router.post("/links", response_model=LinkResponse, status_code=status.HTTP_201_CREATED)
-async def create_link(link: LinkCreate, db: AsyncSession = Depends(get_db)):
+async def create_link(
+    link: LinkCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Create a new requirement-test case link"""
     try:
         return await crud.create_link(db, link)
@@ -36,13 +42,22 @@ async def create_link(link: LinkCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/links", response_model=list[LinkResponse])
-async def list_links(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+async def list_links(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """List all links"""
     return await crud.get_links(db, skip=skip, limit=limit)
 
 
 @router.get("/links/{link_id}", response_model=LinkResponse)
-async def get_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_link(
+    link_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get a specific link by ID"""
     link = await crud.get_link(db, link_id)
     if not link:
@@ -51,19 +66,31 @@ async def get_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/requirements/{requirement_id}/links", response_model=list[LinkResponse])
-async def get_requirement_links(requirement_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_requirement_links(
+    requirement_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get all links for a specific requirement"""
     return await crud.get_links_by_requirement(db, requirement_id)
 
 
 @router.get("/test-cases/{test_case_id}/links", response_model=list[LinkResponse])
-async def get_test_case_links(test_case_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_test_case_links(
+    test_case_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get all links for a specific test case"""
     return await crud.get_links_by_test_case(db, test_case_id)
 
 
 @router.delete("/links/{link_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
+async def delete_link(
+    link_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Delete a link"""
     deleted = await crud.delete_link(db, link_id)
     if not deleted:
@@ -72,7 +99,12 @@ async def delete_link(link_id: UUID, db: AsyncSession = Depends(get_db)):
 
 # Suggestion endpoints
 @router.get("/suggestions", response_model=list[SuggestionResponse])
-async def list_suggestions(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+async def list_suggestions(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """List all link suggestions"""
     return await crud.get_suggestions(db, skip=skip, limit=limit)
 
@@ -87,6 +119,7 @@ async def list_pending_suggestions(
     limit: int | None = Query(100, le=500, description="Maximum results to return"),
     search: str | None = Query(None, description="Search term to filter by requirement/test case title or description"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """List pending suggestions with filtering and sorting"""
     return await crud.get_pending_suggestions(
@@ -102,7 +135,11 @@ async def list_pending_suggestions(
 
 
 @router.get("/suggestions/{suggestion_id}", response_model=SuggestionResponse)
-async def get_suggestion(suggestion_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_suggestion(
+    suggestion_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get a specific suggestion by ID"""
     suggestion = await crud.get_suggestion(db, suggestion_id)
     if not suggestion:
@@ -111,7 +148,12 @@ async def get_suggestion(suggestion_id: UUID, db: AsyncSession = Depends(get_db)
 
 
 @router.post("/suggestions/{suggestion_id}/review", response_model=SuggestionResponse)
-async def review_suggestion(suggestion_id: UUID, review: SuggestionReview, db: AsyncSession = Depends(get_db)):
+async def review_suggestion(
+    suggestion_id: UUID,
+    review: SuggestionReview,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Review a suggestion (accept/reject)"""
     reviewed = await crud.review_suggestion(db, suggestion_id, review)
     if not reviewed:
@@ -120,7 +162,11 @@ async def review_suggestion(suggestion_id: UUID, review: SuggestionReview, db: A
 
 
 @router.post("/suggestions/bulk-review", response_model=dict[str, Any])
-async def bulk_review_suggestions(request: BulkReviewRequest, db: AsyncSession = Depends(get_db)):
+async def bulk_review_suggestions(
+    request: BulkReviewRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Review multiple suggestions at once"""
     reviewed = await crud.bulk_review_suggestions(
         db, request.suggestion_ids, request.status, request.feedback, request.reviewed_by
