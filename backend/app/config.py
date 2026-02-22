@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-me-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
-    DEFAULT_ADMIN_PASSWORD: str = "admin"
+    DEFAULT_ADMIN_PASSWORD: str = "admin1234"
 
     # Auto-Suggestions
     AUTO_SUGGESTIONS_ENABLED: bool = True

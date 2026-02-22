@@ -45,7 +45,7 @@ async def test_get_user_by_email():
     AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with AsyncSessionLocal() as session:
-        await create_user(session, UserCreate(email="lookup@example.com", password="pass"))
+        await create_user(session, UserCreate(email="lookup@example.com", password="password123"))
         user = await get_user_by_email(session, "lookup@example.com")
         assert user is not None
         assert user.email == "lookup@example.com"
@@ -107,7 +107,7 @@ async def test_register_duplicate_email():
     app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as client:
-            payload = {"email": "dup@example.com", "password": "pass"}
+            payload = {"email": "dup@example.com", "password": "password123"}
             client.post("/api/v1/auth/register", json=payload)
             resp = client.post("/api/v1/auth/register", json=payload)
             assert resp.status_code == 400
@@ -158,8 +158,10 @@ async def test_login_wrong_password():
     app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as client:
-            client.post("/api/v1/auth/register", json={"email": "wrongpw@example.com", "password": "correct"})
-            resp = client.post("/api/v1/auth/login", json={"email": "wrongpw@example.com", "password": "wrong"})
+            client.post("/api/v1/auth/register", json={"email": "wrongpw@example.com", "password": "correct_password"})
+            resp = client.post(
+                "/api/v1/auth/login", json={"email": "wrongpw@example.com", "password": "wrong_password"}
+            )
             assert resp.status_code == 401
     finally:
         app.dependency_overrides.clear()
@@ -181,7 +183,7 @@ async def test_login_nonexistent_user():
     app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as client:
-            resp = client.post("/api/v1/auth/login", json={"email": "ghost@example.com", "password": "pass"})
+            resp = client.post("/api/v1/auth/login", json={"email": "ghost@example.com", "password": "password123"})
             assert resp.status_code == 401
     finally:
         app.dependency_overrides.clear()
@@ -203,8 +205,8 @@ async def test_get_me_with_valid_token():
     app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as client:
-            client.post("/api/v1/auth/register", json={"email": "me@example.com", "password": "mypass"})
-            login_resp = client.post("/api/v1/auth/login", json={"email": "me@example.com", "password": "mypass"})
+            client.post("/api/v1/auth/register", json={"email": "me@example.com", "password": "mypassword"})
+            login_resp = client.post("/api/v1/auth/login", json={"email": "me@example.com", "password": "mypassword"})
             token = login_resp.json()["access_token"]
 
             resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
@@ -275,8 +277,10 @@ async def test_protected_endpoint_with_valid_token():
     app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as client:
-            client.post("/api/v1/auth/register", json={"email": "apiuser@example.com", "password": "apipass"})
-            login_resp = client.post("/api/v1/auth/login", json={"email": "apiuser@example.com", "password": "apipass"})
+            client.post("/api/v1/auth/register", json={"email": "apiuser@example.com", "password": "apipassword"})
+            login_resp = client.post(
+                "/api/v1/auth/login", json={"email": "apiuser@example.com", "password": "apipassword"}
+            )
             token = login_resp.json()["access_token"]
 
             resp = client.get("/api/v1/requirements", headers={"Authorization": f"Bearer {token}"})
