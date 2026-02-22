@@ -5,14 +5,16 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.dependencies import get_current_user
 from app.db.session import get_db
+from app.models.user import User
 from app.services.analytics import SuggestionAnalytics
 
 router = APIRouter()
 
 
 @router.get("/analytics/acceptance-rates", response_model=list[dict[str, Any]])
-async def get_acceptance_rates(db: AsyncSession = Depends(get_db)):
+async def get_acceptance_rates(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Get acceptance/rejection rates for link suggestions over time.
 
@@ -24,7 +26,9 @@ async def get_acceptance_rates(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/analytics/confidence-distribution", response_model=list[dict[str, Any]])
-async def get_confidence_distribution(db: AsyncSession = Depends(get_db)):
+async def get_confidence_distribution(
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     """
     Get distribution of confidence scores across suggestions.
 
@@ -36,7 +40,7 @@ async def get_confidence_distribution(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/analytics/generation-trends", response_model=list[dict[str, Any]])
-async def get_generation_trends(db: AsyncSession = Depends(get_db)):
+async def get_generation_trends(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Get trends in suggestion generation volume over time.
 
@@ -47,7 +51,7 @@ async def get_generation_trends(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/analytics/review-velocity", response_model=dict[str, Any])
-async def get_review_velocity(db: AsyncSession = Depends(get_db)):
+async def get_review_velocity(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Get review velocity metrics — how quickly suggestions are being reviewed.
 
@@ -58,7 +62,7 @@ async def get_review_velocity(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/analytics/algorithm-comparison", response_model=list[dict[str, Any]])
-async def get_algorithm_comparison(db: AsyncSession = Depends(get_db)):
+async def get_algorithm_comparison(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Compare performance metrics across algorithms (tfidf, keyword, hybrid, etc.).
 

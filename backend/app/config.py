@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
 
+    # Auth
+    SECRET_KEY: str = "change-me-in-production"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALGORITHM: str = "HS256"
+    DEFAULT_ADMIN_PASSWORD: str = "admin"
+
     # Auto-Suggestions
     AUTO_SUGGESTIONS_ENABLED: bool = True
     AUTO_SUGGESTIONS_ALGORITHM: str = "tfidf"  # 'tfidf', 'keyword', or 'hybrid'

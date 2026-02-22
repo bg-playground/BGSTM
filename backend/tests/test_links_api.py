@@ -7,6 +7,8 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.auth.security import create_access_token
+from app.crud.user import create_user
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
@@ -24,6 +26,7 @@ from app.models.test_case import (
     TestCaseStatus,
     TestCaseType,
 )
+from app.schemas.auth import UserCreate
 
 # ── Shared test engine / session factory ──────────────────────────────────────
 
@@ -47,6 +50,14 @@ async def db_session():
         app.dependency_overrides.clear()
 
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def auth_headers(db_session):
+    """Create a test user and return auth headers with JWT token."""
+    user = await create_user(db_session, UserCreate(email="testuser@example.com", password="testpass123"))
+    token = create_access_token(data={"sub": str(user.id)})
+    return {"Authorization": f"Bearer {token}"}
 
 
 # ── Sample data helpers ────────────────────────────────────────────────────────
@@ -81,7 +92,7 @@ async def _add_req_tc(session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_create_link_endpoint(db_session):
+async def test_create_link_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     with TestClient(app) as client:
         response = client.post(
@@ -93,6 +104,7 @@ async def test_create_link_endpoint(db_session):
                 "link_source": "manual",
                 "created_by": "api_tester",
             },
+            headers=auth_headers,
         )
     assert response.status_code == 201
     data = response.json()
@@ -104,7 +116,7 @@ async def test_create_link_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_list_links_endpoint(db_session):
+async def test_list_links_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     link = RequirementTestCaseLink(
         id=uuid.uuid4(),
@@ -117,7 +129,7 @@ async def test_list_links_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get("/api/v1/links")
+        response = client.get("/api/v1/links", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -125,7 +137,7 @@ async def test_list_links_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_link_endpoint(db_session):
+async def test_get_link_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     link = RequirementTestCaseLink(
         id=uuid.uuid4(),
@@ -139,7 +151,7 @@ async def test_get_link_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/links/{link.id}")
+        response = client.get(f"/api/v1/links/{link.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(link.id)
@@ -147,14 +159,14 @@ async def test_get_link_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_link_endpoint_not_found(db_session):
+async def test_get_link_endpoint_not_found(db_session, auth_headers):
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/links/{uuid.uuid4()}")
+        response = client.get(f"/api/v1/links/{uuid.uuid4()}", headers=auth_headers)
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_delete_link_endpoint(db_session):
+async def test_delete_link_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     link = RequirementTestCaseLink(
         id=uuid.uuid4(),
@@ -167,23 +179,23 @@ async def test_delete_link_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.delete(f"/api/v1/links/{link.id}")
+        response = client.delete(f"/api/v1/links/{link.id}", headers=auth_headers)
     assert response.status_code == 204
 
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/links/{link.id}")
+        response = client.get(f"/api/v1/links/{link.id}", headers=auth_headers)
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_delete_link_endpoint_not_found(db_session):
+async def test_delete_link_endpoint_not_found(db_session, auth_headers):
     with TestClient(app) as client:
-        response = client.delete(f"/api/v1/links/{uuid.uuid4()}")
+        response = client.delete(f"/api/v1/links/{uuid.uuid4()}", headers=auth_headers)
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_get_requirement_links_endpoint(db_session):
+async def test_get_requirement_links_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     link = RequirementTestCaseLink(
         id=uuid.uuid4(),
@@ -196,7 +208,7 @@ async def test_get_requirement_links_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/requirements/{req.id}/links")
+        response = client.get(f"/api/v1/requirements/{req.id}/links", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -204,16 +216,16 @@ async def test_get_requirement_links_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_requirement_links_empty(db_session):
+async def test_get_requirement_links_empty(db_session, auth_headers):
     req_id = uuid.uuid4()
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/requirements/{req_id}/links")
+        response = client.get(f"/api/v1/requirements/{req_id}/links", headers=auth_headers)
     assert response.status_code == 200
     assert response.json() == []
 
 
 @pytest.mark.asyncio
-async def test_get_test_case_links_endpoint(db_session):
+async def test_get_test_case_links_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     link = RequirementTestCaseLink(
         id=uuid.uuid4(),
@@ -226,7 +238,7 @@ async def test_get_test_case_links_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/test-cases/{tc.id}/links")
+        response = client.get(f"/api/v1/test-cases/{tc.id}/links", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -237,7 +249,7 @@ async def test_get_test_case_links_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_list_suggestions_endpoint(db_session):
+async def test_list_suggestions_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     sugg = LinkSuggestion(
         id=uuid.uuid4(),
@@ -251,7 +263,7 @@ async def test_list_suggestions_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get("/api/v1/suggestions")
+        response = client.get("/api/v1/suggestions", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -259,7 +271,7 @@ async def test_list_suggestions_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_list_pending_suggestions_endpoint(db_session):
+async def test_list_pending_suggestions_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     pending = LinkSuggestion(
         id=uuid.uuid4(),
@@ -281,7 +293,7 @@ async def test_list_pending_suggestions_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get("/api/v1/suggestions/pending")
+        response = client.get("/api/v1/suggestions/pending", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert all(s["status"] == "pending" for s in data)
@@ -289,7 +301,7 @@ async def test_list_pending_suggestions_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_list_pending_suggestions_with_filters(db_session):
+async def test_list_pending_suggestions_with_filters(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     for score, method in [(0.9, SuggestionMethod.HYBRID), (0.5, SuggestionMethod.KEYWORD_MATCH)]:
         sugg = LinkSuggestion(
@@ -304,7 +316,7 @@ async def test_list_pending_suggestions_with_filters(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get("/api/v1/suggestions/pending?min_score=0.7&algorithm=hybrid")
+        response = client.get("/api/v1/suggestions/pending?min_score=0.7&algorithm=hybrid", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -313,7 +325,7 @@ async def test_list_pending_suggestions_with_filters(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_suggestion_endpoint(db_session):
+async def test_get_suggestion_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     sugg = LinkSuggestion(
         id=uuid.uuid4(),
@@ -327,7 +339,7 @@ async def test_get_suggestion_endpoint(db_session):
     await db_session.commit()
 
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/suggestions/{sugg.id}")
+        response = client.get(f"/api/v1/suggestions/{sugg.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(sugg.id)
@@ -335,14 +347,14 @@ async def test_get_suggestion_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_suggestion_endpoint_not_found(db_session):
+async def test_get_suggestion_endpoint_not_found(db_session, auth_headers):
     with TestClient(app) as client:
-        response = client.get(f"/api/v1/suggestions/{uuid.uuid4()}")
+        response = client.get(f"/api/v1/suggestions/{uuid.uuid4()}", headers=auth_headers)
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_review_suggestion_endpoint(db_session):
+async def test_review_suggestion_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     sugg = LinkSuggestion(
         id=uuid.uuid4(),
@@ -359,6 +371,7 @@ async def test_review_suggestion_endpoint(db_session):
         response = client.post(
             f"/api/v1/suggestions/{sugg.id}/review",
             json={"status": "accepted", "feedback": "Good match", "reviewed_by": "tester"},
+            headers=auth_headers,
         )
     assert response.status_code == 200
     data = response.json()
@@ -368,17 +381,18 @@ async def test_review_suggestion_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_review_suggestion_endpoint_not_found(db_session):
+async def test_review_suggestion_endpoint_not_found(db_session, auth_headers):
     with TestClient(app) as client:
         response = client.post(
             f"/api/v1/suggestions/{uuid.uuid4()}/review",
             json={"status": "rejected"},
+            headers=auth_headers,
         )
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_bulk_review_suggestions_endpoint(db_session):
+async def test_bulk_review_suggestions_endpoint(db_session, auth_headers):
     req, tc = await _add_req_tc(db_session)
     sugg_ids = []
     for score in [0.8, 0.7]:
@@ -403,6 +417,7 @@ async def test_bulk_review_suggestions_endpoint(db_session):
                 "feedback": "Bulk approved",
                 "reviewed_by": "admin",
             },
+            headers=auth_headers,
         )
     assert response.status_code == 200
     data = response.json()
@@ -411,11 +426,12 @@ async def test_bulk_review_suggestions_endpoint(db_session):
 
 
 @pytest.mark.asyncio
-async def test_bulk_review_empty_ids_rejected(db_session):
+async def test_bulk_review_empty_ids_rejected(db_session, auth_headers):
     """Bulk review with empty list should fail validation."""
     with TestClient(app) as client:
         response = client.post(
             "/api/v1/suggestions/bulk-review",
             json={"suggestion_ids": [], "status": "accepted"},
+            headers=auth_headers,
         )
     assert response.status_code == 422
