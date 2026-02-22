@@ -1,21 +1,115 @@
 """API endpoints for AI Suggestion Generation"""
 
-from typing import Any
+import csv
+import io
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.ai_suggestions.config import SuggestionConfig
 from app.ai_suggestions.engine import SuggestionEngine
-from app.auth.dependencies import require_admin
+from app.auth.dependencies import get_current_user, require_admin
 from app.crud.audit_log import create_audit_entry
 from app.db.session import get_db
+from app.models.suggestion import LinkSuggestion, SuggestionStatus
 from app.models.user import User
 
 router = APIRouter()
 
 
-@router.post("/suggestions/generate", response_model=dict[str, Any])
+@router.get("/suggestions/export/csv")
+async def export_suggestions_csv(
+    status: str | None = Query(None, description="Filter by status: pending, accepted, rejected"),
+    algorithm: str | None = Query(None, description="Filter by algorithm"),
+    min_score: float | None = Query(None, ge=0.0, le=1.0, description="Minimum confidence score"),
+    max_score: float | None = Query(None, ge=0.0, le=1.0, description="Maximum confidence score"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Export suggestions as CSV with optional filtering.
+
+    Supports filtering by status, algorithm, and confidence score range.
+    """
+    query = select(LinkSuggestion).options(
+        selectinload(LinkSuggestion.requirement),
+        selectinload(LinkSuggestion.test_case),
+    )
+
+    if status is not None:
+        try:
+            status_enum = SuggestionStatus(status.lower())
+            query = query.where(LinkSuggestion.status == status_enum)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status '{status}'. Must be one of: pending, accepted, rejected.",
+            )
+
+    if algorithm is not None:
+        from app.models.suggestion import SuggestionMethod
+
+        try:
+            method_enum = SuggestionMethod(algorithm.lower())
+            query = query.where(LinkSuggestion.suggestion_method == method_enum)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid algorithm '{algorithm}'.",
+            )
+
+    if min_score is not None:
+        query = query.where(LinkSuggestion.similarity_score >= min_score)
+
+    if max_score is not None:
+        query = query.where(LinkSuggestion.similarity_score <= max_score)
+
+    result = await db.execute(query)
+    suggestions = result.scalars().all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "ID",
+            "Requirement Title",
+            "Test Case Title",
+            "Algorithm",
+            "Confidence Score",
+            "Status",
+            "Reviewed By",
+            "Feedback",
+            "Created At",
+            "Reviewed At",
+        ]
+    )
+    for s in suggestions:
+        writer.writerow(
+            [
+                str(s.id),
+                s.requirement.title if s.requirement else "",
+                s.test_case.title if s.test_case else "",
+                s.suggestion_method.value if s.suggestion_method else "",
+                f"{s.similarity_score:.4f}" if s.similarity_score is not None else "",
+                s.status.value if s.status else "",
+                s.reviewed_by or "",
+                s.feedback or "",
+                s.created_at.isoformat() if s.created_at else "",
+                s.reviewed_at.isoformat() if s.reviewed_at else "",
+            ]
+        )
+
+    csv_content = output.getvalue()
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=suggestions.csv"},
+    )
+
+
+@router.post("/suggestions/generate", response_model=dict)
 async def generate_suggestions(
     algorithm: str | None = Query(
         None, description="Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'. Uses default if not specified."

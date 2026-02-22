@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import traceabilityApi, { type Metrics } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -6,13 +6,10 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 export default function MetricsDashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadMetrics();
-  }, []);
-
-  const loadMetrics = async () => {
+  const loadMetrics = useCallback(async () => {
     try {
       setLoading(true);
       const data = await traceabilityApi.getMetrics();
@@ -23,7 +20,26 @@ export default function MetricsDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadMetrics();
+  }, [loadMetrics]);
+
+  const handleExportCsv = useCallback(async () => {
+    try {
+      setExporting(true);
+      const blob = await traceabilityApi.exportMetrics();
+      const filename = `metrics_${new Date().toISOString().split("T")[0]}.csv`;
+      traceabilityApi.downloadExport(blob, filename);
+      showToast("Exported metrics as CSV", "success");
+    } catch (error) {
+      console.error("Failed to export metrics:", error);
+      showToast("Failed to export metrics", "error");
+    } finally {
+      setExporting(false);
+    }
+  }, [showToast]);
 
   const getAlgorithmColor = (algorithm: string) => {
     switch (algorithm) {
@@ -60,13 +76,22 @@ export default function MetricsDashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
-        <button
-          onClick={loadMetrics}
-          disabled={loading}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
-        >
-          Refresh
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportCsv}
+            disabled={exporting}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={loadMetrics}
+            disabled={loading}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Key Metrics */}

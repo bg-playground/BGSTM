@@ -26,7 +26,7 @@ export default function TraceabilityMatrixPage() {
     loadMatrix();
   }, [loadMatrix]);
 
-  const handleExport = async (format: "csv" | "json") => {
+  const handleExport = async (format: "csv" | "json" | "pdf") => {
     try {
       setExporting(true);
       const blob = await traceabilityApi.exportMatrix(format);
@@ -101,6 +101,13 @@ export default function TraceabilityMatrixPage() {
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
             Export JSON
+          </button>
+          <button
+            onClick={() => handleExport("pdf")}
+            disabled={exporting}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            Export PDF
           </button>
           <button
             onClick={loadMatrix}
