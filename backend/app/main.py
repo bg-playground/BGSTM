@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -39,13 +41,15 @@ async def startup_event():
     from app.db.session import AsyncSessionLocal
     from app.models.user import User, UserRole
 
+    default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "admin1234")
+
     async with AsyncSessionLocal() as db:
         existing = await get_user_by_email(db, "admin@bgstm.local")
         if not existing:
             db.add(
                 User(
                     email="admin@bgstm.local",
-                    hashed_password=get_password_hash("admin"),  # Change on first use!
+                    hashed_password=get_password_hash(default_password),
                     full_name="Default Admin",
                     role=UserRole.admin,
                 )
