@@ -13,7 +13,7 @@ httpx==0.28.1
 aiosqlite==0.22.1
 scikit-learn==1.8.0
 PyJWT==2.10.1
-passlib[bcrypt]==1.7.4
+bcrypt>=4.0.0
 
 # Optional dependencies for LLM embeddings
 # Uncomment the lines below if using LLM-based similarity
