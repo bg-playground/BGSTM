@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.config import SuggestionConfig
 from app.ai_suggestions.engine import SuggestionEngine
+from app.auth.dependencies import get_current_user
 from app.db.session import get_db
+from app.models.user import User
 
 router = APIRouter()
 
@@ -21,6 +23,7 @@ async def generate_suggestions(
         None, ge=0.0, le=1.0, description="Minimum confidence threshold (0.0-1.0). Uses default if not specified."
     ),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Generate AI-powered link suggestions for all requirements and test cases.

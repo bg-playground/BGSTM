@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import analytics, links, requirements, suggestions, test_cases, traceability
+from app.api import analytics, auth, links, requirements, suggestions, test_cases, traceability
 from app.config import settings
 from app.db.session import init_db
 
@@ -17,6 +17,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX, tags=["auth"])
 app.include_router(requirements.router, prefix=settings.API_V1_PREFIX, tags=["requirements"])
 app.include_router(test_cases.router, prefix=settings.API_V1_PREFIX, tags=["test_cases"])
 app.include_router(links.router, prefix=settings.API_V1_PREFIX, tags=["links"])
@@ -30,6 +31,30 @@ async def startup_event():
     """Initialize database on startup (only for non-PostgreSQL, e.g. SQLite in tests)."""
     if not settings.DATABASE_URL.startswith("postgresql"):
         await init_db()
+    await seed_default_admin()
+
+
+async def seed_default_admin():
+    """Seed a default admin user if no users exist."""
+    from sqlalchemy import select
+
+    from app.crud.user import create_user
+    from app.db.session import AsyncSessionLocal
+    from app.models.user import User, UserRole
+    from app.schemas.auth import UserCreate
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(User).limit(1))
+        if result.scalar_one_or_none() is None:
+            await create_user(
+                db,
+                UserCreate(
+                    email="admin@bgstm.local",
+                    password=settings.DEFAULT_ADMIN_PASSWORD,
+                    full_name="Default Admin",
+                ),
+                role=UserRole.ADMIN,
+            )
 
 
 @app.get("/")
