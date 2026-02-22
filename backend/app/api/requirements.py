@@ -131,4 +131,3 @@ async def delete_requirement(
             user_id=current_user.id, action="delete", resource_type="requirement", resource_id=str(requirement_id)
         ),
     )
-

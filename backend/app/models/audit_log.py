@@ -15,4 +15,4 @@ class AuditLog(Base):
     resource_type = Column(String(100), nullable=False)
     resource_id = Column(String(255), nullable=True)
     details = Column(JSON(), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.utcnow(), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

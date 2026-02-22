@@ -187,4 +187,3 @@ async def bulk_review_suggestions(
     )
 
     return {"message": f"Reviewed {reviewed} suggestions", "count": reviewed, "status": request.status}
-
