@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import traceabilityApi, { type Metrics } from "../api/traceability";
-import { useToast } from "../components/Toast";
+import { useToast } from "../contexts/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function MetricsDashboardPage() {
@@ -8,11 +8,7 @@ export default function MetricsDashboardPage() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadMetrics();
-  }, []);
-
-  const loadMetrics = async () => {
+  const loadMetrics = useCallback(async () => {
     try {
       setLoading(true);
       const data = await traceabilityApi.getMetrics();
@@ -23,7 +19,11 @@ export default function MetricsDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadMetrics();
+  }, [loadMetrics]);
 
   const getAlgorithmColor = (algorithm: string) => {
     switch (algorithm) {

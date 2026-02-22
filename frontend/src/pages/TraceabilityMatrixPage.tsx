@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import traceabilityApi, { type TraceabilityMatrix } from "../api/traceability";
-import { useToast } from "../components/Toast";
+import { useToast } from "../contexts/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function TraceabilityMatrixPage() {
@@ -9,11 +9,7 @@ export default function TraceabilityMatrixPage() {
   const [exporting, setExporting] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadMatrix();
-  }, []);
-
-  const loadMatrix = async () => {
+  const loadMatrix = useCallback(async () => {
     try {
       setLoading(true);
       const data = await traceabilityApi.getMatrix();
@@ -24,7 +20,11 @@ export default function TraceabilityMatrixPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadMatrix();
+  }, [loadMatrix]);
 
   const handleExport = async (format: "csv" | "json") => {
     try {

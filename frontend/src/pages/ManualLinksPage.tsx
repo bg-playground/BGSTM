@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { linksApi } from '../api/links';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
 import { LinkSource, LinkType } from '../types/api';
 import type { Link, LinkCreate, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useToast } from '../components/Toast';
+import { useToast } from '../contexts/ToastContext';
 
 export const ManualLinksPage: React.FC = () => {
   const [links, setLinks] = useState<Link[]>([]);
@@ -21,7 +21,7 @@ export const ManualLinksPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [linksData, reqData, tcData] = await Promise.all([
@@ -38,11 +38,11 @@ export const ManualLinksPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,9 +52,10 @@ export const ManualLinksPage: React.FC = () => {
       setShowModal(false);
       resetForm();
       await loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating link:', error);
-      const message = error.response?.data?.detail || 'Failed to create link';
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      const message = axiosError.response?.data?.detail || 'Failed to create link';
       showToast(message, 'error');
     }
   };

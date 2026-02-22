@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { testCasesApi } from '../api/testCases';
 import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
 import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useToast } from '../components/Toast';
+import { useToast } from '../contexts/ToastContext';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -20,7 +20,7 @@ export const TestCasesPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadTestCases = async () => {
+  const loadTestCases = useCallback(async () => {
     try {
       setLoading(true);
       const data = await testCasesApi.list();
@@ -31,11 +31,11 @@ export const TestCasesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadTestCases();
-  }, []);
+  }, [loadTestCases]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

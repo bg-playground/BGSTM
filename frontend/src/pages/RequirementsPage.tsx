@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { requirementsApi } from '../api/requirements';
 import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
 import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useToast } from '../components/Toast';
+import { useToast } from '../contexts/ToastContext';
 
 export const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -19,7 +19,7 @@ export const RequirementsPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadRequirements = async () => {
+  const loadRequirements = useCallback(async () => {
     try {
       setLoading(true);
       const data = await requirementsApi.list();
@@ -30,11 +30,11 @@ export const RequirementsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadRequirements();
-  }, []);
+  }, [loadRequirements]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

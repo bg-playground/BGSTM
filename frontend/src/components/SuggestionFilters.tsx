@@ -1,15 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-
-export const DEFAULT_FILTERS = {
-  minScore: 0,
-  maxScore: 1,
-  algorithm: 'all',
-  sortBy: 'score',
-  sortOrder: 'desc',
-  search: '',
-};
-
-export type Filters = typeof DEFAULT_FILTERS;
+import { DEFAULT_FILTERS, type Filters } from '../types/filters';
 
 interface SuggestionFiltersProps {
   filters: Filters;
@@ -20,6 +10,14 @@ interface SuggestionFiltersProps {
 export const SuggestionFilters: React.FC<SuggestionFiltersProps> = ({ filters, onFiltersChange, onReset }) => {
   const [searchInput, setSearchInput] = useState(filters.search);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [prevFiltersSearch, setPrevFiltersSearch] = useState(filters.search);
+
+  // Sync searchInput when filters.search is reset externally (e.g. Reset button)
+  // Uses during-render state update to avoid set-state-in-effect
+  if (prevFiltersSearch !== filters.search) {
+    setPrevFiltersSearch(filters.search);
+    setSearchInput(filters.search);
+  }
 
   // Clear debounce timer on unmount
   useEffect(() => {
@@ -27,11 +25,6 @@ export const SuggestionFilters: React.FC<SuggestionFiltersProps> = ({ filters, o
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
-
-  // Sync searchInput when filters.search is reset externally (e.g. Reset button)
-  useEffect(() => {
-    setSearchInput(filters.search);
-  }, [filters.search]);
 
   const handleSearchChange = useCallback(
     (value: string) => {
