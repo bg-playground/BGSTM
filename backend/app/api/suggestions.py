@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.config import SuggestionConfig
 from app.ai_suggestions.engine import SuggestionEngine
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import require_admin
+from app.crud.audit_log import create_audit_entry
 from app.db.session import get_db
 from app.models.user import User
 
@@ -23,7 +24,7 @@ async def generate_suggestions(
         None, ge=0.0, le=1.0, description="Minimum confidence threshold (0.0-1.0). Uses default if not specified."
     ),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_admin),
 ):
     """
     Generate AI-powered link suggestions for all requirements and test cases.
@@ -60,6 +61,15 @@ async def generate_suggestions(
         # Initialize engine and generate suggestions
         engine = SuggestionEngine(config=config)
         result = await engine.generate_suggestions(db)
+
+        await create_audit_entry(
+            db,
+            user_id=current_user.id,
+            action="suggestion.generated",
+            resource_type="suggestion",
+            resource_id="bulk",
+            details=result,
+        )
 
         return {"message": "Suggestion generation completed", "results": result}
 

@@ -2,12 +2,12 @@
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import get_password_hash
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserUpdate
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
@@ -41,3 +41,33 @@ async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[U
     """Get all users with pagination"""
     result = await db.execute(select(User).offset(skip).limit(limit))
     return list(result.scalars().all())
+
+
+async def get_users_count(db: AsyncSession) -> int:
+    """Get total count of users"""
+    result = await db.execute(select(func.count()).select_from(User))
+    return result.scalar_one()
+
+
+async def update_user(db: AsyncSession, user_id: str | UUID, updates: UserUpdate) -> User | None:
+    """Partially update a user's role, is_active, or full_name"""
+    user = await get_user(db, user_id)
+    if not user:
+        return None
+    update_data = updates.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+async def deactivate_user(db: AsyncSession, user_id: str | UUID) -> User | None:
+    """Deactivate a user by setting is_active=False"""
+    user = await get_user(db, user_id)
+    if not user:
+        return None
+    user.is_active = False
+    await db.commit()
+    await db.refresh(user)
+    return user
