@@ -3,7 +3,7 @@ import { requirementsApi } from '../api/requirements';
 import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
 import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useToast } from '../components/Toast';
+import { useToast } from '../context/ToastContext';
 
 export const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
