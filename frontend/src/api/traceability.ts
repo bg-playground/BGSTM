@@ -69,8 +69,15 @@ const traceabilityApi = {
     return response.data;
   },
 
-  async exportMatrix(format: "csv" | "json"): Promise<Blob> {
+  async exportMatrix(format: "csv" | "json" | "pdf"): Promise<Blob> {
     const response = await apiClient.get(`/traceability-matrix/export?format=${format}`, {
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  async exportMetrics(): Promise<Blob> {
+    const response = await apiClient.get("/metrics/export/csv", {
       responseType: "blob",
     });
     return response.data;

@@ -58,4 +58,22 @@ export const suggestionsApi = {
     );
     return response.data;
   },
+
+  exportCsv: async (params?: {
+    status?: string;
+    algorithm?: string;
+    minScore?: number;
+    maxScore?: number;
+  }): Promise<Blob> => {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.algorithm) searchParams.append('algorithm', params.algorithm);
+    if (params?.minScore !== undefined) searchParams.append('min_score', params.minScore.toString());
+    if (params?.maxScore !== undefined) searchParams.append('max_score', params.maxScore.toString());
+    const query = searchParams.toString();
+    const response = await apiClient.get(`/suggestions/export/csv${query ? `?${query}` : ''}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };

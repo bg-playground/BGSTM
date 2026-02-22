@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { suggestionsApi } from '../api/suggestions';
+import traceabilityApi from '../api/traceability';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
 import { SuggestionStatus } from '../types/api';
@@ -90,6 +91,7 @@ export const SuggestionDashboard: React.FC = () => {
   const [testCases, setTestCases] = useState<Map<string, TestCase>>(new Map());
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -228,6 +230,25 @@ export const SuggestionDashboard: React.FC = () => {
     }
   }, [showToast, loadData]);
 
+  const handleExportCsv = useCallback(async () => {
+    try {
+      setExporting(true);
+      const blob = await suggestionsApi.exportCsv({
+        algorithm: filters.algorithm !== 'all' ? filters.algorithm : undefined,
+        minScore: filters.minScore !== 0 ? filters.minScore : undefined,
+        maxScore: filters.maxScore !== 1 ? filters.maxScore : undefined,
+      });
+      const filename = `suggestions_${new Date().toISOString().split('T')[0]}.csv`;
+      traceabilityApi.downloadExport(blob, filename);
+      showToast('Exported suggestions as CSV', 'success');
+    } catch (error) {
+      console.error('Error exporting suggestions:', error);
+      showToast('Failed to export suggestions', 'error');
+    } finally {
+      setExporting(false);
+    }
+  }, [filters, showToast]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -345,6 +366,13 @@ export const SuggestionDashboard: React.FC = () => {
           ) : (
             'Generate Suggestions'
           )}
+        </button>
+        <button
+          onClick={handleExportCsv}
+          disabled={exporting}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+        >
+          Export CSV
         </button>
       </div>
 
