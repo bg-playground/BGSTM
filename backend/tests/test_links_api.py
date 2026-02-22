@@ -379,7 +379,7 @@ async def test_review_suggestion_endpoint(db_session):
     data = response.json()
     assert data["status"] == "accepted"
     assert data["feedback"] == "Good match"
-    assert data["reviewed_by"] == "tester"
+    assert data["reviewed_by"] == "test@example.com"
 
 
 @pytest.mark.asyncio

@@ -6,11 +6,13 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.event_driven import generate_suggestions_for_requirement
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_reviewer_or_admin
 from app.config import settings
+from app.crud import audit_log as crud_audit
 from app.crud import requirement as crud
 from app.db.session import get_db
 from app.models.user import User
+from app.schemas.audit_log import AuditLogCreate
 from app.schemas.requirement import (
     RequirementCreate,
     RequirementResponse,
@@ -25,7 +27,7 @@ async def create_requirement(
     requirement: RequirementCreate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Create a new requirement"""
     # Check if external_id already exists
@@ -38,6 +40,13 @@ async def create_requirement(
             )
 
     new_requirement = await crud.create_requirement(db, requirement)
+
+    await crud_audit.create_audit_log(
+        db,
+        AuditLogCreate(
+            user_id=current_user.id, action="create", resource_type="requirement", resource_id=str(new_requirement.id)
+        ),
+    )
 
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
@@ -80,12 +89,19 @@ async def update_requirement(
     requirement: RequirementUpdate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Update a requirement"""
     updated = await crud.update_requirement(db, requirement_id, requirement)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Requirement {requirement_id} not found")
+
+    await crud_audit.create_audit_log(
+        db,
+        AuditLogCreate(
+            user_id=current_user.id, action="update", resource_type="requirement", resource_id=str(requirement_id)
+        ),
+    )
 
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
@@ -102,9 +118,17 @@ async def update_requirement(
 async def delete_requirement(
     requirement_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Delete a requirement"""
     deleted = await crud.delete_requirement(db, requirement_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Requirement {requirement_id} not found")
+
+    await crud_audit.create_audit_log(
+        db,
+        AuditLogCreate(
+            user_id=current_user.id, action="delete", resource_type="requirement", resource_id=str(requirement_id)
+        ),
+    )
+

@@ -1,5 +1,6 @@
 """Database models for BGSTM AI Traceability"""
 
+from .audit_log import AuditLog
 from .base import Base, TimestampMixin
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
@@ -26,4 +27,6 @@ __all__ = [
     "SuggestionStatus",
     "User",
     "UserRole",
+    "AuditLog",
 ]
+

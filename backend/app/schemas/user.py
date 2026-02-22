@@ -33,3 +33,10 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class UserUpdate(BaseModel):
+    full_name: str | None = None
+    role: UserRole | None = None
+    is_active: bool | None = None
+
