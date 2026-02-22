@@ -35,7 +35,7 @@ export interface Requirement {
   status: RequirementStatus;
   module?: string;
   tags?: string[];
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
   source_system?: string;
   source_url?: string;
   created_by?: string;
@@ -52,7 +52,7 @@ export interface RequirementCreate {
   status?: RequirementStatus;
   module?: string;
   tags?: string[];
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
   source_system?: string;
   source_url?: string;
   created_by?: string;
@@ -67,7 +67,7 @@ export interface RequirementUpdate {
   status?: RequirementStatus;
   module?: string;
   tags?: string[];
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
   source_system?: string;
   source_url?: string;
 }
@@ -115,7 +115,7 @@ export interface TestCase {
   automated: boolean;
   automation_script?: string;
   estimated_duration_minutes?: number;
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
   created_by?: string;
   version: number;
   created_at: string;
@@ -137,7 +137,7 @@ export interface TestCaseCreate {
   automated?: boolean;
   automation_script?: string;
   estimated_duration_minutes?: number;
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
   created_by?: string;
   external_id?: string;
 }
@@ -157,7 +157,7 @@ export interface TestCaseUpdate {
   automated?: boolean;
   automation_script?: string;
   estimated_duration_minutes?: number;
-  custom_metadata?: Record<string, any>;
+  custom_metadata?: Record<string, unknown>;
 }
 
 export enum LinkType {
@@ -221,7 +221,7 @@ export interface Suggestion {
   similarity_score: number;
   suggestion_method: SuggestionMethod;
   suggestion_reason?: string;
-  suggestion_metadata?: Record<string, any>;
+  suggestion_metadata?: Record<string, unknown>;
   status: SuggestionStatus;
   created_at: string;
   reviewed_at?: string;

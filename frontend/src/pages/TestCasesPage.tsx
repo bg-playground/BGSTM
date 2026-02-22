@@ -3,7 +3,7 @@ import { testCasesApi } from '../api/testCases';
 import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
 import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { useToast } from '../components/Toast';
+import { useToast } from '../context/ToastContext';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
