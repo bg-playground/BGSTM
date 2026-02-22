@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import traceabilityApi, { type Metrics } from "../api/traceability";
-import { useToast } from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export default function MetricsDashboardPage() {
