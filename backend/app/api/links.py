@@ -6,8 +6,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_reviewer_or_admin
 from app.crud import link as crud
+from app.crud.audit_log import create_audit_entry
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.link import (
@@ -26,11 +27,13 @@ router = APIRouter()
 async def create_link(
     link: LinkCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Create a new requirement-test case link"""
     try:
-        return await crud.create_link(db, link)
+        new_link = await crud.create_link(db, link)
+        await create_audit_entry(db, current_user.id, "create", "link", str(new_link.id))
+        return new_link
     except Exception as e:
         # Handle unique constraint violation
         if "uq_requirement_test_case" in str(e):
@@ -89,12 +92,13 @@ async def get_test_case_links(
 async def delete_link(
     link_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Delete a link"""
     deleted = await crud.delete_link(db, link_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Link {link_id} not found")
+    await create_audit_entry(db, current_user.id, "delete", "link", str(link_id))
 
 
 # Suggestion endpoints
@@ -152,12 +156,15 @@ async def review_suggestion(
     suggestion_id: UUID,
     review: SuggestionReview,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Review a suggestion (accept/reject)"""
+    # Override reviewed_by from authenticated user
+    review.reviewed_by = current_user.email
     reviewed = await crud.review_suggestion(db, suggestion_id, review)
     if not reviewed:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Suggestion {suggestion_id} not found")
+    await create_audit_entry(db, current_user.id, f"review_{review.status.value}", "suggestion", str(suggestion_id))
     return reviewed
 
 
@@ -165,11 +172,19 @@ async def review_suggestion(
 async def bulk_review_suggestions(
     request: BulkReviewRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_reviewer_or_admin),
 ):
     """Review multiple suggestions at once"""
     reviewed = await crud.bulk_review_suggestions(
-        db, request.suggestion_ids, request.status, request.feedback, request.reviewed_by
+        db, request.suggestion_ids, request.status, request.feedback, current_user.email
+    )
+    await create_audit_entry(
+        db,
+        current_user.id,
+        "bulk_review",
+        "suggestion",
+        None,
+        {"count": reviewed, "status": str(request.status)},
     )
 
     return {"message": f"Reviewed {reviewed} suggestions", "count": reviewed, "status": request.status}

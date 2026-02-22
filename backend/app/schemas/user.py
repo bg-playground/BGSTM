@@ -13,6 +13,12 @@ class UserCreate(BaseModel):
     role: UserRole = UserRole.reviewer
 
 
+class UserUpdate(BaseModel):
+    full_name: str | None = None
+    role: UserRole | None = None
+    is_active: bool | None = None
+
+
 class UserResponse(BaseModel):
     id: UUID
     email: str
@@ -23,6 +29,13 @@ class UserResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserListResponse(BaseModel):
+    items: list[UserResponse]
+    total: int
+    skip: int
+    limit: int
 
 
 class UserLogin(BaseModel):

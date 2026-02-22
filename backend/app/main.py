@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import analytics, auth, links, requirements, suggestions, test_cases, traceability
+from app.api import analytics, audit_log, auth, links, requirements, suggestions, test_cases, traceability, users
 from app.config import settings
 from app.db.session import init_db
 
@@ -26,6 +26,8 @@ app.include_router(links.router, prefix=settings.API_V1_PREFIX, tags=["links"])
 app.include_router(suggestions.router, prefix=settings.API_V1_PREFIX, tags=["suggestions"])
 app.include_router(traceability.router, prefix=settings.API_V1_PREFIX, tags=["traceability"])
 app.include_router(analytics.router, prefix=settings.API_V1_PREFIX, tags=["analytics"])
+app.include_router(audit_log.router, prefix=settings.API_V1_PREFIX, tags=["audit_log"])
+app.include_router(users.router, prefix=settings.API_V1_PREFIX, tags=["users"])
 
 
 @app.on_event("startup")
