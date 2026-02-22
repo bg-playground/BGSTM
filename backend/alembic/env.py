@@ -28,6 +28,7 @@ import app.models.link  # noqa: E402, F401
 import app.models.requirement  # noqa: E402, F401
 import app.models.suggestion  # noqa: E402, F401
 import app.models.test_case  # noqa: E402, F401
+import app.models.user  # noqa: E402, F401
 from app.models.base import Base  # noqa: E402
 
 target_metadata = Base.metadata

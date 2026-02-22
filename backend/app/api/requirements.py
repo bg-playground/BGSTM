@@ -6,9 +6,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.event_driven import generate_suggestions_for_requirement
+from app.auth.dependencies import get_current_user
 from app.config import settings
 from app.crud import requirement as crud
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.requirement import (
     RequirementCreate,
     RequirementResponse,
@@ -23,6 +25,7 @@ async def create_requirement(
     requirement: RequirementCreate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Create a new requirement"""
     # Check if external_id already exists
@@ -48,13 +51,22 @@ async def create_requirement(
 
 
 @router.get("/requirements", response_model=list[RequirementResponse])
-async def list_requirements(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+async def list_requirements(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """List all requirements"""
     return await crud.get_requirements(db, skip=skip, limit=limit)
 
 
 @router.get("/requirements/{requirement_id}", response_model=RequirementResponse)
-async def get_requirement(requirement_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_requirement(
+    requirement_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get a specific requirement by ID"""
     requirement = await crud.get_requirement(db, requirement_id)
     if not requirement:
@@ -68,6 +80,7 @@ async def update_requirement(
     requirement: RequirementUpdate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Update a requirement"""
     updated = await crud.update_requirement(db, requirement_id, requirement)
@@ -86,7 +99,11 @@ async def update_requirement(
 
 
 @router.delete("/requirements/{requirement_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_requirement(requirement_id: UUID, db: AsyncSession = Depends(get_db)):
+async def delete_requirement(
+    requirement_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Delete a requirement"""
     deleted = await crud.delete_requirement(db, requirement_id)
     if not deleted:

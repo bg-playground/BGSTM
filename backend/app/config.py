@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     AUTO_SUGGESTIONS_ALGORITHM: str = "tfidf"  # 'tfidf', 'keyword', or 'hybrid'
     AUTO_SUGGESTIONS_THRESHOLD: float = 0.3  # Minimum confidence threshold (0.0-1.0)
 
+    # Authentication
+    SECRET_KEY: str = "change-me-in-production-use-a-real-secret-key"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ALGORITHM: str = "HS256"
+
     class Config:
         env_file = ".env"
 

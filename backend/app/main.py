@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import analytics, links, requirements, suggestions, test_cases, traceability
+from app.api import analytics, auth, links, requirements, suggestions, test_cases, traceability
 from app.config import settings
 from app.db.session import init_db
 
@@ -17,6 +17,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX, tags=["auth"])
 app.include_router(requirements.router, prefix=settings.API_V1_PREFIX, tags=["requirements"])
 app.include_router(test_cases.router, prefix=settings.API_V1_PREFIX, tags=["test_cases"])
 app.include_router(links.router, prefix=settings.API_V1_PREFIX, tags=["links"])
@@ -30,6 +31,26 @@ async def startup_event():
     """Initialize database on startup (only for non-PostgreSQL, e.g. SQLite in tests)."""
     if not settings.DATABASE_URL.startswith("postgresql"):
         await init_db()
+
+    # Seed default admin user if no users exist
+    # WARNING: Change the default password on first use in production!
+    from app.auth.security import get_password_hash
+    from app.crud.user import get_user_by_email
+    from app.db.session import AsyncSessionLocal
+    from app.models.user import User, UserRole
+
+    async with AsyncSessionLocal() as db:
+        existing = await get_user_by_email(db, "admin@bgstm.local")
+        if not existing:
+            db.add(
+                User(
+                    email="admin@bgstm.local",
+                    hashed_password=get_password_hash("admin"),  # Change on first use!
+                    full_name="Default Admin",
+                    role=UserRole.admin,
+                )
+            )
+            await db.commit()
 
 
 @app.get("/")

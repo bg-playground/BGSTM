@@ -7,15 +7,20 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.dependencies import get_current_user
 from app.crud import traceability as crud
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.traceability import MetricsResponse, TraceabilityMatrixResponse
 
 router = APIRouter()
 
 
 @router.get("/traceability-matrix", response_model=TraceabilityMatrixResponse)
-async def get_traceability_matrix(db: AsyncSession = Depends(get_db)):
+async def get_traceability_matrix(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """
     Get the complete traceability matrix with coverage analysis.
 
@@ -29,7 +34,10 @@ async def get_traceability_matrix(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/metrics", response_model=MetricsResponse)
-async def get_metrics(db: AsyncSession = Depends(get_db)):
+async def get_metrics(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """
     Get system metrics including coverage and suggestion acceptance rates.
 
@@ -47,6 +55,7 @@ async def get_metrics(db: AsyncSession = Depends(get_db)):
 async def export_traceability_matrix(
     format: Literal["csv", "json"] = Query(..., description="Export format: csv or json"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Export the traceability matrix in CSV or JSON format.

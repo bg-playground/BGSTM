@@ -6,9 +6,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.event_driven import generate_suggestions_for_test_case
+from app.auth.dependencies import get_current_user
 from app.config import settings
 from app.crud import test_case as crud
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.test_case import TestCaseCreate, TestCaseResponse, TestCaseUpdate
 
 router = APIRouter()
@@ -19,6 +21,7 @@ async def create_test_case(
     test_case: TestCaseCreate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Create a new test case"""
     # Check if external_id already exists
@@ -44,13 +47,22 @@ async def create_test_case(
 
 
 @router.get("/test-cases", response_model=list[TestCaseResponse])
-async def list_test_cases(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+async def list_test_cases(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """List all test cases"""
     return await crud.get_test_cases(db, skip=skip, limit=limit)
 
 
 @router.get("/test-cases/{test_case_id}", response_model=TestCaseResponse)
-async def get_test_case(test_case_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_test_case(
+    test_case_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Get a specific test case by ID"""
     test_case = await crud.get_test_case(db, test_case_id)
     if not test_case:
@@ -64,6 +76,7 @@ async def update_test_case(
     test_case: TestCaseUpdate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Update a test case"""
     updated = await crud.update_test_case(db, test_case_id, test_case)
@@ -82,7 +95,11 @@ async def update_test_case(
 
 
 @router.delete("/test-cases/{test_case_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_test_case(test_case_id: UUID, db: AsyncSession = Depends(get_db)):
+async def delete_test_case(
+    test_case_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Delete a test case"""
     deleted = await crud.delete_test_case(db, test_case_id)
     if not deleted:
