@@ -24,6 +24,7 @@ if database_url:
 
 # Import Base.metadata for autogenerate support.
 # All models must be imported so their tables are registered on Base.metadata.
+import app.models.audit_log  # noqa: E402, F401
 import app.models.link  # noqa: E402, F401
 import app.models.requirement  # noqa: E402, F401
 import app.models.suggestion  # noqa: E402, F401

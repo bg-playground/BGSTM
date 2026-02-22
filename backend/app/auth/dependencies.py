@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import decode_access_token
 from app.db.session import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 
 bearer_scheme = HTTPBearer()
 
@@ -34,3 +34,28 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+async def require_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Require an active authenticated user (is_active already checked in get_current_user)."""
+    return current_user
+
+
+async def require_reviewer_or_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Require reviewer or admin role."""
+    if current_user.role not in (UserRole.reviewer, UserRole.admin):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Reviewer or admin role required",
+        )
+    return current_user
+
+
+async def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Require admin role."""
+    if current_user.role != UserRole.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required",
+        )
+    return current_user

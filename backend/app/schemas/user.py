@@ -25,6 +25,17 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserUpdate(BaseModel):
+    role: UserRole | None = None
+    is_active: bool | None = None
+    full_name: str | None = None
+
+
+class UserListResponse(BaseModel):
+    users: list[UserResponse]
+    total: int
+
+
 class UserLogin(BaseModel):
     email: str
     password: str
