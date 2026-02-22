@@ -82,7 +82,39 @@ This framework can serve as the foundation for building comprehensive testing ma
 - Development roadmap
 - Implementation considerations
 
-## 📖 Quick Start
+## 🚀 Quick Start
+
+Get a fully working demo environment running with a single command:
+
+```bash
+git clone https://github.com/bg-playground/BGSTM.git
+cd BGSTM
+./setup.sh        # macOS/Linux
+setup.bat          # Windows
+```
+
+The setup script will:
+- Check for Docker / Docker Compose
+- Create `.env` from `.env.example` automatically
+- Build and start all services (backend, frontend, Postgres)
+- Wait for every service to be healthy
+- Optionally load sample data
+- Open the browser to `http://localhost`
+
+| Service     | URL                          |
+|-------------|------------------------------|
+| Frontend    | http://localhost              |
+| Backend API | http://localhost:8000         |
+| API Docs    | http://localhost:8000/docs    |
+
+```bash
+docker compose down      # stop services (or: docker-compose down)
+docker compose logs -f   # view logs   (or: docker-compose logs -f)
+```
+
+---
+
+## 📖 Framework Quick Reference
 
 ### New to BGSTM? 
 👉 **[Start Here: Getting Started Guide](docs/GETTING-STARTED.md)** - Complete walkthrough for beginners
@@ -94,11 +126,9 @@ This framework can serve as the foundation for building comprehensive testing ma
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
 
-## 🚀 Running the Application
+## 🛠️ Manual Setup
 
-### Frontend + Backend (Docker Compose - Recommended)
-
-The easiest way to run the complete application is using Docker Compose:
+### Frontend + Backend (Docker Compose)
 
 ```bash
 # Clone the repository
