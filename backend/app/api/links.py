@@ -1,5 +1,6 @@
 """API endpoints for Links and Suggestions"""
 
+import math
 from typing import Any
 from uuid import UUID
 
@@ -18,6 +19,7 @@ from app.schemas.link import (
     SuggestionResponse,
     SuggestionReview,
 )
+from app.schemas.pagination import PaginatedResponse
 
 router = APIRouter()
 
@@ -52,15 +54,23 @@ async def create_link(
     return new_link
 
 
-@router.get("/links", response_model=list[LinkResponse])
+@router.get("/links", response_model=PaginatedResponse[LinkResponse])
 async def list_links(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """List all links"""
-    return await crud.get_links(db, skip=skip, limit=limit)
+    skip = (page - 1) * page_size
+    items, total = await crud.get_links(db, skip=skip, limit=page_size)
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total > 0 else 0,
+    )
 
 
 @router.get("/links/{link_id}", response_model=LinkResponse)
@@ -117,18 +127,26 @@ async def delete_link(
 
 
 # Suggestion endpoints
-@router.get("/suggestions", response_model=list[SuggestionResponse])
+@router.get("/suggestions", response_model=PaginatedResponse[SuggestionResponse])
 async def list_suggestions(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """List all link suggestions"""
-    return await crud.get_suggestions(db, skip=skip, limit=limit)
+    skip = (page - 1) * page_size
+    items, total = await crud.get_suggestions(db, skip=skip, limit=page_size)
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total > 0 else 0,
+    )
 
 
-@router.get("/suggestions/pending", response_model=list[SuggestionResponse])
+@router.get("/suggestions/pending", response_model=PaginatedResponse[SuggestionResponse])
 async def list_pending_suggestions(
     min_score: float | None = Query(None, ge=0.0, le=1.0, description="Minimum similarity score"),
     max_score: float | None = Query(None, ge=0.0, le=1.0, description="Maximum similarity score"),
@@ -137,19 +155,31 @@ async def list_pending_suggestions(
     sort_order: str | None = Query("desc", description="Sort order: 'asc' or 'desc'"),
     limit: int | None = Query(100, le=500, description="Maximum results to return"),
     search: str | None = Query(None, description="Search term to filter by requirement/test case title or description"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """List pending suggestions with filtering and sorting"""
-    return await crud.get_pending_suggestions(
+    skip = (page - 1) * page_size
+    effective_limit = page_size if limit is None else min(limit, page_size)
+    items, total = await crud.get_pending_suggestions(
         db,
         min_score=min_score,
         max_score=max_score,
         algorithm=algorithm,
         sort_by=sort_by,
         sort_order=sort_order,
-        limit=limit,
+        limit=effective_limit,
         search=search,
+        skip=skip,
+    )
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total > 0 else 0,
     )
 
 

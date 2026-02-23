@@ -1,9 +1,11 @@
 import { apiClient } from './client';
-import type { Suggestion, SuggestionReview, GenerateSuggestionsResponse, SuggestionStatus } from '../types/api';
+import type { Suggestion, SuggestionReview, GenerateSuggestionsResponse, SuggestionStatus, PaginatedResponse } from '../types/api';
 
 export const suggestionsApi = {
-  list: async (): Promise<Suggestion[]> => {
-    const response = await apiClient.get<Suggestion[]>('/suggestions');
+  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<Suggestion>> => {
+    const response = await apiClient.get<PaginatedResponse<Suggestion>>(
+      `/suggestions?page=${page}&page_size=${pageSize}`
+    );
     return response.data;
   },
 
@@ -14,7 +16,9 @@ export const suggestionsApi = {
     sortBy?: string;
     sortOrder?: string;
     search?: string;
-  }): Promise<Suggestion[]> => {
+    page?: number;
+    pageSize?: number;
+  }): Promise<PaginatedResponse<Suggestion>> => {
     const searchParams = new URLSearchParams();
     if (params?.minScore !== undefined) searchParams.append('min_score', params.minScore.toString());
     if (params?.maxScore !== undefined) searchParams.append('max_score', params.maxScore.toString());
@@ -22,8 +26,10 @@ export const suggestionsApi = {
     if (params?.sortBy) searchParams.append('sort_by', params.sortBy);
     if (params?.sortOrder) searchParams.append('sort_order', params.sortOrder);
     if (params?.search) searchParams.append('search', params.search);
+    searchParams.append('page', (params?.page ?? 1).toString());
+    searchParams.append('page_size', (params?.pageSize ?? 50).toString());
     
-    const response = await apiClient.get<Suggestion[]>(`/suggestions/pending?${searchParams}`);
+    const response = await apiClient.get<PaginatedResponse<Suggestion>>(`/suggestions/pending?${searchParams}`);
     return response.data;
   },
 

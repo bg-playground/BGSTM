@@ -29,38 +29,47 @@ export const NotificationBell: React.FC = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      const count = await notificationsApi.getUnreadCount();
-      setUnreadCount(count);
-    } catch {
-      // silent
-    }
-  }, []);
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const data = await notificationsApi.list({ limit: 20 });
-      setNotifications(data.notifications);
-      setUnreadCount(data.unread_count);
-    } catch {
-      // silent
-    }
-  }, []);
-
   // Poll for unread count every 30 seconds
   useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const count = await notificationsApi.getUnreadCount();
+        if (!cancelled) setUnreadCount(count);
+      } catch {
+        // silent
+      }
+    };
+
+    void poll();
+    const interval = setInterval(() => { void poll(); }, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Load notifications when dropdown opens
   useEffect(() => {
-    if (open) {
-      fetchNotifications();
-    }
-  }, [open, fetchNotifications]);
+    if (!open) return;
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const data = await notificationsApi.list({ limit: 20 });
+        if (!cancelled) {
+          setNotifications(data.notifications);
+          setUnreadCount(data.unread_count);
+        }
+      } catch {
+        // silent
+      }
+    };
+
+    void load();
+    return () => { cancelled = true; };
+  }, [open]);
 
   // Close dropdown on outside click
   useEffect(() => {

@@ -1,8 +1,9 @@
 """API endpoints for Test Cases"""
 
+import math
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai_suggestions.event_driven import generate_suggestions_for_test_case
@@ -12,6 +13,7 @@ from app.crud import test_case as crud
 from app.crud.audit_log import create_audit_entry
 from app.db.session import get_db
 from app.models.user import User
+from app.schemas.pagination import PaginatedResponse
 from app.schemas.test_case import TestCaseCreate, TestCaseResponse, TestCaseUpdate
 
 router = APIRouter()
@@ -68,15 +70,23 @@ async def create_test_case(
     return new_test_case
 
 
-@router.get("/test-cases", response_model=list[TestCaseResponse])
+@router.get("/test-cases", response_model=PaginatedResponse[TestCaseResponse])
 async def list_test_cases(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """List all test cases"""
-    return await crud.get_test_cases(db, skip=skip, limit=limit)
+    skip = (page - 1) * page_size
+    items, total = await crud.get_test_cases(db, skip=skip, limit=page_size)
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total > 0 else 0,
+    )
 
 
 @router.get("/test-cases/{test_case_id}", response_model=TestCaseResponse)

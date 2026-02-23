@@ -26,12 +26,12 @@ export const ManualLinksPage: React.FC = () => {
       setLoading(true);
       const [linksData, reqData, tcData] = await Promise.all([
         linksApi.list(),
-        requirementsApi.list(),
-        testCasesApi.list(),
+        requirementsApi.list(1, 200),
+        testCasesApi.list(1, 200),
       ]);
-      setLinks(linksData);
-      setRequirements(reqData);
-      setTestCases(tcData);
+      setLinks(linksData.items);
+      setRequirements(reqData.items);
+      setTestCases(tcData.items);
     } catch (error) {
       console.error('Error loading data:', error);
       showToast('Failed to load data', 'error');

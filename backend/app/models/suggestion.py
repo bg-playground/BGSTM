@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, String, Text
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Index, String, Text
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -43,6 +43,13 @@ class LinkSuggestion(Base):
     # Relationships
     requirement = relationship("Requirement", back_populates="suggestions")
     test_case = relationship("TestCase", back_populates="suggestions")
+
+    __table_args__ = (
+        Index("idx_suggestions_req_tc", "requirement_id", "test_case_id"),
+        Index("idx_suggestions_similarity_score", "similarity_score"),
+        Index("idx_suggestions_method", "suggestion_method"),
+        Index("idx_suggestions_status_score", "status", "similarity_score"),
+    )
 
     def __repr__(self):
         return f"<Suggestion(req={self.requirement_id}, tc={self.test_case_id}, score={self.similarity_score:.2f})>"

@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.requirement import Requirement
@@ -21,10 +21,12 @@ async def get_requirement_by_external_id(db: AsyncSession, external_id: str) -> 
     return result.scalar_one_or_none()
 
 
-async def get_requirements(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[Requirement]:
-    """Get all requirements with pagination"""
+async def get_requirements(db: AsyncSession, skip: int = 0, limit: int = 100) -> tuple[list[Requirement], int]:
+    """Get all requirements with pagination, returns (items, total)"""
+    count_result = await db.execute(select(func.count()).select_from(Requirement))
+    total = count_result.scalar_one()
     result = await db.execute(select(Requirement).offset(skip).limit(limit))
-    return list(result.scalars().all())
+    return list(result.scalars().all()), total
 
 
 async def create_requirement(db: AsyncSession, requirement: RequirementCreate) -> Requirement:
