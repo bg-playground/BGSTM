@@ -1,0 +1,116 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'docker-compose.test.yml'
+      - '.github/workflows/e2e-tests.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'docker-compose.test.yml'
+      - '.github/workflows/e2e-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Docker Compose stack ──────────────────────────────────────────────
+      - name: Start test stack
+        run: |
+          docker compose -f docker-compose.test.yml up -d --build
+
+      - name: Wait for backend to be healthy
+        run: |
+          echo "Waiting for backend health check…"
+          for i in $(seq 1 24); do
+            if curl -sf http://localhost:8000/health; then
+              echo "Backend is healthy"
+              break
+            fi
+            echo "Attempt $i/24 – waiting 5 s…"
+            sleep 5
+          done
+          curl -sf http://localhost:8000/health || (docker compose -f docker-compose.test.yml logs backend && exit 1)
+
+      - name: Wait for frontend to be reachable
+        run: |
+          echo "Waiting for Vite frontend…"
+          for i in $(seq 1 24); do
+            if curl -sf http://localhost:5173; then
+              echo "Frontend is up"
+              break
+            fi
+            echo "Attempt $i/24 – waiting 5 s…"
+            sleep 5
+          done
+          curl -sf http://localhost:5173 || (docker compose -f docker-compose.test.yml logs frontend && exit 1)
+
+      # ── Seed test data ────────────────────────────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Seed E2E test data
+        working-directory: frontend
+        env:
+          API_URL: http://localhost:8000
+        run: npx tsx tests/e2e/seed.ts
+
+      # ── Playwright ────────────────────────────────────────────────────────
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        working-directory: frontend
+        env:
+          BASE_URL: http://localhost:5173
+          API_URL: http://localhost:8000
+          CI: "true"
+        run: npx playwright test
+
+      # ── Artifacts ────────────────────────────────────────────────────────
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (screenshots / videos)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+      # ── Cleanup ───────────────────────────────────────────────────────────
+      - name: Stop test stack
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v

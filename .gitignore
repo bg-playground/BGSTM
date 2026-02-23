@@ -49,6 +49,11 @@ frontend/.env
 frontend/.next/
 .next/
 
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/.playwright/
+
 # Docker
 docker-compose.override.yml
 
