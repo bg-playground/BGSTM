@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.test_case import TestCase
@@ -21,10 +21,12 @@ async def get_test_case_by_external_id(db: AsyncSession, external_id: str) -> Te
     return result.scalar_one_or_none()
 
 
-async def get_test_cases(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[TestCase]:
-    """Get all test cases with pagination"""
+async def get_test_cases(db: AsyncSession, skip: int = 0, limit: int = 100) -> tuple[list[TestCase], int]:
+    """Get all test cases with pagination, returns (items, total)"""
+    count_result = await db.execute(select(func.count()).select_from(TestCase))
+    total = count_result.scalar_one()
     result = await db.execute(select(TestCase).offset(skip).limit(limit))
-    return list(result.scalars().all())
+    return list(result.scalars().all()), total
 
 
 async def create_test_case(db: AsyncSession, test_case: TestCaseCreate) -> TestCase:

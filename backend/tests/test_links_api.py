@@ -135,8 +135,8 @@ async def test_list_links_endpoint(db_session):
         response = client.get("/api/v1/links")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) >= 1
+    assert "items" in data
+    assert len(data["items"]) >= 1
 
 
 @pytest.mark.asyncio
@@ -269,8 +269,8 @@ async def test_list_suggestions_endpoint(db_session):
         response = client.get("/api/v1/suggestions")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) >= 1
+    assert "items" in data
+    assert len(data["items"]) >= 1
 
 
 @pytest.mark.asyncio
@@ -299,8 +299,8 @@ async def test_list_pending_suggestions_endpoint(db_session):
         response = client.get("/api/v1/suggestions/pending")
     assert response.status_code == 200
     data = response.json()
-    assert all(s["status"] == "pending" for s in data)
-    assert len(data) == 1
+    assert all(s["status"] == "pending" for s in data["items"])
+    assert len(data["items"]) == 1
 
 
 @pytest.mark.asyncio
@@ -322,9 +322,9 @@ async def test_list_pending_suggestions_with_filters(db_session):
         response = client.get("/api/v1/suggestions/pending?min_score=0.7&algorithm=hybrid")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["similarity_score"] >= 0.7
-    assert data[0]["suggestion_method"] == "hybrid"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["similarity_score"] >= 0.7
+    assert data["items"][0]["suggestion_method"] == "hybrid"
 
 
 @pytest.mark.asyncio

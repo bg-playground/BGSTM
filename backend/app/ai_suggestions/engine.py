@@ -1,12 +1,12 @@
 """Core Suggestion Engine"""
 
+import logging
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.link import create_suggestion
 from app.models.link import RequirementTestCaseLink
 from app.models.requirement import Requirement
 from app.models.suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
@@ -15,6 +15,10 @@ from app.schemas.link import SuggestionCreate
 
 from .algorithms import get_algorithm
 from .config import SuggestionConfig, default_config
+
+logger = logging.getLogger(__name__)
+
+BATCH_SIZE = 100
 
 
 class SuggestionEngine:
@@ -115,33 +119,45 @@ class SuggestionEngine:
 
         return self.algorithm.compute_similarity(req_text, tc_text)
 
-    async def _get_existing_links(self, db: AsyncSession) -> set[tuple[UUID, UUID]]:
+    async def _get_existing_links(
+        self, db: AsyncSession, requirement_ids: list[UUID] | None = None
+    ) -> set[tuple[UUID, UUID]]:
         """
-        Get all existing requirement-test case link pairs
+        Get existing requirement-test case link pairs
 
         Args:
             db: Database session
+            requirement_ids: If provided, only load links for these requirements
 
         Returns:
             Set of (requirement_id, test_case_id) tuples
         """
-        result = await db.execute(select(RequirementTestCaseLink))
-        links = result.scalars().all()
-        return {(link.requirement_id, link.test_case_id) for link in links}
+        query = select(RequirementTestCaseLink.requirement_id, RequirementTestCaseLink.test_case_id)
+        if requirement_ids:
+            query = query.where(RequirementTestCaseLink.requirement_id.in_(requirement_ids))
+        result = await db.execute(query)
+        return {(row.requirement_id, row.test_case_id) for row in result}
 
-    async def _get_existing_suggestions(self, db: AsyncSession) -> set[tuple[UUID, UUID]]:
+    async def _get_existing_suggestions(
+        self, db: AsyncSession, requirement_ids: list[UUID] | None = None
+    ) -> set[tuple[UUID, UUID]]:
         """
-        Get all existing pending suggestion pairs
+        Get existing pending suggestion pairs
 
         Args:
             db: Database session
+            requirement_ids: If provided, only load suggestions for these requirements
 
         Returns:
             Set of (requirement_id, test_case_id) tuples for pending suggestions
         """
-        result = await db.execute(select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING))
-        suggestions = result.scalars().all()
-        return {(s.requirement_id, s.test_case_id) for s in suggestions}
+        query = select(LinkSuggestion.requirement_id, LinkSuggestion.test_case_id).where(
+            LinkSuggestion.status == SuggestionStatus.PENDING
+        )
+        if requirement_ids:
+            query = query.where(LinkSuggestion.requirement_id.in_(requirement_ids))
+        result = await db.execute(query)
+        return {(row.requirement_id, row.test_case_id) for row in result}
 
     async def generate_suggestions(
         self, db: AsyncSession, requirement_ids: list[UUID] | None = None, test_case_ids: list[UUID] | None = None
@@ -178,9 +194,13 @@ class SuggestionEngine:
         tc_result = await db.execute(tc_query)
         test_cases = list(tc_result.scalars().all())
 
-        # Get existing links and suggestions to avoid duplicates
-        existing_links = await self._get_existing_links(db)
-        existing_suggestions = await self._get_existing_suggestions(db)
+        # Get existing links and suggestions to avoid duplicates (scoped to relevant requirements)
+        existing_links = await self._get_existing_links(db, requirement_ids=requirement_ids)
+        existing_suggestions = await self._get_existing_suggestions(db, requirement_ids=requirement_ids)
+
+        # Pre-compute text representations once to avoid redundant work
+        req_texts = {req.id: self._combine_text(req) for req in requirements}
+        tc_texts = {tc.id: self._combine_test_case_text(tc) for tc in test_cases}
 
         pairs_analyzed = 0
         suggestions_created = 0
@@ -195,10 +215,16 @@ class SuggestionEngine:
         }
         suggestion_method = method_map.get(self.config.default_algorithm, SuggestionMethod.HEURISTIC)
 
+        batch: list[LinkSuggestion] = []
+
         # Analyze all requirement-test case pairs
         for requirement in requirements:
+            req_text = req_texts[requirement.id]
             for test_case in test_cases:
                 pairs_analyzed += 1
+
+                if pairs_analyzed % 1000 == 0:
+                    logger.info("Suggestion engine progress: %d pairs analyzed", pairs_analyzed)
 
                 # Skip if already linked
                 if (requirement.id, test_case.id) in existing_links:
@@ -210,15 +236,16 @@ class SuggestionEngine:
                     suggestions_skipped += 1
                     continue
 
-                # Compute similarity
-                similarity_score = self.compute_similarity(requirement, test_case)
+                # Compute similarity using pre-computed texts
+                tc_text = tc_texts[test_case.id]
+                similarity_score = self.algorithm.compute_similarity(req_text, tc_text)
 
                 # Check threshold
                 if similarity_score < self.config.min_confidence_threshold:
                     suggestions_skipped += 1
                     continue
 
-                # Create suggestion
+                # Collect suggestion for batch insert
                 suggestion_data = SuggestionCreate(
                     requirement_id=requirement.id,
                     test_case_id=test_case.id,
@@ -230,9 +257,18 @@ class SuggestionEngine:
                         "threshold": self.config.min_confidence_threshold,
                     },
                 )
-
-                await create_suggestion(db, suggestion_data)
+                batch.append(LinkSuggestion(**suggestion_data.model_dump()))
                 suggestions_created += 1
+
+                if len(batch) >= BATCH_SIZE:
+                    db.add_all(batch)
+                    await db.flush()
+                    batch = []
+
+        # Insert any remaining suggestions
+        if batch:
+            db.add_all(batch)
+        await db.commit()
 
         return {
             "pairs_analyzed": pairs_analyzed,

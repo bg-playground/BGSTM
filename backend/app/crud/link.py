@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.link import RequirementTestCaseLink
@@ -18,10 +18,12 @@ async def get_link(db: AsyncSession, link_id: UUID) -> RequirementTestCaseLink |
     return result.scalar_one_or_none()
 
 
-async def get_links(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[RequirementTestCaseLink]:
-    """Get all links with pagination"""
+async def get_links(db: AsyncSession, skip: int = 0, limit: int = 100) -> tuple[list[RequirementTestCaseLink], int]:
+    """Get all links with pagination, returns (items, total)"""
+    count_result = await db.execute(select(func.count()).select_from(RequirementTestCaseLink))
+    total = count_result.scalar_one()
     result = await db.execute(select(RequirementTestCaseLink).offset(skip).limit(limit))
-    return list(result.scalars().all())
+    return list(result.scalars().all()), total
 
 
 async def get_links_by_requirement(db: AsyncSession, requirement_id: UUID) -> list[RequirementTestCaseLink]:
@@ -67,10 +69,12 @@ async def get_suggestion(db: AsyncSession, suggestion_id: UUID) -> LinkSuggestio
     return result.scalar_one_or_none()
 
 
-async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[LinkSuggestion]:
-    """Get all suggestions with pagination"""
+async def get_suggestions(db: AsyncSession, skip: int = 0, limit: int = 100) -> tuple[list[LinkSuggestion], int]:
+    """Get all suggestions with pagination, returns (items, total)"""
+    count_result = await db.execute(select(func.count()).select_from(LinkSuggestion))
+    total = count_result.scalar_one()
     result = await db.execute(select(LinkSuggestion).offset(skip).limit(limit))
-    return list(result.scalars().all())
+    return list(result.scalars().all()), total
 
 
 async def get_pending_suggestions(
@@ -82,20 +86,21 @@ async def get_pending_suggestions(
     sort_order: str = "desc",
     limit: int = 100,
     search: str | None = None,
-) -> list[LinkSuggestion]:
-    """Get pending suggestions with filters and sorting"""
+    skip: int = 0,
+) -> tuple[list[LinkSuggestion], int]:
+    """Get pending suggestions with filters and sorting, returns (items, total)"""
     from app.models.requirement import Requirement
     from app.models.suggestion import SuggestionMethod, SuggestionStatus
     from app.models.test_case import TestCase
 
-    query = select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
+    base_query = select(LinkSuggestion).where(LinkSuggestion.status == SuggestionStatus.PENDING)
 
     # Apply search filter by joining with Requirement and TestCase
     if search:
         escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         search_term = f"%{escaped}%"
-        query = (
-            query.join(Requirement, LinkSuggestion.requirement_id == Requirement.id)
+        base_query = (
+            base_query.join(Requirement, LinkSuggestion.requirement_id == Requirement.id)
             .join(TestCase, LinkSuggestion.test_case_id == TestCase.id)
             .where(
                 Requirement.title.ilike(search_term)
@@ -107,9 +112,9 @@ async def get_pending_suggestions(
 
     # Apply filters
     if min_score is not None:
-        query = query.where(LinkSuggestion.similarity_score >= min_score)
+        base_query = base_query.where(LinkSuggestion.similarity_score >= min_score)
     if max_score is not None:
-        query = query.where(LinkSuggestion.similarity_score <= max_score)
+        base_query = base_query.where(LinkSuggestion.similarity_score <= max_score)
     if algorithm:
         # Map algorithm name to enum value
         # Note: 'tfidf' maps to SEMANTIC_SIMILARITY as TF-IDF is the core semantic similarity algorithm
@@ -120,7 +125,12 @@ async def get_pending_suggestions(
             "llm": SuggestionMethod.LLM_EMBEDDING,
         }
         if algorithm in method_map:
-            query = query.where(LinkSuggestion.suggestion_method == method_map[algorithm])
+            base_query = base_query.where(LinkSuggestion.suggestion_method == method_map[algorithm])
+
+    # Count total matching rows
+    count_query = select(func.count()).select_from(base_query.subquery())
+    count_result = await db.execute(count_query)
+    total = count_result.scalar_one()
 
     # Apply sorting
     if sort_by == "score":
@@ -133,14 +143,14 @@ async def get_pending_suggestions(
         order_col = LinkSuggestion.similarity_score
 
     if sort_order == "asc":
-        query = query.order_by(order_col.asc())
+        query = base_query.order_by(order_col.asc())
     else:
-        query = query.order_by(order_col.desc())
+        query = base_query.order_by(order_col.desc())
 
-    query = query.limit(limit)
+    query = query.offset(skip).limit(limit)
 
     result = await db.execute(query)
-    return list(result.scalars().all())
+    return list(result.scalars().all()), total
 
 
 async def create_suggestion(db: AsyncSession, suggestion: SuggestionCreate) -> LinkSuggestion:

@@ -166,13 +166,14 @@ async def test_get_links_pagination():
             session.add(link)
         await session.commit()
 
-        all_links = await get_links(session, skip=0, limit=100)
+        all_links, total_all = await get_links(session, skip=0, limit=100)
         assert len(all_links) == 3
+        assert total_all == 3
 
-        first_page = await get_links(session, skip=0, limit=2)
+        first_page, _ = await get_links(session, skip=0, limit=2)
         assert len(first_page) == 2
 
-        second_page = await get_links(session, skip=2, limit=2)
+        second_page, _ = await get_links(session, skip=2, limit=2)
         assert len(second_page) == 1
     await engine.dispose()
 
@@ -386,10 +387,11 @@ async def test_get_suggestions_all():
             session.add(sugg)
         await session.commit()
 
-        suggestions = await get_suggestions(session, skip=0, limit=100)
+        suggestions, total = await get_suggestions(session, skip=0, limit=100)
         assert len(suggestions) == 3
+        assert total == 3
 
-        limited = await get_suggestions(session, skip=0, limit=2)
+        limited, _ = await get_suggestions(session, skip=0, limit=2)
         assert len(limited) == 2
     await engine.dispose()
 
@@ -418,7 +420,7 @@ async def test_get_pending_suggestions_no_filters():
         session.add_all([pending, accepted])
         await session.commit()
 
-        results = await get_pending_suggestions(session)
+        results, total = await get_pending_suggestions(session)
         assert len(results) == 1
         assert results[0].status == SuggestionStatus.PENDING
     await engine.dispose()
@@ -441,7 +443,7 @@ async def test_get_pending_suggestions_min_score_filter():
             session.add(sugg)
         await session.commit()
 
-        high_quality = await get_pending_suggestions(session, min_score=0.7)
+        high_quality, _ = await get_pending_suggestions(session, min_score=0.7)
         assert len(high_quality) == 1
         assert high_quality[0].similarity_score == pytest.approx(0.9)
     await engine.dispose()
@@ -464,7 +466,7 @@ async def test_get_pending_suggestions_max_score_filter():
             session.add(sugg)
         await session.commit()
 
-        low_quality = await get_pending_suggestions(session, max_score=0.65)
+        low_quality, _ = await get_pending_suggestions(session, max_score=0.65)
         scores = {s.similarity_score for s in low_quality}
         assert all(s <= 0.65 for s in scores)
         assert len(low_quality) == 2
@@ -495,11 +497,11 @@ async def test_get_pending_suggestions_algorithm_filter():
         session.add_all([hybrid_sugg, keyword_sugg])
         await session.commit()
 
-        hybrid_results = await get_pending_suggestions(session, algorithm="hybrid")
+        hybrid_results, _ = await get_pending_suggestions(session, algorithm="hybrid")
         assert len(hybrid_results) == 1
         assert hybrid_results[0].suggestion_method == SuggestionMethod.HYBRID
 
-        keyword_results = await get_pending_suggestions(session, algorithm="keyword")
+        keyword_results, _ = await get_pending_suggestions(session, algorithm="keyword")
         assert len(keyword_results) == 1
         assert keyword_results[0].suggestion_method == SuggestionMethod.KEYWORD_MATCH
     await engine.dispose()
@@ -522,7 +524,7 @@ async def test_get_pending_suggestions_sort_by_score_desc():
             session.add(sugg)
         await session.commit()
 
-        results = await get_pending_suggestions(session, sort_by="score", sort_order="desc")
+        results, _ = await get_pending_suggestions(session, sort_by="score", sort_order="desc")
         scores = [s.similarity_score for s in results]
         assert scores == sorted(scores, reverse=True)
     await engine.dispose()
@@ -545,7 +547,7 @@ async def test_get_pending_suggestions_sort_by_score_asc():
             session.add(sugg)
         await session.commit()
 
-        results = await get_pending_suggestions(session, sort_by="score", sort_order="asc")
+        results, _ = await get_pending_suggestions(session, sort_by="score", sort_order="asc")
         scores = [s.similarity_score for s in results]
         assert scores == sorted(scores)
     await engine.dispose()
@@ -727,7 +729,7 @@ async def test_get_pending_suggestions_search_by_requirement_title():
         session.add_all([sugg_match, sugg_no_match])
         await session.commit()
 
-        results = await get_pending_suggestions(session, search="login")
+        results, _ = await get_pending_suggestions(session, search="login")
         assert len(results) == 1
         assert results[0].requirement_id == req_match.id
     await engine.dispose()
@@ -788,7 +790,7 @@ async def test_get_pending_suggestions_search_by_test_case_title():
         session.add_all([sugg_match, sugg_no_match])
         await session.commit()
 
-        results = await get_pending_suggestions(session, search="password")
+        results, _ = await get_pending_suggestions(session, search="password")
         assert len(results) == 1
         assert results[0].test_case_id == tc_match.id
     await engine.dispose()
@@ -810,7 +812,7 @@ async def test_get_pending_suggestions_search_no_match():
         session.add(sugg)
         await session.commit()
 
-        results = await get_pending_suggestions(session, search="nonexistentterm12345")
+        results, _ = await get_pending_suggestions(session, search="nonexistentterm12345")
         assert len(results) == 0
     await engine.dispose()
 
@@ -832,9 +834,9 @@ async def test_get_pending_suggestions_search_empty_returns_all():
             session.add(sugg)
         await session.commit()
 
-        results = await get_pending_suggestions(session, search=None)
+        results, _ = await get_pending_suggestions(session, search=None)
         assert len(results) == 2
 
-        results_empty = await get_pending_suggestions(session, search="")
+        results_empty, _ = await get_pending_suggestions(session, search="")
         assert len(results_empty) == 2
     await engine.dispose()
