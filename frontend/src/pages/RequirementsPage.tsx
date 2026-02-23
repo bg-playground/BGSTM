@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { requirementsApi } from '../api/requirements';
 import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
 import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
 
 export const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(0);
+  const PAGE_SIZE = 50;
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -19,22 +24,24 @@ export const RequirementsPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadRequirements = async () => {
+  const loadRequirements = useCallback(async (targetPage = page) => {
     try {
       setLoading(true);
-      const data = await requirementsApi.list();
-      setRequirements(data);
+      const data = await requirementsApi.list(targetPage, PAGE_SIZE);
+      setRequirements(data.items);
+      setTotal(data.total);
+      setPages(data.pages);
     } catch (error) {
       console.error('Error loading requirements:', error);
       showToast('Failed to load requirements', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, showToast]);
 
   useEffect(() => {
-    loadRequirements();
-  }, []);
+    loadRequirements(page);
+  }, [page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +56,7 @@ export const RequirementsPage: React.FC = () => {
       setShowModal(false);
       setEditingId(null);
       resetForm();
-      await loadRequirements();
+      await loadRequirements(page);
     } catch (error) {
       console.error('Error saving requirement:', error);
       showToast('Failed to save requirement', 'error');
@@ -76,7 +83,7 @@ export const RequirementsPage: React.FC = () => {
     try {
       await requirementsApi.delete(id);
       showToast('Requirement deleted successfully', 'success');
-      await loadRequirements();
+      await loadRequirements(page);
     } catch (error) {
       console.error('Error deleting requirement:', error);
       showToast('Failed to delete requirement', 'error');
@@ -110,7 +117,9 @@ export const RequirementsPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Requirements</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Requirements {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
+        </h1>
         <button
           onClick={() => setShowModal(true)}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -175,6 +184,8 @@ export const RequirementsPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

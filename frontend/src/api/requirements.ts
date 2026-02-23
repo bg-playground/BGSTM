@@ -1,9 +1,11 @@
 import { apiClient } from './client';
-import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
+import type { Requirement, RequirementCreate, RequirementUpdate, PaginatedResponse } from '../types/api';
 
 export const requirementsApi = {
-  list: async (): Promise<Requirement[]> => {
-    const response = await apiClient.get<Requirement[]>('/requirements');
+  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<Requirement>> => {
+    const response = await apiClient.get<PaginatedResponse<Requirement>>(
+      `/requirements?page=${page}&page_size=${pageSize}`
+    );
     return response.data;
   },
 

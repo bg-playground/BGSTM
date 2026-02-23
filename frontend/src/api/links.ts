@@ -1,9 +1,11 @@
 import { apiClient } from './client';
-import type { Link, LinkCreate } from '../types/api';
+import type { Link, LinkCreate, PaginatedResponse } from '../types/api';
 
 export const linksApi = {
-  list: async (): Promise<Link[]> => {
-    const response = await apiClient.get<Link[]>('/links');
+  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<Link>> => {
+    const response = await apiClient.get<PaginatedResponse<Link>>(
+      `/links?page=${page}&page_size=${pageSize}`
+    );
     return response.data;
   },
 

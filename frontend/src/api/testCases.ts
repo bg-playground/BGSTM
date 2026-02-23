@@ -1,9 +1,11 @@
 import { apiClient } from './client';
-import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
+import type { TestCase, TestCaseCreate, TestCaseUpdate, PaginatedResponse } from '../types/api';
 
 export const testCasesApi = {
-  list: async (): Promise<TestCase[]> => {
-    const response = await apiClient.get<TestCase[]>('/test-cases');
+  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<TestCase>> => {
+    const response = await apiClient.get<PaginatedResponse<TestCase>>(
+      `/test-cases?page=${page}&page_size=${pageSize}`
+    );
     return response.data;
   },
 

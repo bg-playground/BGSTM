@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { testCasesApi } from '../api/testCases';
 import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
 import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(0);
+  const PAGE_SIZE = 50;
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -20,22 +25,24 @@ export const TestCasesPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadTestCases = async () => {
+  const loadTestCases = useCallback(async (targetPage = page) => {
     try {
       setLoading(true);
-      const data = await testCasesApi.list();
-      setTestCases(data);
+      const data = await testCasesApi.list(targetPage, PAGE_SIZE);
+      setTestCases(data.items);
+      setTotal(data.total);
+      setPages(data.pages);
     } catch (error) {
       console.error('Error loading test cases:', error);
       showToast('Failed to load test cases', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, showToast]);
 
   useEffect(() => {
-    loadTestCases();
-  }, []);
+    loadTestCases(page);
+  }, [page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +57,7 @@ export const TestCasesPage: React.FC = () => {
       setShowModal(false);
       setEditingId(null);
       resetForm();
-      await loadTestCases();
+      await loadTestCases(page);
     } catch (error) {
       console.error('Error saving test case:', error);
       showToast('Failed to save test case', 'error');
@@ -81,7 +88,7 @@ export const TestCasesPage: React.FC = () => {
     try {
       await testCasesApi.delete(id);
       showToast('Test case deleted successfully', 'success');
-      await loadTestCases();
+      await loadTestCases(page);
     } catch (error) {
       console.error('Error deleting test case:', error);
       showToast('Failed to delete test case', 'error');
@@ -116,7 +123,9 @@ export const TestCasesPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Test Cases</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Test Cases {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
+        </h1>
         <button
           onClick={() => setShowModal(true)}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
@@ -186,6 +195,8 @@ export const TestCasesPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

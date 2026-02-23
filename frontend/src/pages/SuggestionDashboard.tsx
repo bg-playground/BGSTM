@@ -15,6 +15,9 @@ import type { Filters } from '../types/filters';
 import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
+import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+
+const VIRTUALIZATION_THRESHOLD = 50;
 
 const STORAGE_KEY = 'bgstm-suggestion-filters';
 
@@ -144,14 +147,15 @@ export const SuggestionDashboard: React.FC = () => {
           sortBy: filters.sortBy,
           sortOrder: filters.sortOrder,
           search: filters.search || undefined,
+          pageSize: 200,
         }),
-        requirementsApi.list(),
-        testCasesApi.list(),
+        requirementsApi.list(1, 200),
+        testCasesApi.list(1, 200),
       ]);
 
-      setSuggestions(suggestionData);
-      setRequirements(new Map(reqData.map((r) => [r.id, r])));
-      setTestCases(new Map(tcData.map((tc) => [tc.id, tc])));
+      setSuggestions(suggestionData.items);
+      setRequirements(new Map(reqData.items.map((r) => [r.id, r])));
+      setTestCases(new Map(tcData.items.map((tc) => [tc.id, tc])));
     } catch (error) {
       console.error('Error loading data:', error);
       showToast('Failed to load suggestions', 'error');
@@ -389,6 +393,18 @@ export const SuggestionDashboard: React.FC = () => {
             Click "Generate Suggestions" to create AI-powered link recommendations
           </p>
         </div>
+      ) : suggestions.length > VIRTUALIZATION_THRESHOLD ? (
+        <VirtualizedSuggestionList
+          suggestions={suggestions}
+          requirements={requirements}
+          testCases={testCases}
+          selectedIds={selectedIds}
+          focusedIndex={focusedIndex}
+          onToggleSelect={handleToggleSelect}
+          onReview={handleReview}
+          onPreview={setPreviewSuggestion}
+          height={Math.min(suggestions.length * 160, 800)}
+        />
       ) : (
         <div className="space-y-4">
           {suggestions.map((suggestion, index) => (
