@@ -41,7 +41,7 @@ export const RequirementsPage: React.FC = () => {
 
   useEffect(() => {
     loadRequirements(page);
-  }, [page]);
+  }, [page, loadRequirements]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

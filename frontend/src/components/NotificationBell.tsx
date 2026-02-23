@@ -50,15 +50,15 @@ export const NotificationBell: React.FC = () => {
 
   // Poll for unread count every 30 seconds
   useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
+    void fetchUnreadCount();
+    const interval = setInterval(() => { void fetchUnreadCount(); }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);
 
   // Load notifications when dropdown opens
   useEffect(() => {
     if (open) {
-      fetchNotifications();
+      void fetchNotifications();
     }
   }, [open, fetchNotifications]);
 

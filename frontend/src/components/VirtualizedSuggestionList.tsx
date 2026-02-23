@@ -21,11 +21,9 @@ interface VirtualizedSuggestionListProps extends RowData {
   height?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const RowComponent = ({
   index,
   style,
-  ariaAttributes: _ariaAttributes,
   suggestions,
   requirements,
   testCases,
@@ -35,7 +33,6 @@ const RowComponent = ({
   onReview,
   onPreview,
 }: {
-  ariaAttributes: Record<string, unknown>;
   index: number;
   style: React.CSSProperties;
 } & RowData) => {
