@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { AuthProvider } from './components/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import { ToastProvider } from './components/Toast';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -11,6 +12,8 @@ import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
 import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
+import { AuditLogPage } from './pages/AuditLogPage';
+import { UserManagementPage } from './pages/UserManagementPage';
 
 function ProtectedLayout() {
   return (
@@ -38,6 +41,22 @@ function App() {
               <Route path="/links" element={<ManualLinksPage />} />
               <Route path="/traceability" element={<TraceabilityMatrixPage />} />
               <Route path="/metrics" element={<MetricsDashboardPage />} />
+              <Route
+                path="/admin/audit-log"
+                element={
+                  <AdminRoute>
+                    <AuditLogPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <UserManagementPage />
+                  </AdminRoute>
+                }
+              />
             </Route>
           </Routes>
         </ToastProvider>

@@ -16,6 +16,11 @@ export const Navigation: React.FC = () => {
     { path: '/metrics', label: 'Metrics' },
   ];
 
+  const adminNavItems = [
+    { path: '/admin/audit-log', label: 'Audit Log' },
+    { path: '/admin/users', label: 'Users' },
+  ];
+
   const roleBadgeColor = {
     admin: 'bg-red-500',
     reviewer: 'bg-yellow-500',
@@ -43,6 +48,24 @@ export const Navigation: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+            {user?.role === 'admin' && (
+              <span className="flex items-center ml-3 pl-3 border-l border-primary-500">
+                <span className="text-xs text-gray-400 mr-2" aria-hidden="true">🔒</span>
+                {adminNavItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      location.pathname === item.path
+                        ? 'bg-primary-800 text-white'
+                        : 'text-gray-300 hover:bg-primary-600 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </span>
+            )}
           </div>
           {user && (
             <div className="flex items-center space-x-3">
