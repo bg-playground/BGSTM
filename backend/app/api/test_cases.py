@@ -45,6 +45,18 @@ async def create_test_case(
         details={"title": new_test_case.title},
     )
 
+    try:
+        from app.services.notification_service import notify_test_case_created
+
+        await notify_test_case_created(
+            db,
+            creator_user_id=current_user.id,
+            test_case_title=new_test_case.title,
+            metadata={"test_case_id": str(new_test_case.id)},
+        )
+    except Exception:
+        pass
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(

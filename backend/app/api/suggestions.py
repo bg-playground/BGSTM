@@ -165,6 +165,18 @@ async def generate_suggestions(
             details=result,
         )
 
+        try:
+            from app.services.notification_service import notify_suggestions_generated
+
+            await notify_suggestions_generated(
+                db,
+                user_id=current_user.id,
+                suggestions_created=result.get("suggestions_created", 0),
+                pairs_analyzed=result.get("pairs_analyzed", 0),
+            )
+        except Exception:
+            pass
+
         return {"message": "Suggestion generation completed", "results": result}
 
     except ImportError as e:

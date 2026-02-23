@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { NotificationBell } from './NotificationBell';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
@@ -45,6 +46,7 @@ export const Navigation: React.FC = () => {
           </div>
           {user && (
             <div className="flex items-center space-x-3">
+              <NotificationBell />
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${roleBadgeColor[user.role]}`}
               >

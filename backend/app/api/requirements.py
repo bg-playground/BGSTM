@@ -49,6 +49,18 @@ async def create_requirement(
         details={"title": new_requirement.title},
     )
 
+    try:
+        from app.services.notification_service import notify_requirement_created
+
+        await notify_requirement_created(
+            db,
+            creator_user_id=current_user.id,
+            requirement_title=new_requirement.title,
+            metadata={"requirement_id": str(new_requirement.id)},
+        )
+    except Exception:
+        pass
+
     # Trigger auto-suggestion generation in background if enabled
     if settings.AUTO_SUGGESTIONS_ENABLED:
         background_tasks.add_task(

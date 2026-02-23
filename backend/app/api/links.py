@@ -187,6 +187,16 @@ async def review_suggestion(
         resource_id=str(suggestion_id),
         details={"feedback": review.feedback, "status": review.status.value},
     )
+
+    try:
+        from app.services.notification_service import notify_suggestion_reviewed
+
+        await notify_suggestion_reviewed(
+            db, reviewer_user_id=current_user.id, suggestion_count=1, status=review.status.value
+        )
+    except Exception:
+        pass
+
     return reviewed
 
 
@@ -213,5 +223,14 @@ async def bulk_review_suggestions(
             "suggestion_ids": [str(sid) for sid in request.suggestion_ids],
         },
     )
+
+    try:
+        from app.services.notification_service import notify_suggestion_reviewed
+
+        await notify_suggestion_reviewed(
+            db, reviewer_user_id=current_user.id, suggestion_count=reviewed, status=request.status.value
+        )
+    except Exception:
+        pass
 
     return {"message": f"Reviewed {reviewed} suggestions", "count": reviewed, "status": request.status}

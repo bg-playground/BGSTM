@@ -3,6 +3,7 @@
 from .audit_log import AuditLog
 from .base import Base, TimestampMixin
 from .link import LinkSource, LinkType, RequirementTestCaseLink
+from .notification import Notification, NotificationType
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from .suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
 from .test_case import AutomationStatus, TestCase, TestCaseStatus, TestCaseType
@@ -12,6 +13,8 @@ __all__ = [
     "AuditLog",
     "Base",
     "TimestampMixin",
+    "Notification",
+    "NotificationType",
     "Requirement",
     "RequirementType",
     "PriorityLevel",
