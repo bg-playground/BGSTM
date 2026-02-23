@@ -42,7 +42,7 @@ export const TestCasesPage: React.FC = () => {
 
   useEffect(() => {
     loadTestCases(page);
-  }, [page]);
+  }, [page, loadTestCases]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
