@@ -11,10 +11,24 @@ import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
 import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
+import AuditLogPage from './pages/AuditLogPage';
+import UserManagementPage from './pages/UserManagementPage';
+import AccessDeniedPage from './pages/AccessDeniedPage';
 
 function ProtectedLayout() {
   return (
     <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <Outlet />
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function AdminLayout() {
+  return (
+    <ProtectedRoute requiredRole="admin">
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <Outlet />
@@ -38,6 +52,11 @@ function App() {
               <Route path="/links" element={<ManualLinksPage />} />
               <Route path="/traceability" element={<TraceabilityMatrixPage />} />
               <Route path="/metrics" element={<MetricsDashboardPage />} />
+              <Route path="/403" element={<AccessDeniedPage />} />
+            </Route>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/audit-log" element={<AuditLogPage />} />
+              <Route path="/admin/users" element={<UserManagementPage />} />
             </Route>
           </Routes>
         </ToastProvider>

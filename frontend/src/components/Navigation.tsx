@@ -14,6 +14,12 @@ export const Navigation: React.FC = () => {
     { path: '/links', label: 'Manual Links' },
     { path: '/traceability', label: 'Traceability Matrix' },
     { path: '/metrics', label: 'Metrics' },
+    ...(user?.role === 'admin'
+      ? [
+          { path: '/admin/audit-log', label: 'Audit Log' },
+          { path: '/admin/users', label: 'Users' },
+        ]
+      : []),
   ];
 
   const roleBadgeColor = {
