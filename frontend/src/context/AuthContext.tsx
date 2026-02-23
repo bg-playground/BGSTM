@@ -4,6 +4,10 @@ import type { User } from '../types/auth';
 export interface AuthContextValue {
   user: User | null;
   token: string | null;
+  role: 'admin' | 'reviewer' | 'viewer' | null;
+  isAdmin: boolean;
+  isReviewer: boolean;
+  isViewer: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;

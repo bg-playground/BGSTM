@@ -5,6 +5,7 @@ import type { Requirement, RequirementCreate, RequirementUpdate } from '../types
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 export const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -23,6 +24,7 @@ export const RequirementsPage: React.FC = () => {
     status: RequirementStatus.DRAFT,
   });
   const { showToast } = useToast();
+  const { isAdmin } = useAuth();
 
   const loadRequirements = useCallback(async (targetPage = page) => {
     try {
@@ -120,20 +122,24 @@ export const RequirementsPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           Requirements {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Requirement
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Requirement
+          </button>
+        )}
       </div>
 
       {requirements.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
           <p className="text-gray-600 text-lg">No requirements yet</p>
-          <p className="text-gray-500 text-sm mt-2">
-            Click "New Requirement" to create your first requirement
-          </p>
+          {isAdmin && (
+            <p className="text-gray-500 text-sm mt-2">
+              Click "New Requirement" to create your first requirement
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid gap-4">
@@ -165,20 +171,22 @@ export const RequirementsPage: React.FC = () => {
                     <span>Version: {req.version}</span>
                   </div>
                 </div>
-                <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(req)}
-                    className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(req.id)}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handleEdit(req)}
+                      className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(req.id)}
+                      className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

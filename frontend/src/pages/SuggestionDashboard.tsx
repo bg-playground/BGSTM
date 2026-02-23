@@ -16,6 +16,7 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+import { useAuth } from '../context/AuthContext';
 
 const VIRTUALIZATION_THRESHOLD = 50;
 
@@ -100,6 +101,7 @@ export const SuggestionDashboard: React.FC = () => {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [previewSuggestion, setPreviewSuggestion] = useState<Suggestion | null>(null);
   const { showToast } = useToast();
+  const { isAdmin, isViewer } = useAuth();
 
   // Filters state: priority URL params > localStorage > defaults
   const [filters, setFilters] = useState<Filters>(() =>
@@ -355,22 +357,29 @@ export const SuggestionDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {isViewer && (
+        <div className="mb-4 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+          You are in <strong>read-only</strong> mode. Contact an admin to make changes.
+        </div>
+      )}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">AI Suggestion Dashboard</h1>
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {generating ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Generating...
-            </>
-          ) : (
-            'Generate Suggestions'
-          )}
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {generating ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Generating...
+              </>
+            ) : (
+              'Generate Suggestions'
+            )}
+          </button>
+        )}
         <button
           onClick={handleExportCsv}
           disabled={exporting}
@@ -389,9 +398,11 @@ export const SuggestionDashboard: React.FC = () => {
       {suggestions.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
           <p className="text-gray-600 text-lg">No pending suggestions</p>
-          <p className="text-gray-500 text-sm mt-2">
-            Click "Generate Suggestions" to create AI-powered link recommendations
-          </p>
+          {isAdmin && (
+            <p className="text-gray-500 text-sm mt-2">
+              Click "Generate Suggestions" to create AI-powered link recommendations
+            </p>
+          )}
         </div>
       ) : suggestions.length > VIRTUALIZATION_THRESHOLD ? (
         <VirtualizedSuggestionList
@@ -404,6 +415,7 @@ export const SuggestionDashboard: React.FC = () => {
           onReview={handleReview}
           onPreview={setPreviewSuggestion}
           height={Math.min(suggestions.length * 160, 800)}
+          readOnly={isViewer}
         />
       ) : (
         <div className="space-y-4">
@@ -419,13 +431,14 @@ export const SuggestionDashboard: React.FC = () => {
               onToggleSelect={handleToggleSelect}
               onReview={handleReview}
               onPreview={setPreviewSuggestion}
+              readOnly={isViewer}
             />
           ))}
         </div>
       )}
 
-      {/* Bulk action bar */}
-      {selectedIds.size > 0 && (
+      {/* Bulk action bar (hidden for viewers) */}
+      {selectedIds.size > 0 && !isViewer && (
         <div className="fixed bottom-0 left-0 right-0 bg-primary-600 text-white shadow-lg p-4 flex items-center justify-between z-50">
           <div>
             <span className="font-semibold">{selectedIds.size} suggestions selected</span>

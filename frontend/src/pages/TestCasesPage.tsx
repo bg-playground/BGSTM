@@ -5,6 +5,7 @@ import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -24,6 +25,7 @@ export const TestCasesPage: React.FC = () => {
     automated: false,
   });
   const { showToast } = useToast();
+  const { isAdmin } = useAuth();
 
   const loadTestCases = useCallback(async (targetPage = page) => {
     try {
@@ -126,20 +128,24 @@ export const TestCasesPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           Test Cases {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Test Case
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Test Case
+          </button>
+        )}
       </div>
 
       {testCases.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-8 text-center">
           <p className="text-gray-600 text-lg">No test cases yet</p>
-          <p className="text-gray-500 text-sm mt-2">
-            Click "New Test Case" to create your first test case
-          </p>
+          {isAdmin && (
+            <p className="text-gray-500 text-sm mt-2">
+              Click "New Test Case" to create your first test case
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid gap-4">
@@ -176,20 +182,22 @@ export const TestCasesPage: React.FC = () => {
                     <span>Version: {tc.version}</span>
                   </div>
                 </div>
-                <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(tc)}
-                    className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tc.id)}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handleEdit(tc)}
+                      className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tc.id)}
+                      className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

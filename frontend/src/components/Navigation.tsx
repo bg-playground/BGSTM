@@ -5,7 +5,7 @@ import { NotificationBell } from './NotificationBell';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Suggestion Dashboard' },
@@ -14,6 +14,11 @@ export const Navigation: React.FC = () => {
     { path: '/links', label: 'Manual Links' },
     { path: '/traceability', label: 'Traceability Matrix' },
     { path: '/metrics', label: 'Metrics' },
+  ];
+
+  const adminNavItems = [
+    { path: '/admin/audit-log', label: 'Audit Log' },
+    { path: '/admin/user-management', label: 'User Management' },
   ];
 
   const roleBadgeColor = {
@@ -31,6 +36,19 @@ export const Navigation: React.FC = () => {
           </div>
           <div className="flex space-x-1">
             {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === item.path
+                    ? 'bg-primary-800 text-white'
+                    : 'text-gray-200 hover:bg-primary-600 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {isAdmin && adminNavItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
