@@ -112,4 +112,4 @@ async def mark_all_as_read(db: AsyncSession, user_id: UUID) -> int:
         .values(read=True)
     )
     await db.commit()
-    return result.rowcount
+    return result.rowcount  # type: ignore[attr-defined]
