@@ -11,6 +11,8 @@ import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
 import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
+import UserManagementPage from './pages/UserManagementPage';
+import AuditLogPage from './pages/AuditLogPage';
 
 function ProtectedLayout() {
   return (
@@ -38,6 +40,22 @@ function App() {
               <Route path="/links" element={<ManualLinksPage />} />
               <Route path="/traceability" element={<TraceabilityMatrixPage />} />
               <Route path="/metrics" element={<MetricsDashboardPage />} />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <UserManagementPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/audit-log"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AuditLogPage />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
           </Routes>
         </ToastProvider>

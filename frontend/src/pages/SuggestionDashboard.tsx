@@ -16,6 +16,8 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+import RoleGate from '../components/RoleGate';
+import { useAuth } from '../context/AuthContext';
 
 const VIRTUALIZATION_THRESHOLD = 50;
 
@@ -100,6 +102,8 @@ export const SuggestionDashboard: React.FC = () => {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [previewSuggestion, setPreviewSuggestion] = useState<Suggestion | null>(null);
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const isViewer = user?.role === 'viewer';
 
   // Filters state: priority URL params > localStorage > defaults
   const [filters, setFilters] = useState<Filters>(() =>
@@ -260,6 +264,8 @@ export const SuggestionDashboard: React.FC = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
+      // Viewers cannot perform review actions
+      if (isViewer) return;
 
       switch(e.key) {
         case 'ArrowDown':
@@ -356,28 +362,39 @@ export const SuggestionDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">AI Suggestion Dashboard</h1>
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {generating ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Generating...
-            </>
-          ) : (
-            'Generate Suggestions'
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">AI Suggestion Dashboard</h1>
+          {isViewer && (
+            <span className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full border border-blue-300">
+              Read Only
+            </span>
           )}
-        </button>
-        <button
-          onClick={handleExportCsv}
-          disabled={exporting}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          Export CSV
-        </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <RoleGate allowedRoles={['admin']}>
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {generating ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Suggestions'
+              )}
+            </button>
+          </RoleGate>
+          <button
+            onClick={handleExportCsv}
+            disabled={exporting}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            Export CSV
+          </button>
+        </div>
       </div>
 
       <KeyboardShortcutsHelp />
@@ -400,6 +417,7 @@ export const SuggestionDashboard: React.FC = () => {
           testCases={testCases}
           selectedIds={selectedIds}
           focusedIndex={focusedIndex}
+          readOnly={isViewer}
           onToggleSelect={handleToggleSelect}
           onReview={handleReview}
           onPreview={setPreviewSuggestion}
@@ -416,6 +434,7 @@ export const SuggestionDashboard: React.FC = () => {
               testCase={testCases.get(suggestion.test_case_id)}
               isSelected={selectedIds.has(suggestion.id)}
               isFocused={focusedIndex === index}
+              readOnly={isViewer}
               onToggleSelect={handleToggleSelect}
               onReview={handleReview}
               onPreview={setPreviewSuggestion}
@@ -425,7 +444,7 @@ export const SuggestionDashboard: React.FC = () => {
       )}
 
       {/* Bulk action bar */}
-      {selectedIds.size > 0 && (
+      {selectedIds.size > 0 && !isViewer && (
         <div className="fixed bottom-0 left-0 right-0 bg-primary-600 text-white shadow-lg p-4 flex items-center justify-between z-50">
           <div>
             <span className="font-semibold">{selectedIds.size} suggestions selected</span>
@@ -459,6 +478,7 @@ export const SuggestionDashboard: React.FC = () => {
           suggestion={previewSuggestion}
           requirement={requirements.get(previewSuggestion.requirement_id)}
           testCase={testCases.get(previewSuggestion.test_case_id)}
+          readOnly={isViewer}
           onClose={() => setPreviewSuggestion(null)}
           onReview={handleReview}
         />

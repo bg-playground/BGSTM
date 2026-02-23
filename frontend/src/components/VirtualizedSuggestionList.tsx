@@ -12,6 +12,7 @@ interface RowData {
   testCases: Map<string, TestCase>;
   selectedIds: Set<string>;
   focusedIndex: number;
+  readOnly?: boolean;
   onToggleSelect: (id: string, checked: boolean) => void;
   onReview: (id: string, status: SuggestionStatus) => void;
   onPreview: (suggestion: Suggestion) => void;
@@ -29,6 +30,7 @@ const RowComponent = ({
   testCases,
   selectedIds,
   focusedIndex,
+  readOnly,
   onToggleSelect,
   onReview,
   onPreview,
@@ -45,6 +47,7 @@ const RowComponent = ({
         testCase={testCases.get(suggestion.test_case_id)}
         isSelected={selectedIds.has(suggestion.id)}
         isFocused={index === focusedIndex}
+        readOnly={readOnly}
         onToggleSelect={onToggleSelect}
         onReview={onReview}
         onPreview={onPreview}
@@ -59,6 +62,7 @@ export const VirtualizedSuggestionList: React.FC<VirtualizedSuggestionListProps>
   testCases,
   selectedIds,
   focusedIndex,
+  readOnly,
   onToggleSelect,
   onReview,
   onPreview,
@@ -77,6 +81,7 @@ export const VirtualizedSuggestionList: React.FC<VirtualizedSuggestionListProps>
         testCases,
         selectedIds,
         focusedIndex,
+        readOnly,
         onToggleSelect,
         onReview,
         onPreview,

@@ -6,6 +6,7 @@ interface SuggestionPreviewModalProps {
   suggestion: Suggestion;
   requirement: Requirement | undefined;
   testCase: TestCase | undefined;
+  readOnly?: boolean;
   onClose: () => void;
   onReview: (id: string, status: SuggestionStatus) => void;
 }
@@ -14,6 +15,7 @@ export const SuggestionPreviewModal: React.FC<SuggestionPreviewModalProps> = ({
   suggestion,
   requirement,
   testCase,
+  readOnly = false,
   onClose,
   onReview,
 }) => {
@@ -132,24 +134,28 @@ export const SuggestionPreviewModal: React.FC<SuggestionPreviewModalProps> = ({
         </div>
 
         <div className="flex gap-3 justify-end">
-          <button
-            onClick={() => {
-              onReview(suggestion.id, SuggestionStatus.REJECTED);
-              onClose();
-            }}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-          >
-            Reject
-          </button>
-          <button
-            onClick={() => {
-              onReview(suggestion.id, SuggestionStatus.ACCEPTED);
-              onClose();
-            }}
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-          >
-            Accept
-          </button>
+          {!readOnly && (
+            <>
+              <button
+                onClick={() => {
+                  onReview(suggestion.id, SuggestionStatus.REJECTED);
+                  onClose();
+                }}
+                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => {
+                  onReview(suggestion.id, SuggestionStatus.ACCEPTED);
+                  onClose();
+                }}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Accept
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

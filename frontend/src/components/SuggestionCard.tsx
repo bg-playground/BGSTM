@@ -8,6 +8,7 @@ interface SuggestionCardProps {
   testCase: TestCase | undefined;
   isSelected: boolean;
   isFocused?: boolean;
+  readOnly?: boolean;
   onToggleSelect: (id: string, checked: boolean) => void;
   onReview: (id: string, status: SuggestionStatus) => void;
   onPreview: (suggestion: Suggestion) => void;
@@ -26,6 +27,7 @@ export const SuggestionCard = React.forwardRef<HTMLDivElement, SuggestionCardPro
   testCase,
   isSelected,
   isFocused = false,
+  readOnly = false,
   onToggleSelect,
   onReview,
   onPreview,
@@ -37,12 +39,14 @@ export const SuggestionCard = React.forwardRef<HTMLDivElement, SuggestionCardPro
       className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow${isFocused ? ' ring-2 ring-blue-500' : ''}`}
     >
       <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={(e) => onToggleSelect(suggestion.id, e.target.checked)}
-          className="mt-1"
-        />
+        {!readOnly && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={(e) => onToggleSelect(suggestion.id, e.target.checked)}
+            className="mt-1"
+          />
+        )}
         <div className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border-r pr-6">
@@ -103,18 +107,22 @@ export const SuggestionCard = React.forwardRef<HTMLDivElement, SuggestionCardPro
               >
                 Quick Preview
               </button>
-              <button
-                onClick={() => onReview(suggestion.id, SuggestionStatus.REJECTED)}
-                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Reject
-              </button>
-              <button
-                onClick={() => onReview(suggestion.id, SuggestionStatus.ACCEPTED)}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                Accept
-              </button>
+              {!readOnly && (
+                <>
+                  <button
+                    onClick={() => onReview(suggestion.id, SuggestionStatus.REJECTED)}
+                    className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => onReview(suggestion.id, SuggestionStatus.ACCEPTED)}
+                    className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    Accept
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

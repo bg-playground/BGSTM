@@ -5,6 +5,7 @@ import type { Requirement, RequirementCreate, RequirementUpdate } from '../types
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import RoleGate from '../components/RoleGate';
 
 export const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -120,12 +121,14 @@ export const RequirementsPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           Requirements {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Requirement
-        </button>
+        <RoleGate allowedRoles={['admin', 'reviewer']}>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Requirement
+          </button>
+        </RoleGate>
       </div>
 
       {requirements.length === 0 ? (
@@ -166,18 +169,20 @@ export const RequirementsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(req)}
-                    className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(req.id)}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                  <RoleGate allowedRoles={['admin', 'reviewer']}>
+                    <button
+                      onClick={() => handleEdit(req)}
+                      className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(req.id)}
+                      className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </RoleGate>
                 </div>
               </div>
             </div>

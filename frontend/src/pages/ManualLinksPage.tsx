@@ -6,6 +6,7 @@ import { LinkSource, LinkType } from '../types/api';
 import type { Link, LinkCreate, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
+import RoleGate from '../components/RoleGate';
 
 export const ManualLinksPage: React.FC = () => {
   const [links, setLinks] = useState<Link[]>([]);
@@ -102,12 +103,14 @@ export const ManualLinksPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Manual Links</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Link
-        </button>
+        <RoleGate allowedRoles={['admin', 'reviewer']}>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Link
+          </button>
+        </RoleGate>
       </div>
 
       {links.length === 0 ? (
@@ -166,12 +169,14 @@ export const ManualLinksPage: React.FC = () => {
                     )}
                   </div>
 
-                  <button
-                    onClick={() => handleDelete(link.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                  <RoleGate allowedRoles={['admin', 'reviewer']}>
+                    <button
+                      onClick={() => handleDelete(link.id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </RoleGate>
                 </div>
               </div>
             );

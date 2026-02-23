@@ -8,13 +8,15 @@ export const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { path: '/', label: 'Suggestion Dashboard' },
-    { path: '/requirements', label: 'Requirements' },
-    { path: '/test-cases', label: 'Test Cases' },
-    { path: '/links', label: 'Manual Links' },
-    { path: '/traceability', label: 'Traceability Matrix' },
-    { path: '/metrics', label: 'Metrics' },
-  ];
+    { path: '/', label: 'Suggestion Dashboard', roles: null },
+    { path: '/requirements', label: 'Requirements', roles: null },
+    { path: '/test-cases', label: 'Test Cases', roles: null },
+    { path: '/links', label: 'Manual Links', roles: null },
+    { path: '/traceability', label: 'Traceability Matrix', roles: null },
+    { path: '/metrics', label: 'Metrics', roles: null },
+    { path: '/admin/users', label: 'User Management', roles: ['admin'] },
+    { path: '/admin/audit-log', label: 'Audit Log', roles: ['admin'] },
+  ].filter((item) => !item.roles || (user && (item.roles as string[]).includes(user.role)));
 
   const roleBadgeColor = {
     admin: 'bg-red-500',
