@@ -30,6 +30,9 @@ apiClient.interceptors.response.use(
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       window.dispatchEvent(new Event('bgstm-unauthorized'));
     }
+    if (error.response?.status === 403) {
+      window.dispatchEvent(new Event('bgstm-forbidden'));
+    }
     return Promise.reject(error);
   }
 );

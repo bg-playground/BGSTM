@@ -1,6 +1,7 @@
 import React from 'react';
 import { SuggestionStatus } from '../types/api';
 import type { Suggestion, Requirement, TestCase } from '../types/api';
+import { RoleGate } from './RoleGate';
 
 interface SuggestionCardProps {
   suggestion: Suggestion;
@@ -103,18 +104,20 @@ export const SuggestionCard = React.forwardRef<HTMLDivElement, SuggestionCardPro
               >
                 Quick Preview
               </button>
-              <button
-                onClick={() => onReview(suggestion.id, SuggestionStatus.REJECTED)}
-                className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Reject
-              </button>
-              <button
-                onClick={() => onReview(suggestion.id, SuggestionStatus.ACCEPTED)}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                Accept
-              </button>
+              <RoleGate allowedRoles={['admin', 'reviewer']}>
+                <button
+                  onClick={() => onReview(suggestion.id, SuggestionStatus.REJECTED)}
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={() => onReview(suggestion.id, SuggestionStatus.ACCEPTED)}
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Accept
+                </button>
+              </RoleGate>
             </div>
           </div>
         </div>

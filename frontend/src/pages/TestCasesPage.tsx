@@ -5,6 +5,7 @@ import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { RoleGate } from '../components/RoleGate';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -126,12 +127,14 @@ export const TestCasesPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           Test Cases {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Test Case
-        </button>
+        <RoleGate allowedRoles={['admin', 'reviewer']}>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Test Case
+          </button>
+        </RoleGate>
       </div>
 
       {testCases.length === 0 ? (
@@ -177,18 +180,22 @@ export const TestCasesPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(tc)}
-                    className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tc.id)}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                  <RoleGate allowedRoles={['admin', 'reviewer']}>
+                    <button
+                      onClick={() => handleEdit(tc)}
+                      className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                  </RoleGate>
+                  <RoleGate allowedRoles={['admin']}>
+                    <button
+                      onClick={() => handleDelete(tc.id)}
+                      className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </RoleGate>
                 </div>
               </div>
             </div>

@@ -16,6 +16,7 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+import { RoleGate } from '../components/RoleGate';
 
 const VIRTUALIZATION_THRESHOLD = 50;
 
@@ -357,20 +358,22 @@ export const SuggestionDashboard: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">AI Suggestion Dashboard</h1>
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {generating ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Generating...
-            </>
-          ) : (
-            'Generate Suggestions'
-          )}
-        </button>
+        <RoleGate allowedRoles={['admin', 'reviewer']}>
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {generating ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Generating...
+              </>
+            ) : (
+              'Generate Suggestions'
+            )}
+          </button>
+        </RoleGate>
         <button
           onClick={handleExportCsv}
           disabled={exporting}
@@ -426,31 +429,33 @@ export const SuggestionDashboard: React.FC = () => {
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-primary-600 text-white shadow-lg p-4 flex items-center justify-between z-50">
-          <div>
-            <span className="font-semibold">{selectedIds.size} suggestions selected</span>
+        <RoleGate allowedRoles={['admin', 'reviewer']}>
+          <div className="fixed bottom-0 left-0 right-0 bg-primary-600 text-white shadow-lg p-4 flex items-center justify-between z-50">
+            <div>
+              <span className="font-semibold">{selectedIds.size} suggestions selected</span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleBulkReject}
+                className="px-6 py-2 bg-red-500 hover:bg-red-600 rounded-lg"
+              >
+                Reject Selected
+              </button>
+              <button
+                onClick={handleBulkAccept}
+                className="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg"
+              >
+                Accept Selected
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+              >
+                Clear Selection
+              </button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleBulkReject}
-              className="px-6 py-2 bg-red-500 hover:bg-red-600 rounded-lg"
-            >
-              Reject Selected
-            </button>
-            <button
-              onClick={handleBulkAccept}
-              className="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg"
-            >
-              Accept Selected
-            </button>
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
-            >
-              Clear Selection
-            </button>
-          </div>
-        </div>
+        </RoleGate>
       )}
 
       {/* Preview Modal */}

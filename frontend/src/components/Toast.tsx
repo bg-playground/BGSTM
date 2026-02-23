@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ToastContext } from '../context/ToastContext';
 import type { Toast } from '../context/ToastContext';
 
@@ -16,6 +16,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  useEffect(() => {
+    const handleForbidden = () => {
+      showToast("You don't have permission to perform this action", 'error');
+    };
+    window.addEventListener('bgstm-forbidden', handleForbidden);
+    return () => window.removeEventListener('bgstm-forbidden', handleForbidden);
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ toasts, showToast, removeToast }}>

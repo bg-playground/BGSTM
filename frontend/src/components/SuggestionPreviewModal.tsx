@@ -1,6 +1,7 @@
 import React from 'react';
 import { SuggestionStatus } from '../types/api';
 import type { Suggestion, Requirement, TestCase } from '../types/api';
+import { RoleGate } from './RoleGate';
 
 interface SuggestionPreviewModalProps {
   suggestion: Suggestion;
@@ -132,24 +133,26 @@ export const SuggestionPreviewModal: React.FC<SuggestionPreviewModalProps> = ({
         </div>
 
         <div className="flex gap-3 justify-end">
-          <button
-            onClick={() => {
-              onReview(suggestion.id, SuggestionStatus.REJECTED);
-              onClose();
-            }}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-          >
-            Reject
-          </button>
-          <button
-            onClick={() => {
-              onReview(suggestion.id, SuggestionStatus.ACCEPTED);
-              onClose();
-            }}
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-          >
-            Accept
-          </button>
+          <RoleGate allowedRoles={['admin', 'reviewer']}>
+            <button
+              onClick={() => {
+                onReview(suggestion.id, SuggestionStatus.REJECTED);
+                onClose();
+              }}
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Reject
+            </button>
+            <button
+              onClick={() => {
+                onReview(suggestion.id, SuggestionStatus.ACCEPTED);
+                onClose();
+              }}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            >
+              Accept
+            </button>
+          </RoleGate>
         </div>
       </div>
     </div>
