@@ -1,0 +1,1 @@
+Closing as feature complete. Multi-user collaboration (RBAC roles, audit trail, user management) was implemented in PRs #128 and #132. Admin privileges, reviewer/viewer support, full audit logging, and user CRUD are all available.
