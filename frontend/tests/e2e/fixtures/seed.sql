@@ -3,6 +3,109 @@
 -- Generated with: python -c "from passlib.context import CryptContext; ctx = CryptContext(schemes=['bcrypt']); print(ctx.hash('password123'))"
 
 -- ============================================================
+-- Enum types
+-- ============================================================
+CREATE TYPE userrole AS ENUM ('admin', 'reviewer', 'viewer');
+CREATE TYPE requirementtype AS ENUM ('functional', 'non_functional', 'technical');
+CREATE TYPE prioritylevel AS ENUM ('critical', 'high', 'medium', 'low');
+CREATE TYPE requirementstatus AS ENUM ('draft', 'approved', 'implemented', 'tested', 'closed');
+CREATE TYPE testcasetype AS ENUM ('functional', 'integration', 'performance', 'security', 'ui', 'regression');
+CREATE TYPE testcasestatus AS ENUM ('draft', 'ready', 'executing', 'passed', 'failed', 'blocked', 'deprecated');
+CREATE TYPE automationstatus AS ENUM ('manual', 'automated', 'automatable');
+CREATE TYPE linktype AS ENUM ('covers', 'verifies', 'validates', 'related');
+CREATE TYPE linksource AS ENUM ('manual', 'ai_suggested', 'ai_confirmed', 'imported');
+CREATE TYPE suggestionmethod AS ENUM ('semantic_similarity', 'keyword_match', 'heuristic', 'hybrid', 'llm_embedding');
+CREATE TYPE suggestionstatus AS ENUM ('pending', 'accepted', 'rejected', 'expired');
+
+-- ============================================================
+-- Tables
+-- ============================================================
+CREATE TABLE IF NOT EXISTS users (
+    id              UUID PRIMARY KEY,
+    email           VARCHAR(255) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    full_name       VARCHAR(255),
+    role            userrole NOT NULL DEFAULT 'reviewer',
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS requirements (
+    id              UUID PRIMARY KEY,
+    external_id     VARCHAR(100) UNIQUE,
+    title           VARCHAR(500) NOT NULL,
+    description     TEXT NOT NULL,
+    type            requirementtype NOT NULL,
+    priority        prioritylevel NOT NULL,
+    status          requirementstatus NOT NULL DEFAULT 'draft',
+    module          VARCHAR(100),
+    tags            TEXT[],
+    custom_metadata JSONB,
+    source_system   VARCHAR(50),
+    source_url      TEXT,
+    created_by      VARCHAR(100),
+    version         INTEGER DEFAULT 1,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS test_cases (
+    id                     UUID PRIMARY KEY,
+    external_id            VARCHAR(100) UNIQUE,
+    title                  VARCHAR(500) NOT NULL,
+    description            TEXT NOT NULL,
+    type                   testcasetype NOT NULL,
+    priority               prioritylevel NOT NULL,
+    status                 testcasestatus NOT NULL DEFAULT 'draft',
+    steps                  JSONB,
+    preconditions          TEXT,
+    postconditions         TEXT,
+    test_data              JSONB,
+    module                 VARCHAR(100),
+    tags                   TEXT[],
+    automation_status      automationstatus DEFAULT 'manual',
+    execution_time_minutes INTEGER,
+    custom_metadata        JSONB,
+    source_system          VARCHAR(50),
+    source_url             TEXT,
+    created_by             VARCHAR(100),
+    version                INTEGER DEFAULT 1,
+    created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at             TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS requirement_test_case_links (
+    id              UUID PRIMARY KEY,
+    requirement_id  UUID NOT NULL REFERENCES requirements(id) ON DELETE CASCADE,
+    test_case_id    UUID NOT NULL REFERENCES test_cases(id) ON DELETE CASCADE,
+    link_type       linktype NOT NULL DEFAULT 'covers',
+    confidence_score FLOAT,
+    link_source     linksource NOT NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      VARCHAR(100),
+    confirmed_at    TIMESTAMP,
+    confirmed_by    VARCHAR(100),
+    notes           TEXT,
+    UNIQUE (requirement_id, test_case_id)
+);
+
+CREATE TABLE IF NOT EXISTS link_suggestions (
+    id                  UUID PRIMARY KEY,
+    requirement_id      UUID NOT NULL REFERENCES requirements(id) ON DELETE CASCADE,
+    test_case_id        UUID NOT NULL REFERENCES test_cases(id) ON DELETE CASCADE,
+    similarity_score    FLOAT NOT NULL,
+    suggestion_method   suggestionmethod NOT NULL,
+    suggestion_reason   TEXT,
+    suggestion_metadata JSONB,
+    status              suggestionstatus NOT NULL DEFAULT 'pending',
+    created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+    reviewed_at         TIMESTAMP,
+    reviewed_by         VARCHAR(100),
+    feedback            TEXT
+);
+
+-- ============================================================
 -- Users
 -- ============================================================
 INSERT INTO users (id, email, hashed_password, full_name, role, is_active, created_at, updated_at)
@@ -60,35 +163,35 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- Test Cases (5 sample)
 -- ============================================================
-INSERT INTO test_cases (id, title, description, type, priority, status, automated, created_at, updated_at)
+INSERT INTO test_cases (id, title, description, type, priority, status, automation_status, created_at, updated_at)
 VALUES
   ('20000000-0000-0000-0000-000000000001',
    'TC-001: Login with valid credentials',
    'Verify that a user can log in with valid email and password.',
-   'functional', 'high', 'ready', true, NOW(), NOW()),
+   'functional', 'high', 'ready', 'automated', NOW(), NOW()),
   ('20000000-0000-0000-0000-000000000002',
    'TC-002: Login with invalid credentials',
    'Verify that an error message is shown for invalid credentials.',
-   'functional', 'high', 'ready', true, NOW(), NOW()),
+   'functional', 'high', 'ready', 'automated', NOW(), NOW()),
   ('20000000-0000-0000-0000-000000000003',
    'TC-003: Export PDF report',
    'Verify that the traceability matrix can be exported as a PDF.',
-   'functional', 'medium', 'draft', false, NOW(), NOW()),
+   'functional', 'medium', 'draft', 'manual', NOW(), NOW()),
   ('20000000-0000-0000-0000-000000000004',
    'TC-004: Role enforcement for admin actions',
    'Verify that only admin users can access administrative features.',
-   'functional', 'high', 'ready', false, NOW(), NOW()),
+   'functional', 'high', 'ready', 'manual', NOW(), NOW()),
   ('20000000-0000-0000-0000-000000000005',
    'TC-005: API response time under load',
    'Measure API response times with 100 concurrent requests.',
-   'performance', 'low', 'draft', false, NOW(), NOW())
+   'performance', 'low', 'draft', 'manual', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- Existing links (3)
 -- ============================================================
 INSERT INTO requirement_test_case_links
-  (id, requirement_id, test_case_id, link_type, source, notes, created_at)
+  (id, requirement_id, test_case_id, link_type, link_source, notes, created_at)
 VALUES
   ('30000000-0000-0000-0000-000000000001',
    '10000000-0000-0000-0000-000000000001',
