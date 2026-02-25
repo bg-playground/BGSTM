@@ -16,6 +16,7 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+import { useRoleGate } from '../hooks/useRoleGate';
 
 const VIRTUALIZATION_THRESHOLD = 50;
 
@@ -100,6 +101,8 @@ export const SuggestionDashboard: React.FC = () => {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [previewSuggestion, setPreviewSuggestion] = useState<Suggestion | null>(null);
   const { showToast } = useToast();
+  const { isAdmin, hasRole } = useRoleGate();
+  const canReview = hasRole(['admin', 'reviewer']);
 
   // Filters state: priority URL params > localStorage > defaults
   const [filters, setFilters] = useState<Filters>(() =>
@@ -273,6 +276,7 @@ export const SuggestionDashboard: React.FC = () => {
           setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
           break;
         case 'a': {
+          if (!canReview) break;
           const hasFocusedCard = selectedIds.size === 0 && focusedIndex >= 0;
           if (hasFocusedCard) {
             // Accept focused card
@@ -284,6 +288,7 @@ export const SuggestionDashboard: React.FC = () => {
           break;
         }
         case 'r': {
+          if (!canReview) break;
           const hasFocusedCard = selectedIds.size === 0 && focusedIndex >= 0;
           if (hasFocusedCard) {
             handleReview(suggestions[focusedIndex].id, SuggestionStatus.REJECTED);
@@ -297,6 +302,7 @@ export const SuggestionDashboard: React.FC = () => {
         case ' ':
           if (focusedIndex >= 0) {
             e.preventDefault();
+            if (!canReview) break;
             const focusedId = suggestions[focusedIndex].id;
             setSelectedIds((prev) => {
               const next = new Set(prev);
@@ -313,7 +319,7 @@ export const SuggestionDashboard: React.FC = () => {
           if (focusedIndex >= 0 && selectedIds.size === 0) {
             // Open preview for focused suggestion
             setPreviewSuggestion(suggestions[focusedIndex]);
-          } else if (selectedIds.size > 0) {
+          } else if (selectedIds.size > 0 && canReview) {
             // Accept selected
             handleBulkAccept();
           }
@@ -321,7 +327,7 @@ export const SuggestionDashboard: React.FC = () => {
         case 'Delete':
         case 'Backspace':
           // Reject selected
-          if (selectedIds.size > 0 && e.shiftKey) {
+          if (selectedIds.size > 0 && e.shiftKey && canReview) {
             e.preventDefault();
             handleBulkReject();
           }
@@ -331,7 +337,7 @@ export const SuggestionDashboard: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [suggestions, selectedIds, focusedIndex, handleBulkAccept, handleBulkReject, handleReview]);
+  }, [suggestions, selectedIds, focusedIndex, canReview, handleBulkAccept, handleBulkReject, handleReview]);
 
   const handleToggleSelect = useCallback((id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -357,27 +363,33 @@ export const SuggestionDashboard: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">AI Suggestion Dashboard</h1>
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {generating ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Generating...
-            </>
-          ) : (
-            'Generate Suggestions'
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {generating ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Suggestions'
+              )}
+            </button>
           )}
-        </button>
-        <button
-          onClick={handleExportCsv}
-          disabled={exporting}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          Export CSV
-        </button>
+          {canReview && (
+            <button
+              onClick={handleExportCsv}
+              disabled={exporting}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+            >
+              Export CSV
+            </button>
+          )}
+        </div>
       </div>
 
       <KeyboardShortcutsHelp />
@@ -425,7 +437,7 @@ export const SuggestionDashboard: React.FC = () => {
       )}
 
       {/* Bulk action bar */}
-      {selectedIds.size > 0 && (
+      {selectedIds.size > 0 && canReview && (
         <div className="fixed bottom-0 left-0 right-0 bg-primary-600 text-white shadow-lg p-4 flex items-center justify-between z-50">
           <div>
             <span className="font-semibold">{selectedIds.size} suggestions selected</span>

@@ -22,9 +22,9 @@ export const Navigation: React.FC = () => {
   ];
 
   const roleBadgeColor = {
-    admin: 'bg-red-500',
-    reviewer: 'bg-yellow-500',
-    viewer: 'bg-blue-500',
+    admin: 'bg-purple-600',
+    reviewer: 'bg-blue-500',
+    viewer: 'bg-gray-400',
   } as const;
 
   return (

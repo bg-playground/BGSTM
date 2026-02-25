@@ -5,6 +5,7 @@ import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useRoleGate } from '../hooks/useRoleGate';
 
 export const TestCasesPage: React.FC = () => {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -24,6 +25,7 @@ export const TestCasesPage: React.FC = () => {
     automated: false,
   });
   const { showToast } = useToast();
+  const { isAdmin } = useRoleGate();
 
   const loadTestCases = useCallback(async (targetPage = page) => {
     try {
@@ -126,12 +128,14 @@ export const TestCasesPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">
           Test Cases {total > 0 && <span className="text-lg font-normal text-gray-500">({total} total)</span>}
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + New Test Case
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            + New Test Case
+          </button>
+        )}
       </div>
 
       {testCases.length === 0 ? (
@@ -177,18 +181,22 @@ export const TestCasesPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(tc)}
-                    className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tc.id)}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(tc)}
+                        className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(tc.id)}
+                        className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -198,7 +206,7 @@ export const TestCasesPage: React.FC = () => {
 
       <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
 
-      {showModal && (
+      {showModal && isAdmin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-6">
