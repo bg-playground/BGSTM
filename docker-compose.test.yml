@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: bgstm_test
       POSTGRES_PASSWORD: bgstm_test
       POSTGRES_DB: bgstm_test
-    volumes:
-      - ./frontend/tests/e2e/fixtures/seed.sql:/docker-entrypoint-initdb.d/99-seed.sql:ro
     ports:
       - "5433:5432"
     healthcheck:
@@ -26,13 +24,16 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://bgstm_test:bgstm_test@db:5432/bgstm_test
       SECRET_KEY: test-secret-key-for-e2e-tests-only
-      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
-      ALGORITHM: HS256
       API_V1_PREFIX: /api/v1
       PROJECT_NAME: "BGSTM AI Traceability (Test)"
       VERSION: "2.0.0"
-      BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://frontend:3000"]'
+      BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://localhost:3001", "http://frontend:3000"]'
       PYTHONPATH: /app
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      ALGORITHM: HS256
+      E2E_SEED_FILE: /app/seed.sql
+    volumes:
+      - ./frontend/tests/e2e/fixtures/seed.sql:/app/seed.sql:ro
     ports:
       - "8001:8000"
     depends_on:
