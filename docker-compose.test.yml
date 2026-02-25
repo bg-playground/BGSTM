@@ -31,6 +31,10 @@ services:
       VERSION: "2.0.0"
       BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://frontend:3000"]'
       PYTHONPATH: /app
+      SECRET_KEY: test-secret-key-for-e2e-tests-only
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      ALGORITHM: HS256
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8001:8000"
     depends_on:
