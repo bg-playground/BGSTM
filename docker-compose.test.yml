@@ -43,8 +43,8 @@ services:
       test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
       interval: 15s
       timeout: 10s
-      retries: 5
-      start_period: 40s
+      retries: 8
+      start_period: 90s
     networks:
       - bgstm-test-network
 
@@ -58,8 +58,7 @@ services:
     ports:
       - "3001:80"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
       interval: 15s
