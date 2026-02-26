@@ -27,7 +27,21 @@ def upgrade() -> None:
             sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
+        sa.Column(
+            "type",
+            sa.Enum(
+                "suggestions_generated",
+                "coverage_drop",
+                "suggestion_reviewed",
+                "requirement_created",
+                "test_case_created",
+                name="notificationtype",
+            ),
+            nullable=False,
+        ),
+        sa.Column("title", sa.String(255), nullable=False),
         sa.Column("message", sa.Text(), nullable=False),
+        sa.Column("metadata", sa.JSON(), nullable=True),
         sa.Column("read", sa.Boolean(), nullable=False, server_default="false"),
         sa.Column(
             "created_at",
@@ -40,3 +54,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("notifications")
+    sa.Enum(name="notificationtype").drop(op.get_bind(), checkfirst=True)
