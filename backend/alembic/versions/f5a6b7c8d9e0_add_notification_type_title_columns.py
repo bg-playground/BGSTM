@@ -8,18 +8,21 @@ Create Date: 2026-02-26 00:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "f5a6b7c8d9e0"
 down_revision: Union[str, None] = "e4f5a6b7c8d9"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+
 def _column_exists(table: str, column: str) -> bool:
     bind = op.get_bind()
     insp = inspect(bind)
     return column in [c["name"] for c in insp.get_columns(table)]
+
 
 def upgrade() -> None:
     bind = op.get_bind()
@@ -68,6 +71,7 @@ def upgrade() -> None:
             "notifications",
             sa.Column("metadata", sa.JSON(), nullable=True),
         )
+
 
 def downgrade() -> None:
     if _column_exists("notifications", "metadata"):
