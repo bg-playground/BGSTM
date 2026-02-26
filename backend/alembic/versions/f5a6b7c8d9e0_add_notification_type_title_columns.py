@@ -18,16 +18,11 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def _column_exists(table: str, column: str) -> bool:
-    bind = op.get_bind()
-    insp = inspect(bind)
-    return column in [c["name"] for c in insp.get_columns(table)]
-
-
 def upgrade() -> None:
     bind = op.get_bind()
+    insp = inspect(bind)
+    existing_columns = {c["name"] for c in insp.get_columns("notifications")}
 
-    # Create the enum type if it doesn't already exist (idempotent)
     notification_type_enum = sa.Enum(
         "suggestions_generated",
         "coverage_drop",
@@ -38,8 +33,7 @@ def upgrade() -> None:
     )
     notification_type_enum.create(bind, checkfirst=True)
 
-    # Only add columns that don't already exist (handles both fresh and pre-existing DBs)
-    if not _column_exists("notifications", "type"):
+    if "type" not in existing_columns:
         op.add_column(
             "notifications",
             sa.Column(
@@ -59,14 +53,14 @@ def upgrade() -> None:
         )
         op.alter_column("notifications", "type", server_default=None)
 
-    if not _column_exists("notifications", "title"):
+    if "title" not in existing_columns:
         op.add_column(
             "notifications",
             sa.Column("title", sa.String(255), nullable=False, server_default=""),
         )
         op.alter_column("notifications", "title", server_default=None)
 
-    if not _column_exists("notifications", "metadata"):
+    if "metadata" not in existing_columns:
         op.add_column(
             "notifications",
             sa.Column("metadata", sa.JSON(), nullable=True),
@@ -74,10 +68,14 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    if _column_exists("notifications", "metadata"):
+    bind = op.get_bind()
+    insp = inspect(bind)
+    existing_columns = {c["name"] for c in insp.get_columns("notifications")}
+
+    if "metadata" in existing_columns:
         op.drop_column("notifications", "metadata")
-    if _column_exists("notifications", "title"):
+    if "title" in existing_columns:
         op.drop_column("notifications", "title")
-    if _column_exists("notifications", "type"):
+    if "type" in existing_columns:
         op.drop_column("notifications", "type")
-    sa.Enum(name="notificationtype").drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name="notificationtype").drop(bind, checkfirst=True)
