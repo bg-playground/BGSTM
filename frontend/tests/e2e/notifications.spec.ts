@@ -1,12 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from './helpers/auth';
-
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 
 test.describe('Notification Lifecycle', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
   });

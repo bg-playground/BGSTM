@@ -5,6 +5,9 @@ const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 
 test.describe('Authentication', () => {
+  // Auth tests verify login/logout flows and must start from an unauthenticated state.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('register a new user', async ({ page }) => {
     const uniqueEmail = `e2e-reg-${Date.now()}@test.com`;
 

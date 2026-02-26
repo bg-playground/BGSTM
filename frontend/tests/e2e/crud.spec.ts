@@ -1,15 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { login } from './helpers/auth';
-
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 
 // ---------------------------------------------------------------------------
 // Requirements CRUD
 // ---------------------------------------------------------------------------
 test.describe('Requirements CRUD', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/requirements');
     await page.waitForLoadState('networkidle');
   });
@@ -81,7 +76,6 @@ test.describe('Requirements CRUD', () => {
 // ---------------------------------------------------------------------------
 test.describe('Test Cases CRUD', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/test-cases');
     await page.waitForLoadState('networkidle');
   });

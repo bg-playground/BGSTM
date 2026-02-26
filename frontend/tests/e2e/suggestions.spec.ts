@@ -1,12 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from './helpers/auth';
-
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 
 test.describe('Suggestion Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/');
     // Wait for the page to finish loading suggestions
     await page.waitForLoadState('networkidle');
@@ -16,14 +11,14 @@ test.describe('Suggestion Dashboard', () => {
     // The SuggestionFilters component renders an algorithm select/dropdown
     const algorithmSelect = page.locator('select[name="algorithm"], [data-testid="algorithm-filter"]').first();
     if (await algorithmSelect.isVisible()) {
-      await algorithmSelect.selectOption('tfidf');
+      await algorithmSelect.selectOption('hybrid');
       // URL or displayed results should reflect the filter
-      await expect(page).toHaveURL(/algorithm=tfidf/);
+      await expect(page).toHaveURL(/algorithm=hybrid/);
     } else {
-      // Fallback: look for a button/tab labelled tfidf
-      const tfidfBtn = page.getByRole('button', { name: /tfidf/i });
-      await tfidfBtn.click();
-      await expect(page).toHaveURL(/algorithm=tfidf/);
+      // Fallback: look for a button/tab labelled hybrid
+      const hybridBtn = page.getByRole('button', { name: /hybrid/i });
+      await hybridBtn.click();
+      await expect(page).toHaveURL(/algorithm=hybrid/);
     }
   });
 
