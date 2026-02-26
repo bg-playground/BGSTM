@@ -12,6 +12,12 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# VITE_API_BASE_URL must be provided at build time (Vite bakes it into the bundle).
+# Pass it via --build-arg VITE_API_BASE_URL=<value> in docker-compose or docker build.
+# An empty string causes the app to use a relative base path so nginx can proxy /api/.
+ARG VITE_API_BASE_URL=""
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 # Build the application
 RUN npm run build
 
