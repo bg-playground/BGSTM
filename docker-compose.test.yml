@@ -27,11 +27,11 @@ services:
       API_V1_PREFIX: /api/v1
       PROJECT_NAME: "BGSTM AI Traceability (Test)"
       VERSION: "2.0.0"
-      BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://localhost:3001", "http://frontend:3000"]'
+      BACKEND_CORS_ORIGINS: '["http://localhost:3001", "http://localhost:3000", "http://frontend:80"]'
       PYTHONPATH: /app
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
       ALGORITHM: HS256
-      E2E_SEED_FILE: /app/seed.sql
+      E2E_SEED_SQL: /app/seed.sql
     volumes:
       - ./frontend/tests/e2e/fixtures/seed.sql:/app/seed.sql:ro
     ports:
@@ -44,7 +44,7 @@ services:
       interval: 15s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 40s
     networks:
       - bgstm-test-network
 
@@ -54,7 +54,7 @@ services:
       dockerfile: Dockerfile
     container_name: bgstm-test-frontend
     environment:
-      VITE_API_BASE_URL: http://backend:8000
+      VITE_API_BASE_URL: http://localhost:8001
     ports:
       - "3001:80"
     depends_on:
