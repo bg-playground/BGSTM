@@ -16,6 +16,7 @@ down_revision: Union[str, None] = "e4f5a6b7c8d9"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+
 def upgrade() -> None:
     # Composite index for duplicate checking in suggestion engine
     op.create_index(
@@ -47,6 +48,7 @@ def upgrade() -> None:
         "audit_log",
         ["resource_type", "resource_id"],
     )
+
 
 def downgrade() -> None:
     op.drop_index("idx_audit_log_resource", table_name="audit_log")
