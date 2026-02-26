@@ -13,10 +13,8 @@ test.describe('Authentication', () => {
 
     await page.getByLabel(/full name/i).fill('E2E Test User');
     await page.getByLabel('Email address').fill(uniqueEmail);
-    // Use password field by index to distinguish password vs confirm-password
-    const passwordInputs = page.getByLabel(/^password/i);
-    await passwordInputs.nth(0).fill('password123');
-    await page.getByLabel(/confirm password/i).fill('password123');
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
 
     await page.getByRole('button', { name: /create account/i }).click();
 
