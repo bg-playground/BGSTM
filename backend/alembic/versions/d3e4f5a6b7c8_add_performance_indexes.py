@@ -16,7 +16,6 @@ down_revision: Union[str, None] = "e4f5a6b7c8d9"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-
 def upgrade() -> None:
     # Composite index for duplicate checking in suggestion engine
     op.create_index(
@@ -30,11 +29,17 @@ def upgrade() -> None:
         "link_suggestions",
         ["similarity_score"],
     )
-    # Index on status for pending/accepted/rejected filtering
+    # Index on suggestion_method for algorithm filtering
     op.create_index(
-        "idx_suggestions_status",
+        "idx_suggestions_method",
         "link_suggestions",
-        ["status"],
+        ["suggestion_method"],
+    )
+    # Composite index for common query pattern (status + score)
+    op.create_index(
+        "idx_suggestions_status_score",
+        "link_suggestions",
+        ["status", "similarity_score"],
     )
     # Index on notifications for user + read status
     op.create_index(
@@ -42,17 +47,10 @@ def upgrade() -> None:
         "notifications",
         ["user_id", "read"],
     )
-    # Index on audit_log for resource lookups
-    op.create_index(
-        "idx_audit_log_resource",
-        "audit_log",
-        ["resource_type", "resource_id"],
-    )
-
 
 def downgrade() -> None:
-    op.drop_index("idx_audit_log_resource", table_name="audit_log")
     op.drop_index("idx_notifications_user_read", table_name="notifications")
-    op.drop_index("idx_suggestions_status", table_name="link_suggestions")
+    op.drop_index("idx_suggestions_status_score", table_name="link_suggestions")
+    op.drop_index("idx_suggestions_method", table_name="link_suggestions")
     op.drop_index("idx_suggestions_similarity_score", table_name="link_suggestions")
     op.drop_index("idx_suggestions_req_tc", table_name="link_suggestions")
