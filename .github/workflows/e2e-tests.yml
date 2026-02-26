@@ -45,19 +45,22 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Start test environment with Docker Compose
-        run: |
-          docker compose -f docker-compose.test.yml up -d
-          echo "Waiting for services to become healthy..."
+      - name: Start test environment
+        run: docker compose -f docker-compose.test.yml up -d --build
 
-      - name: Wait for backend health check
+      - name: Wait for backend to be healthy
         run: |
-          timeout 120 bash -c '
-            until curl -sf http://localhost:8001/health; do
-              echo "Backend not ready, retrying in 5s..."
-              sleep 5
-            done
-          '
+          echo "Waiting for backend health check..."
+          for i in $(seq 1 24); do
+            if curl -sf http://localhost:8001/health; then
+              echo "Backend is healthy!"
+              break
+            fi
+            echo "Attempt $i/24 — backend not ready yet, waiting 10s..."
+            sleep 10
+          done
+          # Final check — fail loudly if still not healthy
+          curl -sf http://localhost:8001/health || (echo "Backend failed to become healthy" && exit 1)
 
       - name: Wait for frontend health check
         run: |
@@ -67,6 +70,32 @@ jobs:
               sleep 5
             done
           '
+
+      - name: Dump container logs (always)
+        if: always()
+        run: |
+          echo "===== DB logs ====="
+          docker compose -f docker-compose.test.yml logs db || true
+          echo "===== Backend logs ====="
+          docker compose -f docker-compose.test.yml logs backend || true
+          echo "===== Frontend logs ====="
+          docker compose -f docker-compose.test.yml logs frontend || true
+
+      - name: Upload container logs on failure
+        if: failure()
+        run: |
+          mkdir -p /tmp/container-logs
+          docker compose -f docker-compose.test.yml logs db       > /tmp/container-logs/db.log       2>&1 || true
+          docker compose -f docker-compose.test.yml logs backend  > /tmp/container-logs/backend.log  2>&1 || true
+          docker compose -f docker-compose.test.yml logs frontend > /tmp/container-logs/frontend.log 2>&1 || true
+
+      - name: Upload container logs artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-logs
+          path: /tmp/container-logs/
+          retention-days: 7
 
       - name: Run Playwright tests
         working-directory: frontend
@@ -95,4 +124,4 @@ jobs:
 
       - name: Tear down test environment
         if: always()
-        run: docker compose -f docker-compose.test.yml down -v
+        run: docker compose -f docker-compose.test.yml down -v --remove-orphans || true
