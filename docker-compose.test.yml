@@ -1,0 +1,74 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: bgstm-test-db
+    environment:
+      POSTGRES_USER: bgstm_test
+      POSTGRES_PASSWORD: bgstm_test
+      POSTGRES_DB: bgstm_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bgstm_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bgstm-test-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bgstm-test-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://bgstm_test:bgstm_test@db:5432/bgstm_test
+      SECRET_KEY: test-secret-key-for-e2e-tests-only
+      API_V1_PREFIX: /api/v1
+      PROJECT_NAME: "BGSTM AI Traceability (Test)"
+      VERSION: "2.0.0"
+      BACKEND_CORS_ORIGINS: '["http://localhost:3001", "http://localhost:3000", "http://frontend:80"]'
+      PYTHONPATH: /app
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      ALGORITHM: HS256
+      E2E_SEED_SQL: /app/seed.sql
+    volumes:
+      - ./frontend/tests/e2e/fixtures/seed.sql:/app/seed.sql:ro
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - bgstm-test-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bgstm-test-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8001
+    ports:
+      - "3001:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - bgstm-test-network
+
+networks:
+  bgstm-test-network:
+    driver: bridge
