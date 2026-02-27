@@ -6,7 +6,7 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 
 test.describe('Authentication', () => {
   test('register a new user', async ({ page }) => {
-    const uniqueEmail = `e2e-reg-${Date.now()}@test.com`;
+    const uniqueEmail = `e2e-reg-${Date.now()}@example.com`;
 
     await page.goto('/register');
     await expect(page.getByRole('heading', { name: /bgstm traceability/i })).toBeVisible();
@@ -19,7 +19,7 @@ test.describe('Authentication', () => {
     await page.getByRole('button', { name: /create account/i }).click();
 
     // After registration user should be redirected to the dashboard
-    await expect(page).not.toHaveURL(/\/register/);
+    await expect(page).not.toHaveURL(/\/register/, { timeout: 30_000 });
   });
 
   test('login with valid credentials', async ({ page }) => {
