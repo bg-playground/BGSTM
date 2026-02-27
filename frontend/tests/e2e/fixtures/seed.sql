@@ -127,3 +127,17 @@ VALUES
    'pending',
    NOW())
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Notifications (1 seeded unread for admin)
+-- ============================================================
+INSERT INTO notifications (id, user_id, type, title, message, read, created_at)
+VALUES
+  ('50000000-0000-0000-0000-000000000001',
+   '00000000-0000-0000-0000-000000000001',
+   'requirement_created',
+   'New requirement created',
+   'Requirement "User Authentication" was created.',
+   false,
+   NOW())
+ON CONFLICT (id) DO NOTHING;
