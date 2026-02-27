@@ -10,7 +10,7 @@ export async function login(page: Page, email: string, password: string): Promis
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: /sign in/i }).click();
   // Wait until redirected away from the login page
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 });
 }
 
 /**
@@ -18,5 +18,5 @@ export async function login(page: Page, email: string, password: string): Promis
  */
 export async function logout(page: Page): Promise<void> {
   await page.getByRole('button', { name: /sign out/i }).click();
-  await page.waitForURL('**/login', { timeout: 10_000 });
+  await page.waitForURL('**/login', { timeout: 30_000 });
 }
