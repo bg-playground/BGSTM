@@ -84,14 +84,7 @@ test.describe('Suggestion Dashboard', () => {
       return;
     }
     await rejectBtn.click();
-
-    // If a feedback modal/input appears, fill it in
-    const feedbackInput = page.getByLabel(/feedback|reason/i).first();
-    if (await feedbackInput.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await feedbackInput.fill('Not relevant to this requirement.');
-      await page.getByRole('button', { name: /confirm|submit|reject/i }).last().click();
-    }
-
+    // No feedback modal exists — rejection happens immediately
     await expect(page.getByText(/rejected|success/i).first()).toBeVisible({ timeout: 10_000 });
   });
 
