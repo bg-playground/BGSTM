@@ -23,7 +23,7 @@ class Notification(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     user_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
-    type = Column(Enum(NotificationType), nullable=False)
+    type = Column(Enum(NotificationType, values_callable=lambda x: [e.value for e in x]), nullable=False)
     title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
     read = Column(Boolean, default=False, nullable=False)
