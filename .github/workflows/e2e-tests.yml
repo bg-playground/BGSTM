@@ -95,6 +95,15 @@ jobs:
           PLAYWRIGHT_API_URL: http://localhost:8001
           E2E_ADMIN_EMAIL: admin@test.com
 
+      - name: Run Playwright tests
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
+          PLAYWRIGHT_API_URL: http://localhost:8001
+          E2E_ADMIN_EMAIL: admin@test.com
+          E2E_ADMIN_PASSWORD: password123
+        run: npx playwright test --project=chromium
+
       - name: Dump container logs (always)
         if: always()
         run: |
@@ -120,15 +129,6 @@ jobs:
           name: container-logs
           path: /tmp/container-logs/
           retention-days: 7
-
-      - name: Run Playwright tests
-        working-directory: frontend
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3001
-          PLAYWRIGHT_API_URL: http://localhost:8001
-          E2E_ADMIN_EMAIL: admin@test.com
-          E2E_ADMIN_PASSWORD: password123
-        run: npx playwright test --project=chromium
 
       - name: Upload Playwright HTML report on failure
         if: failure()
