@@ -127,7 +127,11 @@ class Requirement(Base, TimestampMixin):
     description = Column(Text, nullable=False)
     type = Column(Enum(RequirementType, values_callable=lambda x: [e.value for e in x]), nullable=False)
     priority = Column(Enum(PriorityLevel, values_callable=lambda x: [e.value for e in x]), nullable=False)
-    status = Column(Enum(RequirementStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=RequirementStatus.DRAFT)
+    status = Column(
+        Enum(RequirementStatus, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=RequirementStatus.DRAFT,
+    )
     module = Column(String(100), nullable=True)
     tags = Column(ArrayType(), nullable=True)
     custom_metadata = Column(JSON(), nullable=True)

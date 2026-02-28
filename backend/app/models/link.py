@@ -38,7 +38,11 @@ class RequirementTestCaseLink(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     requirement_id = Column(GUID(), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
     test_case_id = Column(GUID(), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
-    link_type = Column(Enum(LinkType, values_callable=lambda x: [e.value for e in x]), nullable=False, default=LinkType.COVERS)
+    link_type = Column(
+        Enum(LinkType, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=LinkType.COVERS,
+    )
     confidence_score = Column(Float, nullable=True)
     link_source = Column(Enum(LinkSource, values_callable=lambda x: [e.value for e in x]), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
