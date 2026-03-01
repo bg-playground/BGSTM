@@ -240,13 +240,13 @@ export const RequirementsPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as RequirementType })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="FUNCTIONAL">Functional</option>
-                      <option value="NON_FUNCTIONAL">Non-Functional</option>
-                      <option value="TECHNICAL">Technical</option>
-                      <option value="BUSINESS">Business</option>
-                      <option value="SECURITY">Security</option>
-                      <option value="PERFORMANCE">Performance</option>
-                      <option value="USABILITY">Usability</option>
+                      <option value={RequirementType.FUNCTIONAL}>Functional</option>
+                      <option value={RequirementType.NON_FUNCTIONAL}>Non-Functional</option>
+                      <option value={RequirementType.TECHNICAL}>Technical</option>
+                      <option value={RequirementType.BUSINESS}>Business</option>
+                      <option value={RequirementType.SECURITY}>Security</option>
+                      <option value={RequirementType.PERFORMANCE}>Performance</option>
+                      <option value={RequirementType.USABILITY}>Usability</option>
                     </select>
                   </div>
 
@@ -258,10 +258,10 @@ export const RequirementsPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as PriorityLevel })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="CRITICAL">Critical</option>
-                      <option value="HIGH">High</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="LOW">Low</option>
+                      <option value={PriorityLevel.CRITICAL}>Critical</option>
+                      <option value={PriorityLevel.HIGH}>High</option>
+                      <option value={PriorityLevel.MEDIUM}>Medium</option>
+                      <option value={PriorityLevel.LOW}>Low</option>
                     </select>
                   </div>
 
@@ -273,11 +273,11 @@ export const RequirementsPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as RequirementStatus })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="DRAFT">Draft</option>
-                      <option value="APPROVED">Approved</option>
-                      <option value="IN_PROGRESS">In Progress</option>
-                      <option value="COMPLETED">Completed</option>
-                      <option value="DEPRECATED">Deprecated</option>
+                      <option value={RequirementStatus.DRAFT}>Draft</option>
+                      <option value={RequirementStatus.APPROVED}>Approved</option>
+                      <option value={RequirementStatus.IN_PROGRESS}>In Progress</option>
+                      <option value={RequirementStatus.COMPLETED}>Completed</option>
+                      <option value={RequirementStatus.DEPRECATED}>Deprecated</option>
                     </select>
                   </div>
                 </div>
