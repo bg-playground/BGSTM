@@ -9,10 +9,12 @@ const AUTH_TIMEOUT_MS = 30_000;
 export async function login(page: Page, email: string, password: string): Promise<void> {
   // Clear any stale auth state from previous tests
   await page.context().clearCookies();
-  await page.evaluate(() => localStorage.clear());
 
   await page.goto('/login');
   await page.waitForLoadState('load');
+
+  // Clear localStorage after navigating to a real page (avoids SecurityError on about:blank)
+  await page.evaluate(() => localStorage.clear());
 
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(password);
