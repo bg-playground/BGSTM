@@ -95,6 +95,69 @@ jobs:
           PLAYWRIGHT_API_URL: http://localhost:8001
           E2E_ADMIN_EMAIL: admin@test.com
 
+      - name: "Diagnostics: backend logs, DB state, and login smoke test"
+        run: |
+          echo "============================================"
+          echo "=== BACKEND CONTAINER LOGS (last 80 lines) ==="
+          echo "============================================"
+          docker compose -f docker-compose.test.yml logs --tail=80 backend
+          echo ""
+
+          echo "============================================"
+          echo "=== DATABASE: list tables ==="
+          echo "============================================"
+          docker compose -f docker-compose.test.yml exec -T db \
+            psql -U bgstm_test -d bgstm_test -c "\dt" || echo "FAILED to list tables"
+          echo ""
+
+          echo "============================================"
+          echo "=== DATABASE: users table contents ==="
+          echo "============================================"
+          docker compose -f docker-compose.test.yml exec -T db \
+            psql -U bgstm_test -d bgstm_test -c "SELECT id, email, full_name, role, is_active FROM users;" || echo "FAILED to query users"
+          echo ""
+
+          echo "============================================"
+          echo "=== DATABASE: alembic_version ==="
+          echo "============================================"
+          docker compose -f docker-compose.test.yml exec -T db \
+            psql -U bgstm_test -d bgstm_test -c "SELECT * FROM alembic_version;" || echo "FAILED to query alembic_version"
+          echo ""
+
+          echo "============================================"
+          echo "=== SMOKE TEST: login via nginx proxy ==="
+          echo "============================================"
+          curl -sv -X POST http://localhost:3001/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@test.com","password":"password123"}' 2>&1 || echo "PROXY LOGIN FAILED"
+          echo ""
+
+          echo "============================================"
+          echo "=== SMOKE TEST: login via backend direct ==="
+          echo "============================================"
+          curl -sv -X POST http://localhost:8001/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@test.com","password":"password123"}' 2>&1 || echo "DIRECT LOGIN FAILED"
+          echo ""
+
+          echo "============================================"
+          echo "=== SMOKE TEST: /auth/me after login ==="
+          echo "============================================"
+          TOKEN=$(curl -sf -X POST http://localhost:8001/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@test.com","password":"password123"}' | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token','NO_TOKEN'))" 2>/dev/null) || TOKEN="LOGIN_FAILED"
+          echo "Token: ${TOKEN:0:20}..."
+          if [ "$TOKEN" != "LOGIN_FAILED" ] && [ "$TOKEN" != "NO_TOKEN" ]; then
+            curl -sv http://localhost:3001/api/v1/auth/me \
+              -H "Authorization: Bearer $TOKEN" 2>&1 || echo "/auth/me via proxy FAILED"
+          else
+            echo "Skipping /auth/me — login did not return a token"
+          fi
+          echo ""
+          echo "============================================"
+          echo "=== DIAGNOSTICS COMPLETE ==="
+          echo "============================================"
+
       - name: Run Playwright tests
         working-directory: frontend
         env:
