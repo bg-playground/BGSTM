@@ -204,10 +204,11 @@ export const RequirementsPage: React.FC = () => {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="req-title" className="block text-sm font-medium text-gray-700 mb-1">
                     Title *
                   </label>
                   <input
+                    id="req-title"
                     type="text"
                     required
                     value={formData.title}
@@ -217,10 +218,11 @@ export const RequirementsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="req-description" className="block text-sm font-medium text-gray-700 mb-1">
                     Description *
                   </label>
                   <textarea
+                    id="req-description"
                     required
                     rows={4}
                     value={formData.description}
@@ -231,55 +233,59 @@ export const RequirementsPage: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                    <label htmlFor="req-type" className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
                     <select
+                      id="req-type"
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as RequirementType })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="FUNCTIONAL">Functional</option>
-                      <option value="NON_FUNCTIONAL">Non-Functional</option>
-                      <option value="TECHNICAL">Technical</option>
-                      <option value="BUSINESS">Business</option>
-                      <option value="SECURITY">Security</option>
-                      <option value="PERFORMANCE">Performance</option>
-                      <option value="USABILITY">Usability</option>
+                      <option value={RequirementType.FUNCTIONAL}>Functional</option>
+                      <option value={RequirementType.NON_FUNCTIONAL}>Non-Functional</option>
+                      <option value={RequirementType.TECHNICAL}>Technical</option>
+                      <option value={RequirementType.BUSINESS}>Business</option>
+                      <option value={RequirementType.SECURITY}>Security</option>
+                      <option value={RequirementType.PERFORMANCE}>Performance</option>
+                      <option value={RequirementType.USABILITY}>Usability</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
+                    <label htmlFor="req-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
                     <select
+                      id="req-priority"
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as PriorityLevel })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="CRITICAL">Critical</option>
-                      <option value="HIGH">High</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="LOW">Low</option>
+                      <option value={PriorityLevel.CRITICAL}>Critical</option>
+                      <option value={PriorityLevel.HIGH}>High</option>
+                      <option value={PriorityLevel.MEDIUM}>Medium</option>
+                      <option value={PriorityLevel.LOW}>Low</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                    <label htmlFor="req-status" className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
                     <select
+                      id="req-status"
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as RequirementStatus })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="DRAFT">Draft</option>
-                      <option value="APPROVED">Approved</option>
-                      <option value="IN_PROGRESS">In Progress</option>
-                      <option value="COMPLETED">Completed</option>
-                      <option value="DEPRECATED">Deprecated</option>
+                      <option value={RequirementStatus.DRAFT}>Draft</option>
+                      <option value={RequirementStatus.APPROVED}>Approved</option>
+                      <option value={RequirementStatus.IN_PROGRESS}>In Progress</option>
+                      <option value={RequirementStatus.COMPLETED}>Completed</option>
+                      <option value={RequirementStatus.DEPRECATED}>Deprecated</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Module</label>
+                  <label htmlFor="req-module" className="block text-sm font-medium text-gray-700 mb-1">Module</label>
                   <input
+                    id="req-module"
                     type="text"
                     value={formData.module || ''}
                     onChange={(e) => setFormData({ ...formData, module: e.target.value })}
