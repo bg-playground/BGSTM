@@ -45,16 +45,23 @@ class TestCase(Base, TimestampMixin):
     external_id = Column(String(100), unique=True, nullable=True, index=True)
     title = Column(String(500), nullable=False, index=True)
     description = Column(Text, nullable=False)
-    type = Column(Enum(TestCaseType), nullable=False)
-    priority = Column(Enum(PriorityLevel), nullable=False)
-    status = Column(Enum(TestCaseStatus), nullable=False, default=TestCaseStatus.DRAFT)
+    type = Column(Enum(TestCaseType, values_callable=lambda x: [e.value for e in x]), nullable=False)
+    priority = Column(Enum(PriorityLevel, values_callable=lambda x: [e.value for e in x]), nullable=False)
+    status = Column(
+        Enum(TestCaseStatus, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=TestCaseStatus.DRAFT,
+    )
     steps = Column(JSON(), nullable=True)
     preconditions = Column(Text, nullable=True)
     postconditions = Column(Text, nullable=True)
     test_data = Column(JSON(), nullable=True)
     module = Column(String(100), nullable=True)
     tags = Column(ArrayType(), nullable=True)
-    automation_status = Column(Enum(AutomationStatus), default=AutomationStatus.MANUAL)
+    automation_status = Column(
+        Enum(AutomationStatus, values_callable=lambda x: [e.value for e in x]),
+        default=AutomationStatus.MANUAL,
+    )
     execution_time_minutes = Column(Integer, nullable=True)
     custom_metadata = Column(JSON(), nullable=True)
     source_system = Column(String(50), nullable=True)

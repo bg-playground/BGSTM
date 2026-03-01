@@ -55,14 +55,15 @@ async def startup_event():
     from app.db.session import AsyncSessionLocal
     from app.models.user import User, UserRole
 
+    default_email = os.environ.get("DEFAULT_ADMIN_EMAIL", "admin@bgstm.local")
     default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "admin1234")
 
     async with AsyncSessionLocal() as db:
-        existing = await get_user_by_email(db, "admin@bgstm.local")
+        existing = await get_user_by_email(db, default_email)
         if not existing:
             db.add(
                 User(
-                    email="admin@bgstm.local",
+                    email=default_email,
                     hashed_password=get_password_hash(default_password),
                     full_name="Default Admin",
                     role=UserRole.admin,
