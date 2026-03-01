@@ -215,10 +215,11 @@ export const TestCasesPage: React.FC = () => {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="tc-title" className="block text-sm font-medium text-gray-700 mb-1">
                     Title *
                   </label>
                   <input
+                    id="tc-title"
                     type="text"
                     required
                     value={formData.title}
@@ -228,10 +229,11 @@ export const TestCasesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="tc-description" className="block text-sm font-medium text-gray-700 mb-1">
                     Description *
                   </label>
                   <textarea
+                    id="tc-description"
                     required
                     rows={3}
                     value={formData.description}
@@ -242,8 +244,9 @@ export const TestCasesPage: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                    <label htmlFor="tc-type" className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
                     <select
+                      id="tc-type"
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as TestCaseType })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
@@ -262,8 +265,9 @@ export const TestCasesPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
+                    <label htmlFor="tc-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
                     <select
+                      id="tc-priority"
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as PriorityLevel })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
@@ -276,8 +280,9 @@ export const TestCasesPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                    <label htmlFor="tc-status" className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
                     <select
+                      id="tc-status"
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as TestCaseStatus })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
@@ -295,10 +300,11 @@ export const TestCasesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="tc-preconditions" className="block text-sm font-medium text-gray-700 mb-1">
                     Preconditions
                   </label>
                   <textarea
+                    id="tc-preconditions"
                     rows={2}
                     value={formData.preconditions || ''}
                     onChange={(e) => setFormData({ ...formData, preconditions: e.target.value })}
@@ -307,10 +313,11 @@ export const TestCasesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="tc-test-steps" className="block text-sm font-medium text-gray-700 mb-1">
                     Test Steps
                   </label>
                   <textarea
+                    id="tc-test-steps"
                     rows={3}
                     value={formData.test_steps || ''}
                     onChange={(e) => setFormData({ ...formData, test_steps: e.target.value })}
@@ -319,10 +326,11 @@ export const TestCasesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="tc-expected-result" className="block text-sm font-medium text-gray-700 mb-1">
                     Expected Result
                   </label>
                   <textarea
+                    id="tc-expected-result"
                     rows={2}
                     value={formData.expected_result || ''}
                     onChange={(e) => setFormData({ ...formData, expected_result: e.target.value })}
@@ -343,8 +351,9 @@ export const TestCasesPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Module</label>
+                  <label htmlFor="tc-module" className="block text-sm font-medium text-gray-700 mb-1">Module</label>
                   <input
+                    id="tc-module"
                     type="text"
                     value={formData.module || ''}
                     onChange={(e) => setFormData({ ...formData, module: e.target.value })}
