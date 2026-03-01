@@ -19,7 +19,7 @@ export async function login(page: Page, email: string, password: string): Promis
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(password);
 
-  // Click sign in and wait for the API response
+  // Click sign in and wait for both API responses (login + me)
   await Promise.all([
     page.waitForResponse(
       (resp) => resp.url().includes('/api/v1/auth/login') && resp.status() === 200,
@@ -27,6 +27,12 @@ export async function login(page: Page, email: string, password: string): Promis
     ),
     page.getByRole('button', { name: /sign in/i }).click(),
   ]);
+
+  // Wait for the /auth/me call that the AuthProvider makes after login
+  await page.waitForResponse(
+    (resp) => resp.url().includes('/api/v1/auth/me') && resp.status() === 200,
+    { timeout: AUTH_TIMEOUT_MS },
+  );
 
   // Wait until redirected away from the login page
   await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: AUTH_TIMEOUT_MS });
