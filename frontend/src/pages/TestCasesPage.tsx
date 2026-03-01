@@ -251,16 +251,16 @@ export const TestCasesPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as TestCaseType })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="FUNCTIONAL">Functional</option>
-                      <option value="INTEGRATION">Integration</option>
-                      <option value="SYSTEM">System</option>
-                      <option value="ACCEPTANCE">Acceptance</option>
-                      <option value="REGRESSION">Regression</option>
-                      <option value="SMOKE">Smoke</option>
-                      <option value="PERFORMANCE">Performance</option>
-                      <option value="SECURITY">Security</option>
-                      <option value="USABILITY">Usability</option>
-                      <option value="API">API</option>
+                      <option value={TestCaseType.FUNCTIONAL}>Functional</option>
+                      <option value={TestCaseType.INTEGRATION}>Integration</option>
+                      <option value={TestCaseType.SYSTEM}>System</option>
+                      <option value={TestCaseType.ACCEPTANCE}>Acceptance</option>
+                      <option value={TestCaseType.REGRESSION}>Regression</option>
+                      <option value={TestCaseType.SMOKE}>Smoke</option>
+                      <option value={TestCaseType.PERFORMANCE}>Performance</option>
+                      <option value={TestCaseType.SECURITY}>Security</option>
+                      <option value={TestCaseType.USABILITY}>Usability</option>
+                      <option value={TestCaseType.API}>API</option>
                     </select>
                   </div>
 
@@ -272,10 +272,10 @@ export const TestCasesPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as PriorityLevel })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="CRITICAL">Critical</option>
-                      <option value="HIGH">High</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="LOW">Low</option>
+                      <option value={PriorityLevel.CRITICAL}>Critical</option>
+                      <option value={PriorityLevel.HIGH}>High</option>
+                      <option value={PriorityLevel.MEDIUM}>Medium</option>
+                      <option value={PriorityLevel.LOW}>Low</option>
                     </select>
                   </div>
 
@@ -287,14 +287,14 @@ export const TestCasesPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as TestCaseStatus })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                     >
-                      <option value="DRAFT">Draft</option>
-                      <option value="READY">Ready</option>
-                      <option value="IN_PROGRESS">In Progress</option>
-                      <option value="PASSED">Passed</option>
-                      <option value="FAILED">Failed</option>
-                      <option value="BLOCKED">Blocked</option>
-                      <option value="SKIPPED">Skipped</option>
-                      <option value="DEPRECATED">Deprecated</option>
+                      <option value={TestCaseStatus.DRAFT}>Draft</option>
+                      <option value={TestCaseStatus.READY}>Ready</option>
+                      <option value={TestCaseStatus.IN_PROGRESS}>In Progress</option>
+                      <option value={TestCaseStatus.PASSED}>Passed</option>
+                      <option value={TestCaseStatus.FAILED}>Failed</option>
+                      <option value={TestCaseStatus.BLOCKED}>Blocked</option>
+                      <option value={TestCaseStatus.SKIPPED}>Skipped</option>
+                      <option value={TestCaseStatus.DEPRECATED}>Deprecated</option>
                     </select>
                   </div>
                 </div>
