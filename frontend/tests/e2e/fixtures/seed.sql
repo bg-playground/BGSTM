@@ -7,13 +7,6 @@
 -- ============================================================
 INSERT INTO users (id, email, hashed_password, full_name, role, is_active, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000001',
-   'admin@test.com',
-   '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s9u.Ge',
-   'Test Admin',
-   'admin',
-   true,
-   NOW(), NOW()),
   ('00000000-0000-0000-0000-000000000002',
    'reviewer@test.com',
    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s9u.Ge',
