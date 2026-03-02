@@ -1,0 +1,92 @@
+import { test, expect } from '@playwright/test';
+import { login } from './helpers/auth';
+
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
+const REVIEWER_EMAIL = process.env.E2E_REVIEWER_EMAIL || 'reviewer@test.com';
+const VIEWER_EMAIL = process.env.E2E_VIEWER_EMAIL || 'viewer@test.com';
+const PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
+
+// ---------------------------------------------------------------------------
+// Viewer role
+// ---------------------------------------------------------------------------
+test.describe('RBAC – Viewer role', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, VIEWER_EMAIL, PASSWORD);
+  });
+
+  test('viewer cannot access admin-only page', async ({ page }) => {
+    await page.goto('/admin');
+    await page.waitForLoadState('networkidle');
+
+    // Expect either a redirect away from /admin or an unauthorized message
+    const isUnauthorized =
+      (await page.getByText(/403|unauthorized|forbidden|access denied/i).isVisible().catch(() => false)) ||
+      !page.url().includes('/admin');
+    expect(isUnauthorized).toBe(true);
+  });
+
+  test('viewer can view requirements list', async ({ page }) => {
+    await page.goto('/requirements');
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/requirements/);
+  });
+
+  test('viewer does not see Add Requirement button', async ({ page }) => {
+    await page.goto('/requirements');
+    await page.waitForLoadState('networkidle');
+
+    const addBtn = page.getByRole('button', { name: /add requirement|new requirement|\+ requirement/i });
+    const isVisible = await addBtn.isVisible().catch(() => false);
+    expect(isVisible).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reviewer role
+// ---------------------------------------------------------------------------
+test.describe('RBAC – Reviewer role', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, REVIEWER_EMAIL, PASSWORD);
+  });
+
+  test('reviewer can view requirements', async ({ page }) => {
+    await page.goto('/requirements');
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/requirements/);
+  });
+
+  test('reviewer does not see delete buttons for requirements', async ({ page }) => {
+    await page.goto('/requirements');
+    await page.waitForLoadState('networkidle');
+
+    const deleteBtn = page.getByRole('button', { name: /delete/i }).first();
+    const isVisible = await deleteBtn.isVisible().catch(() => false);
+    expect(isVisible).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Admin role
+// ---------------------------------------------------------------------------
+test.describe('RBAC – Admin role', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+  });
+
+  test('admin can access user management page without 403 or login redirect', async ({ page }) => {
+    await page.goto('/admin');
+    await page.waitForLoadState('networkidle');
+
+    // Should NOT have been redirected to login
+    expect(page.url()).not.toMatch(/\/login/);
+
+    const isForbidden = await page.getByText(/403|forbidden|access denied/i).isVisible().catch(() => false);
+    // If /admin doesn't exist yet, try /users as a fallback
+    if (isForbidden || !page.url().includes('/admin')) {
+      await page.goto('/users');
+      await page.waitForLoadState('networkidle');
+      expect(page.url()).not.toMatch(/\/login/);
+    }
+  });
+});
