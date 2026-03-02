@@ -15,7 +15,7 @@ scikit-learn==1.8.0
 PyJWT==2.10.1
 bcrypt>=4.0.0
 email-validator==2.2.0
-reportlab==4.4.1
+reportlab==4.4.10
 
 # Optional dependencies for LLM embeddings
 # Uncomment the lines below if using LLM-based similarity
