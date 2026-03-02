@@ -32,6 +32,8 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
       ALGORITHM: HS256
       E2E_SEED_SQL: /app/seed.sql
+      DEFAULT_ADMIN_EMAIL: admin@test.com
+      DEFAULT_ADMIN_PASSWORD: password123
     volumes:
       - ./frontend/tests/e2e/fixtures/seed.sql:/app/seed.sql:ro
     ports:
@@ -53,8 +55,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: bgstm-test-frontend
-    environment:
-      VITE_API_BASE_URL: http://localhost:8001
     ports:
       - "3001:80"
     depends_on:
