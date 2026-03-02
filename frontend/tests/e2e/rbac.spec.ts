@@ -16,7 +16,7 @@ test.describe('RBAC – Viewer role', () => {
   });
 
   test('viewer cannot access admin-only page', async ({ page }) => {
-    await page.goto('/admin');
+    await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 
     // Expect either a redirect away from /admin or an unauthorized message
@@ -75,18 +75,14 @@ test.describe('RBAC – Admin role', () => {
   });
 
   test('admin can access user management page without 403 or login redirect', async ({ page }) => {
-    await page.goto('/admin');
+    await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 
     // Should NOT have been redirected to login
     expect(page.url()).not.toMatch(/\/login/);
 
+    // Should NOT see a 403/forbidden page
     const isForbidden = await page.getByText(/403|forbidden|access denied/i).isVisible().catch(() => false);
-    // If /admin doesn't exist yet, try /users as a fallback
-    if (isForbidden || !page.url().includes('/admin')) {
-      await page.goto('/users');
-      await page.waitForLoadState('networkidle');
-      expect(page.url()).not.toMatch(/\/login/);
-    }
+    expect(isForbidden).toBe(false);
   });
 });
