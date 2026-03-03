@@ -20,7 +20,9 @@ class User(Base, TimestampMixin):
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.reviewer)
+    role = Column(
+        Enum(UserRole, values_callable=lambda x: [e.value for e in x]), nullable=False, default=UserRole.reviewer
+    )
     is_active = Column(Boolean, default=True, nullable=False)
 
     def __repr__(self):
