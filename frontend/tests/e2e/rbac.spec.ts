@@ -19,11 +19,13 @@ test.describe('RBAC – Viewer role', () => {
     await page.goto('/admin/users');
     await page.waitForLoadState('networkidle');
 
-    // Expect either a redirect away from /admin or an unauthorized message
-    const isUnauthorized =
-      (await page.getByText(/403|unauthorized|forbidden|access denied/i).isVisible().catch(() => false)) ||
-      !page.url().includes('/admin');
-    expect(isUnauthorized).toBe(true);
+    // Either redirected away from /admin, or an unauthorized message is shown (with auto-retry for React render)
+    const isRedirected = !page.url().includes('/admin');
+    if (!isRedirected) {
+      await expect(page.getByText(/403|unauthorized|forbidden|access denied/i)).toBeVisible({
+        timeout: 10_000,
+      });
+    }
   });
 
   test('viewer can view requirements list', async ({ page }) => {

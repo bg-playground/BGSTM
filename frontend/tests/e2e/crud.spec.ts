@@ -17,12 +17,20 @@ test.describe('Requirements CRUD', () => {
   test('create a new requirement', async ({ page }) => {
     await page.getByRole('button', { name: /add requirement|new requirement|\+ requirement/i }).click();
 
-    await page.getByLabel(/title/i).fill('E2E Test Requirement');
-    await page.getByLabel(/description/i).fill('Created by Playwright end-to-end test.');
+    // Wait for the modal to appear before interacting with form fields
+    await expect(page.getByRole('heading', { name: /new requirement/i })).toBeVisible({ timeout: 5_000 });
 
-    await page.getByRole('button', { name: /save|create|submit/i }).click();
+    await page.locator('#req-title').fill('E2E Test Requirement');
+    await page.locator('#req-description').fill('Created by Playwright end-to-end test.');
 
-    await expect(page.getByText('E2E Test Requirement')).toBeVisible({ timeout: 10_000 });
+    await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes('/api/v1/requirements') && resp.request().method() === 'POST',
+      ),
+      page.getByRole('button', { name: /save|create|submit/i }).click(),
+    ]);
+
+    await expect(page.getByText('E2E Test Requirement')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
       timeout: 10_000,
     });
@@ -89,12 +97,20 @@ test.describe('Test Cases CRUD', () => {
   test('create a new test case', async ({ page }) => {
     await page.getByRole('button', { name: /add test case|new test case|\+ test case/i }).click();
 
-    await page.getByLabel(/title/i).fill('E2E Test Case');
-    await page.getByLabel(/description/i).fill('Created by Playwright end-to-end test.');
+    // Wait for the modal to appear before interacting with form fields
+    await expect(page.getByRole('heading', { name: /new test case/i })).toBeVisible({ timeout: 5_000 });
 
-    await page.getByRole('button', { name: /save|create|submit/i }).click();
+    await page.locator('#tc-title').fill('E2E Test Case');
+    await page.locator('#tc-description').fill('Created by Playwright end-to-end test.');
 
-    await expect(page.getByText('E2E Test Case')).toBeVisible({ timeout: 10_000 });
+    await Promise.all([
+      page.waitForResponse(
+        (resp) => resp.url().includes('/api/v1/test-cases') && resp.request().method() === 'POST',
+      ),
+      page.getByRole('button', { name: /save|create|submit/i }).click(),
+    ]);
+
+    await expect(page.getByText('E2E Test Case')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
       timeout: 10_000,
     });

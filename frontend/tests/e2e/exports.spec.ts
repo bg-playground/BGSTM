@@ -15,8 +15,6 @@ test.describe('Export Functionality', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
-
     // Look for an export/CSV button on the Suggestion Dashboard
     const exportBtn = page
       .getByRole('button', { name: /export.*csv|csv.*export|download.*csv/i })
@@ -27,6 +25,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    // Register download listener AFTER confirming the button is visible
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
 
     const download = await downloadPromise;
@@ -37,8 +37,6 @@ test.describe('Export Functionality', () => {
     await page.goto('/traceability');
     await page.waitForLoadState('networkidle');
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
-
     const exportBtn = page
       .getByRole('button', { name: /export.*pdf|pdf.*export|download.*pdf/i })
       .first();
@@ -48,6 +46,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    // Register download listener AFTER confirming the button is visible
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
 
     const download = await downloadPromise;
@@ -58,8 +58,6 @@ test.describe('Export Functionality', () => {
     await page.goto('/metrics');
     await page.waitForLoadState('networkidle');
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
-
     const exportBtn = page
       .getByRole('button', { name: /export.*csv|csv.*export|download.*csv/i })
       .first();
@@ -69,6 +67,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    // Register download listener AFTER confirming the button is visible
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
 
     const download = await downloadPromise;

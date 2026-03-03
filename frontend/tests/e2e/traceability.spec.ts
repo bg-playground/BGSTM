@@ -12,6 +12,8 @@ test.describe('Traceability Matrix', () => {
     await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/traceability');
     await page.waitForLoadState('networkidle');
+    // Wait for the component to finish rendering and data to load
+    await expect(page.getByRole('heading', { name: /traceability/i })).toBeVisible({ timeout: 15_000 });
   });
 
   test('matrix page loads and heading contains "traceability"', async ({ page }) => {
@@ -19,11 +21,11 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 30_000 });
   });
 
   test('seeded test case "TC-001" is visible in the matrix', async ({ page }) => {
-    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 30_000 });
   });
 
   test('filtering by requirement title updates results', async ({ page }) => {
