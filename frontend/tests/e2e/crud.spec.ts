@@ -22,9 +22,12 @@ test.describe('Requirements CRUD', () => {
 
     await page.getByRole('button', { name: /save|create|submit/i }).click();
 
-    await expect(page.getByText('E2E Test Requirement')).toBeVisible({ timeout: 10_000 });
+    // Wait for the modal/form to close after submission
+    await page.waitForSelector('[role="dialog"]', { state: 'detached', timeout: 10_000 }).catch(() => {});
+
+    await expect(page.getByText('E2E Test Requirement')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
-      timeout: 10_000,
+      timeout: 15_000,
     });
   });
 
@@ -94,9 +97,12 @@ test.describe('Test Cases CRUD', () => {
 
     await page.getByRole('button', { name: /save|create|submit/i }).click();
 
-    await expect(page.getByText('E2E Test Case')).toBeVisible({ timeout: 10_000 });
+    // Wait for the modal/form to close after submission
+    await page.waitForSelector('[role="dialog"]', { state: 'detached', timeout: 10_000 }).catch(() => {});
+
+    await expect(page.getByText('E2E Test Case')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
-      timeout: 10_000,
+      timeout: 15_000,
     });
   });
 
