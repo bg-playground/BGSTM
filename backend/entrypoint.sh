@@ -13,7 +13,12 @@ if [ -n "${E2E_SEED_SQL}" ] && [ -f "${E2E_SEED_SQL}" ]; then
     echo "Seeding E2E test data from ${E2E_SEED_SQL}..."
     # Convert asyncpg URL to standard psql URL
     PSQL_URL=$(echo "${DATABASE_URL}" | sed 's|postgresql+asyncpg://|postgresql://|')
-    psql "${PSQL_URL}" -f "${E2E_SEED_SQL}" || echo "WARNING: psql exited with a non-zero status (seed may already be applied or a constraint violation occurred)."
+    if ! psql "${PSQL_URL}" -f "${E2E_SEED_SQL}"; then
+        echo "ERROR: Seed script failed! Backend will not start with incomplete test data."
+        echo "Check the SQL for type mismatches or missing tables."
+        exit 1
+    fi
+    echo "Seed script completed successfully."
 else
     echo "No E2E seed file found, skipping seed step."
 fi
