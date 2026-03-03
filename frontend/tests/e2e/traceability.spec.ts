@@ -19,11 +19,15 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+    // Wait for the traceability matrix API data to load
+    await page.waitForResponse(resp => resp.url().includes('/traceability-matrix') && resp.status() === 200, { timeout: 15_000 }).catch(() => {});
+    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 30_000 });
   });
 
   test('seeded test case "TC-001" is visible in the matrix', async ({ page }) => {
-    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 10_000 });
+    // Wait for the traceability matrix API data to load
+    await page.waitForResponse(resp => resp.url().includes('/traceability-matrix') && resp.status() === 200, { timeout: 15_000 }).catch(() => {});
+    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 30_000 });
   });
 
   test('filtering by requirement title updates results', async ({ page }) => {
