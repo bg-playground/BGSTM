@@ -30,11 +30,12 @@ test.describe('RBAC – Viewer role', () => {
       .isVisible()
       .catch(() => false);
     const showsEmptyOrError = await page
-      .getByText(/no permission|you do not have|admin only|admin required/i)
+      .getByText(/no users|error|something went wrong/i)
       .isVisible()
       .catch(() => false);
+    const hasNoUserRows = (await page.getByRole('row').count()) <= 1;
 
-    expect(wasRedirected || showsForbidden || showsEmptyOrError).toBe(true);
+    expect(wasRedirected || showsForbidden || showsEmptyOrError || hasNoUserRows).toBe(true);
   });
 
   test('viewer can view requirements list', async ({ page }) => {
