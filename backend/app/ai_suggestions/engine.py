@@ -202,6 +202,11 @@ class SuggestionEngine:
         req_texts = {req.id: self._combine_text(req) for req in requirements}
         tc_texts = {tc.id: self._combine_test_case_text(tc) for tc in test_cases}
 
+        # Pre-embed all texts in a single batched API call when using the LLM algorithm
+        if self.config.default_algorithm == "llm":
+            all_texts = list({*req_texts.values(), *tc_texts.values()})
+            self.algorithm.precompute_embeddings(all_texts)
+
         pairs_analyzed = 0
         suggestions_created = 0
         suggestions_skipped = 0

@@ -45,6 +45,8 @@ class SuggestionConfig(BaseModel):
 
     llm_cache_embeddings: bool = Field(default=True, description="Cache embeddings in memory for performance")
 
+    llm_batch_size: int = Field(default=2048, description="Maximum number of texts per batch embedding API call")
+
     class Config:
         frozen = False
 
