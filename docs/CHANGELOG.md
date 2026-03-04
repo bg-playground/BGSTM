@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-platform integration guide for building testing management applications
 - Getting Started guide for new users
 - CONTRIBUTING.md with contribution guidelines
-- LICENSE file (Creative Commons Attribution 4.0 International)
+- LICENSE file (MIT License)
 - GitHub issue templates for bug reports, documentation improvements, feature requests, and template contributions
 - Project labels: documentation, enhancement, templates, examples, integration
 - Project milestones: v1.0 Core Framework, v1.1 Templates & Examples, v2.0 Traceability & AI Features, v3.0 App Integration

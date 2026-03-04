@@ -10,6 +10,7 @@ Thank you for your interest in contributing to BGSTM (Better Global Software Tes
 - [Pull Request Process](#pull-request-process)
 - [Style Guidelines](#style-guidelines)
 - [Issue Reporting Guidelines](#issue-reporting-guidelines)
+- [Releasing](#releasing)
 - [Contact](#contact)
 
 ## 🤝 Code of Conduct
@@ -292,6 +293,37 @@ All contributors will be recognized for their contributions. We value every cont
 - Issue reporting and triage
 - Community support
 - Spreading the word about BGSTM
+
+## 🚢 Releasing
+
+Maintainers with push access can publish a new GitHub Release by following these steps:
+
+1. **Update the changelog** — Add an entry for the new version in `docs/CHANGELOG.md` under a heading like:
+   ```markdown
+   ## [X.Y.Z] - YYYY-MM-DD
+   ```
+
+2. **Add the footer link** — At the bottom of `docs/CHANGELOG.md`, add:
+   ```markdown
+   [X.Y.Z]: https://github.com/bg-playground/BGSTM/releases/tag/vX.Y.Z
+   ```
+
+3. **Commit and push to main**
+   ```bash
+   git add docs/CHANGELOG.md
+   git commit -m "chore: release vX.Y.Z"
+   git push origin main
+   ```
+
+4. **Create and push the tag**
+   ```bash
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+5. **Automatic release** — The `release.yml` workflow will trigger automatically, extract the changelog section for the version, and create a GitHub Release with those notes.
+
+> **Pre-releases:** Tags containing `-alpha`, `-beta`, or `-rc` (e.g., `v2.1.0-beta.1`) are automatically marked as pre-releases.
 
 ## 📚 Additional Resources
 
