@@ -110,4 +110,4 @@ async def delete_stale_embeddings(db: AsyncSession, older_than_days: int = 90) -
     cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=older_than_days)
     result = await db.execute(delete(EmbeddingCache).where(EmbeddingCache.updated_at < cutoff))
     await db.flush()
-    return result.rowcount
+    return result.rowcount  # type: ignore[attr-defined]
