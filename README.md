@@ -3,6 +3,7 @@
 [![Backend CI](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml)
 [![Frontend CI](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml)
 [![Docker Build](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml)
+[![E2E Tests](https://github.com/bg-playground/BGSTM/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/e2e-tests.yml)
 
 **BGSTM** (Better Global Software Testing Methodology) is a comprehensive, professional software testing framework adaptable to various software development methodologies including Agile, Scrum, and Waterfall.
 
@@ -186,6 +187,97 @@ alembic upgrade head
 # Start server
 uvicorn app.main:app --reload --port 8000
 ```
+
+## 🧪 Testing
+
+### Backend Unit Tests
+
+```bash
+cd backend
+pytest                     # Run all backend tests
+pytest -v                  # Verbose output
+pytest --cov=app           # With coverage report
+```
+
+Or inside Docker:
+
+```bash
+docker-compose exec backend pytest
+```
+
+### Frontend Lint & Type Check
+
+```bash
+cd frontend
+npm run lint               # ESLint
+npm run type-check         # TypeScript type checking
+```
+
+### End-to-End Tests (Playwright)
+
+The E2E test suite uses [Playwright](https://playwright.dev/) to test critical flows against a fully dockerized stack (PostgreSQL + FastAPI backend + React frontend).
+
+**Quick start with Docker Compose:**
+
+```bash
+# 1. Start the test environment (builds & seeds the database)
+docker compose -f docker-compose.test.yml up -d
+
+# 2. Wait for services to be healthy (~60-90s)
+curl -sf http://localhost:8001/health   # backend
+curl -sf http://localhost:3001          # frontend
+
+# 3. Install Playwright (first time only)
+cd frontend
+npm ci
+npx playwright install --with-deps chromium
+
+# 4. Run the tests
+PLAYWRIGHT_BASE_URL=http://localhost:3001 \
+E2E_ADMIN_EMAIL=admin@test.com \
+E2E_ADMIN_PASSWORD=password123 \
+npx playwright test
+
+# 5. View the HTML report
+npx playwright show-report
+
+# 6. Tear down
+cd ..
+docker compose -f docker-compose.test.yml down -v
+```
+
+**Test suites:**
+
+| Spec File | Coverage |
+|---|---|
+| `auth.spec.ts` | Registration, login, logout, protected routes |
+| `suggestions.spec.ts` | Suggestion dashboard, filters, accept/reject |
+| `crud.spec.ts` | Requirements & test case CRUD (create, edit, delete) |
+| `traceability.spec.ts` | Traceability matrix data, filtering, export buttons |
+| `exports.spec.ts` | CSV and PDF export downloads |
+| `rbac.spec.ts` | Role-based access: viewer, reviewer, admin |
+| `notifications.spec.ts` | Notification bell, mark-as-read, lifecycle |
+
+**Useful commands:**
+
+```bash
+npx playwright test --headed           # Watch in browser
+npx playwright test --ui               # Interactive UI mode
+npx playwright test auth.spec.ts       # Run a single spec
+npx playwright test --project=chromium # Chromium only (default in CI)
+```
+
+**Environment variables:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `PLAYWRIGHT_BASE_URL` | `http://localhost:3000` | Frontend URL |
+| `E2E_ADMIN_EMAIL` | `admin@test.com` | Seeded admin email |
+| `E2E_ADMIN_PASSWORD` | `password123` | Seeded admin password |
+
+> **Note:** In CI, the E2E tests run automatically via the [E2E Tests workflow](.github/workflows/e2e-tests.yml) on every push/PR to `main` that touches `frontend/`, `backend/`, or `docker-compose.test.yml`.
+
+For full details, see the [E2E Test README](frontend/tests/e2e/README.md).
 
 ## 🤝 Contributing
 
