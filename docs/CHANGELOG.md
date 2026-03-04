@@ -7,14 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-03-04
+
 ### Added
-- Traceability matrix API endpoint with coverage analysis and gap identification (#44)
-- Metrics API endpoint with coverage percentage and suggestion acceptance rate (#44)
-- CSV and JSON export for traceability matrix (#44)
-- Frontend traceability matrix view and metrics dashboard (#44)
-- React + TypeScript frontend with suggestion review dashboard, CRUD views, and manual link management (#43)
-- Dockerfile and docker-compose.yml for containerized backend deployment (#42)
-- GitHub Actions CI/CD pipeline for automated testing, linting, and type checking (#40)
+- **User Authentication & RBAC** — JWT-based authentication with admin, reviewer, and viewer roles; login, register, and logout flows
+- **Notification System** — In-app notifications for suggestion generation, coverage drops, suggestion reviews, and requirement/test case creation events; mark as read and mark all as read
+- **Audit Logging** — Full audit trail for all user actions including CRUD operations on requirements, test cases, links, and suggestions
+- **Traceability Matrix View** — Visual matrix showing requirement-to-test-case coverage with filtering and PDF export
+- **Metrics Dashboard** — Coverage metrics and suggestion statistics, exportable as CSV
+- **E2E Test Suite** — Comprehensive Playwright end-to-end tests covering auth, CRUD, suggestions, RBAC, traceability, exports, and notifications; Docker Compose test environment (`docker-compose.test.yml`); CI workflow (`.github/workflows/e2e-tests.yml`)
+- **AI Suggestion Engine Enhancements** — LLM embedding support (OpenAI & HuggingFace), batch embedding with caching, event-driven suggestion generation
+- **Database Migrations** — Alembic migration system with versioned migrations for all tables (requirements, test_cases, link_suggestions, users, audit_log, notifications, performance indexes)
+- **Docker & DevOps** — Full Docker Compose setup for production and testing, setup scripts (`setup.sh`, `setup.bat`), CI/CD workflows for backend, frontend, Docker, and E2E tests
+- **MkDocs Documentation Site** — Material theme with dark/light mode, search, code copy, and GitHub Pages deployment; explicit nav with tabs covering all documentation sections
 
 ## [1.0.0] - 2026-02-17
 
@@ -48,4 +53,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Standardized all phase documentation to follow a uniform structure
 
+[2.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v2.0.0
 [1.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v1.0.0
