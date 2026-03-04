@@ -99,6 +99,10 @@ class ArrayType(TypeDecorator):
         return value
 
 
+def _enum_values(x):
+    return [e.value for e in x]
+
+
 class RequirementType(str, enum.Enum):
     FUNCTIONAL = "functional"
     NON_FUNCTIONAL = "non_functional"
@@ -127,9 +131,11 @@ class Requirement(Base, TimestampMixin):
     external_id = Column(String(100), unique=True, nullable=True, index=True)
     title = Column(String(500), nullable=False, index=True)
     description = Column(Text, nullable=False)
-    type = Column(Enum(RequirementType), nullable=False)
-    priority = Column(Enum(PriorityLevel), nullable=False)
-    status = Column(Enum(RequirementStatus), nullable=False, default=RequirementStatus.DRAFT)
+    type = Column(Enum(RequirementType, values_callable=_enum_values), nullable=False)
+    priority = Column(Enum(PriorityLevel, values_callable=_enum_values), nullable=False)
+    status = Column(
+        Enum(RequirementStatus, values_callable=_enum_values), nullable=False, default=RequirementStatus.DRAFT
+    )
     module = Column(String(100), nullable=True)
     tags = Column(ArrayType(), nullable=True)
     custom_metadata = Column(JSON(), nullable=True)
