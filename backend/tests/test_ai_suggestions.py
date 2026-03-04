@@ -234,6 +234,161 @@ def test_llm_embedding_similarity_missing_openai_library():
             LLMEmbeddingSimilarity(provider="openai")
 
 
+def test_llm_get_embeddings_batch_openai():
+    """Test that get_embeddings_batch returns embeddings in order and populates cache"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        emb_a = [0.1] * 1536
+        emb_b = [0.2] * 1536
+
+        def make_response(texts):
+            embeddings = [emb_a if t == "text_a" else emb_b for t in texts]
+            resp = MagicMock()
+            resp.data = [MagicMock(embedding=e) for e in embeddings]
+            return resp
+
+        mock_client.embeddings.create.side_effect = lambda input, model: make_response(input)
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+
+            texts = ["text_a", "text_b", "text_a"]
+            result = algo.get_embeddings_batch(texts)
+
+            # Correct order and values
+            assert result[0] == emb_a
+            assert result[1] == emb_b
+            assert result[2] == emb_a  # duplicate resolved from cache
+
+            # Cache should be populated
+            assert algo._embedding_cache["text_a"] == emb_a
+            assert algo._embedding_cache["text_b"] == emb_b
+
+            # Only one API call (deduplication)
+            assert mock_client.embeddings.create.call_count == 1
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_get_embeddings_batch_uses_cache():
+    """Test that already-cached texts are not re-fetched"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=[0.3] * 1536)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+
+            # Pre-populate cache for "cached_text"
+            algo._embedding_cache["cached_text"] = [0.9] * 1536
+
+            result = algo.get_embeddings_batch(["cached_text", "new_text"])
+
+            # Cached text should return the cached value
+            assert result[0] == [0.9] * 1536
+            # New text fetched from API
+            assert result[1] == [0.3] * 1536
+
+            # API called only once for the new text
+            assert mock_client.embeddings.create.call_count == 1
+            call_args = mock_client.embeddings.create.call_args
+            assert (
+                call_args.kwargs["input"] == ["new_text"]
+                or call_args.args[0] == ["new_text"]
+                or "new_text" in str(call_args)
+            )
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_get_embeddings_batch_chunking():
+    """Test that batch embedding chunks input when it exceeds batch_size"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        def make_response(texts):
+            resp = MagicMock()
+            resp.data = [MagicMock(embedding=[float(i)] * 4) for i in range(len(texts))]
+            return resp
+
+        mock_client.embeddings.create.side_effect = lambda input, model: make_response(input)
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            # Use a small batch_size of 3
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True, batch_size=3)
+
+            texts = [f"text_{i}" for i in range(7)]
+            result = algo.get_embeddings_batch(texts)
+
+            assert len(result) == 7
+
+            # 7 unique texts with batch_size=3 → ceil(7/3) = 3 API calls
+            assert mock_client.embeddings.create.call_count == 3
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+def test_llm_precompute_embeddings_warms_cache():
+    """Test that precompute_embeddings populates the cache before pairwise computation"""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        emb = [0.5] * 1536
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=emb), MagicMock(embedding=emb)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+
+            texts = ["req text", "tc text"]
+            algo.precompute_embeddings(texts)
+
+            # Cache should be warm
+            assert "req text" in algo._embedding_cache
+            assert "tc text" in algo._embedding_cache
+
+            api_calls_after_precompute = mock_client.embeddings.create.call_count
+
+            # compute_similarity should not make additional API calls
+            algo.compute_similarity("req text", "tc text")
+            assert mock_client.embeddings.create.call_count == api_calls_after_precompute
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
 # Engine Tests (with DB)
 
 

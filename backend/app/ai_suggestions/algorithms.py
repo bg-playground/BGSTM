@@ -11,6 +11,9 @@ class SimilarityAlgorithm:
         """Compute similarity between two texts. Returns score 0.0-1.0"""
         raise NotImplementedError
 
+    def precompute_embeddings(self, texts: list[str]) -> None:
+        """Pre-compute embeddings for a list of texts. No-op by default."""
+
 
 class TFIDFSimilarity(SimilarityAlgorithm):
     """TF-IDF based cosine similarity using scikit-learn"""
@@ -341,16 +344,20 @@ class HybridSimilarity(SimilarityAlgorithm):
 class LLMEmbeddingSimilarity(SimilarityAlgorithm):
     """LLM-based embedding similarity using OpenAI or HuggingFace"""
 
-    def __init__(self, provider: str = "openai", model: str = None, cache_embeddings: bool = True):
+    def __init__(
+        self, provider: str = "openai", model: str = None, cache_embeddings: bool = True, batch_size: int = 2048
+    ):
         """
         Args:
             provider: 'openai' or 'huggingface'
             model: Model name (e.g., 'text-embedding-3-small' for OpenAI,
                 'sentence-transformers/all-MiniLM-L6-v2' for HF)
             cache_embeddings: Whether to cache embeddings in memory for performance
+            batch_size: Maximum number of texts per batch embedding API call
         """
         self.provider = provider.lower()
         self.cache_embeddings = cache_embeddings
+        self.batch_size = batch_size
         self._embedding_cache = {} if cache_embeddings else None
 
         if self.provider == "openai":
@@ -411,6 +418,56 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
             self._embedding_cache[text] = embedding
 
         return embedding
+
+    def get_embeddings_batch(self, texts: list[str]) -> list[list[float]]:
+        """
+        Get embeddings for a batch of texts, using cache where available.
+
+        Uncached texts are sent to the API/model in a single batched call.
+        Handles the OpenAI batch size limit (2048) by chunking if needed.
+
+        Args:
+            texts: List of text strings to embed
+
+        Returns:
+            List of embedding vectors in the same order as the input texts
+        """
+        if not texts:
+            return []
+
+        # Local result map covers both cached and newly fetched embeddings
+        result_map: dict[str, list[float]] = {}
+
+        # Populate from cache first
+        if self._embedding_cache is not None:
+            for t in texts:
+                if t in self._embedding_cache:
+                    result_map[t] = self._embedding_cache[t]
+
+        # Collect unique uncached texts (preserve order with dict.fromkeys)
+        unique_uncached = list(dict.fromkeys(t for t in texts if t not in result_map))
+
+        if unique_uncached:
+            # Chunk to respect API limits (OpenAI max: 2048)
+            chunk_size = self.batch_size
+            for i in range(0, len(unique_uncached), chunk_size):
+                chunk = unique_uncached[i : i + chunk_size]
+                if self.provider == "openai":
+                    response = self.client.embeddings.create(input=chunk, model=self.model)
+                    new_embeddings = [item.embedding for item in response.data]
+                else:  # huggingface
+                    new_embeddings = [vec.tolist() for vec in self.model_instance.encode(chunk)]
+
+                for text, embedding in zip(chunk, new_embeddings):
+                    result_map[text] = embedding
+                    if self.cache_embeddings and self._embedding_cache is not None:
+                        self._embedding_cache[text] = embedding
+
+        return [result_map[t] for t in texts]
+
+    def precompute_embeddings(self, texts: list[str]) -> None:
+        """Pre-compute and cache embeddings for a list of texts in a single batched API call."""
+        self.get_embeddings_batch(texts)
 
     def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Compute cosine similarity between two vectors"""
@@ -475,6 +532,7 @@ def get_algorithm(algorithm_name: str, config=None) -> SimilarityAlgorithm:
                 "provider": getattr(config, "llm_provider", "openai"),
                 "model": getattr(config, "llm_model", None),
                 "cache_embeddings": getattr(config, "llm_cache_embeddings", True),
+                "batch_size": getattr(config, "llm_batch_size", 2048),
             }
         return LLMEmbeddingSimilarity(**kwargs)
 

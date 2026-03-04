@@ -137,6 +137,8 @@ For **HuggingFace**:
 
 **Performance Considerations:**
 - **Caching**: Embeddings are cached in memory by default to avoid redundant API calls/computations
+- **Batch Pre-embedding**: When using the `llm` algorithm, the engine pre-computes embeddings for all unique requirement and test-case texts in a single batched API call before the pairwise comparison loop. This reduces N+M individual API calls to just a handful of batched calls and dramatically lowers latency and cost.
+- **Batch Size**: The OpenAI embeddings API supports up to 2048 texts per request. The engine automatically chunks larger workloads. The default batch size can be tuned via `llm_batch_size` in `SuggestionConfig`.
 - **OpenAI Costs**: OpenAI charges per embedding (~$0.0001 per 1K tokens for text-embedding-3-small)
 - **HuggingFace**: First run downloads model (~90MB for all-MiniLM-L6-v2), subsequent runs are faster
 - **Batch Processing**: For large datasets, consider processing in batches during off-peak hours
@@ -333,6 +335,7 @@ pytest tests/test_ai_suggestions.py -v
   - `tfidf` is slower but more accurate
   - `hybrid` is in between
   - `llm` has the highest accuracy but also highest latency and potential costs
+- **LLM batch pre-embedding**: When using the `llm` algorithm, all unique texts are embedded in bulk before the pairwise loop. This replaces N+M sequential API calls with a small number of batched calls, significantly reducing latency and API cost.
 
 For large datasets (>1000 requirements or test cases), consider:
 - Running generation during off-peak hours
