@@ -13,7 +13,7 @@
     "test:e2e:headed": "npx playwright test --headed"
   },
   "dependencies": {
-    "@types/react-window": "^1.8.8",
+    "@types/react-window": "^2.0.0",
     "axios": "^1.13.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

@@ -15,8 +15,6 @@ test.describe('Export Functionality', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
-
     // Look for an export/CSV button on the Suggestion Dashboard
     const exportBtn = page
       .getByRole('button', { name: /export.*csv|csv.*export|download.*csv/i })
@@ -27,8 +25,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
-
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.csv$/i);
   });
@@ -36,8 +34,6 @@ test.describe('Export Functionality', () => {
   test('export traceability matrix as PDF triggers a download', async ({ page }) => {
     await page.goto('/traceability');
     await page.waitForLoadState('networkidle');
-
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
 
     const exportBtn = page
       .getByRole('button', { name: /export.*pdf|pdf.*export|download.*pdf/i })
@@ -48,8 +44,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
-
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
   });
@@ -57,8 +53,6 @@ test.describe('Export Functionality', () => {
   test('export metrics as CSV triggers a download', async ({ page }) => {
     await page.goto('/metrics');
     await page.waitForLoadState('networkidle');
-
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
 
     const exportBtn = page
       .getByRole('button', { name: /export.*csv|csv.*export|download.*csv/i })
@@ -69,8 +63,8 @@ test.describe('Export Functionality', () => {
       return;
     }
 
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
     await exportBtn.click();
-
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.csv$/i);
 

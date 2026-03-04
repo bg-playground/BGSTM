@@ -19,10 +19,15 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
+    // Wait for matrix data to load (table, grid, or list)
+    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
+    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
   });
 
   test('seeded test case "TC-001" is visible in the matrix', async ({ page }) => {
+    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
+    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 10_000 });
   });
 
