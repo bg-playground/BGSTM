@@ -7,7 +7,7 @@ repo_name: bg-playground/BGSTM
 repo_url: https://github.com/bg-playground/BGSTM
 edit_uri: edit/main/docs/
 
-copyright: Copyright &copy; 2024-2026 BGSTM Project. Licensed under CC BY 4.0.
+copyright: Copyright &copy; 2024-2026 BGSTM Project. Licensed under the MIT License.
 
 draft_docs: '!*'  # Do not exclude any files as drafts
 not_in_nav: warn
@@ -65,10 +65,6 @@ extra:
       name: BGSTM on GitHub
   
   generator: false  # Remove "Made with Material for MkDocs" footer
-  
-  version:
-    provider: mike
-    default: latest
 
 extra_css:
   - stylesheets/extra.css
@@ -166,6 +162,14 @@ nav:
   - Integration:
     - integration/multi-platform-guide.md
     - Event-Driven Suggestions: EVENT_DRIVEN_SUGGESTIONS.md
+
+  - Application:
+    - application/index.md
+    - Authentication & RBAC: application/authentication.md
+    - API Reference: application/api-reference.md
+    - Notifications: application/notifications.md
+    - Audit Logging: application/audit-logging.md
+    - Deployment Guide: application/deployment.md
 
   - Features:
     - Enhanced Suggestion Review: features/enhanced-suggestion-review.md
