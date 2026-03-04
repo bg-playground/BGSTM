@@ -10,7 +10,14 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 test.describe('Traceability Matrix', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    // Navigate and wait for the traceability matrix API to respond
     await page.goto('/traceability');
+    // Wait for the matrix API call that the component makes on mount
+    await page.waitForResponse(
+      (resp) => resp.url().includes('/api/v1/traceability') && resp.status() === 200,
+      { timeout: 30_000 }
+    );
+    // Wait for React to re-render with the data
     await page.waitForLoadState('networkidle');
   });
 
@@ -19,15 +26,15 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
-    // Wait for matrix data to load (table, grid, or list)
-    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
-    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
+    // Verify the table has rendered with data rows
+    const dataRows = page.locator('table tbody tr');
+    await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
   });
 
   test('seeded test case "TC-001: Login with valid credentials" is visible in the matrix', async ({ page }) => {
-    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
-    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
+    const dataRows = page.locator('table tbody tr');
+    await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('TC-001: Login with valid credentials')).toBeVisible({ timeout: 10_000 });
   });
 
