@@ -63,21 +63,20 @@ test.describe('Requirements CRUD', () => {
       return;
     }
 
-    // Grab the text of the item about to be deleted for later assertion
-    const row = deleteBtn.locator('..').first();
-    const itemText = await row.textContent().catch(() => '');
+    // Grab the title from the h3 heading within the requirement card
+    const card = deleteBtn.locator('../..').first();
+    const itemTitle = await card.locator('h3').first().textContent().catch(() => '');
+
+    // Handle the native confirm() dialog BEFORE clicking delete
+    page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
 
     await deleteBtn.click();
 
-    // Confirm deletion if a dialog appears
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|delete/i }).last();
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
-
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
-    if (itemText) {
-      await expect(page.getByText(itemText.trim().slice(0, 30))).toHaveCount(0);
+    if (itemTitle) {
+      await expect(page.getByText(itemTitle.trim(), { exact: true })).toHaveCount(0);
     }
   });
 });
@@ -139,12 +138,12 @@ test.describe('Test Cases CRUD', () => {
       return;
     }
 
-    await deleteBtn.click();
+    // Handle the native confirm() dialog BEFORE clicking delete
+    page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
 
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|delete/i }).last();
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+    await deleteBtn.click();
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
   });
