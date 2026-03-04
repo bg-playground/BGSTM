@@ -2,6 +2,7 @@
 
 from .audit_log import AuditLog
 from .base import Base, TimestampMixin
+from .embedding_cache import EmbeddingCache
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
@@ -13,6 +14,7 @@ __all__ = [
     "AuditLog",
     "Base",
     "TimestampMixin",
+    "EmbeddingCache",
     "Notification",
     "NotificationType",
     "Requirement",
