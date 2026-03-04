@@ -61,13 +61,12 @@ test.describe('Requirements CRUD', () => {
     const row = deleteBtn.locator('..').first();
     const itemText = await row.textContent().catch(() => '');
 
-    await deleteBtn.click();
+    // Handle the native confirm() dialog BEFORE clicking delete
+    page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
 
-    // Confirm deletion if a dialog appears
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|delete/i }).last();
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+    await deleteBtn.click();
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
     if (itemText) {
@@ -127,12 +126,12 @@ test.describe('Test Cases CRUD', () => {
       return;
     }
 
-    await deleteBtn.click();
+    // Handle the native confirm() dialog BEFORE clicking delete
+    page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
 
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|delete/i }).last();
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+    await deleteBtn.click();
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
   });
