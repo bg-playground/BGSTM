@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Index, String,
 from sqlalchemy.orm import relationship
 
 from .base import Base
-from .requirement import GUID, JSON  # Import cross-platform types
+from .requirement import GUID, JSON, _enum_values  # Import cross-platform types
 
 
 class SuggestionMethod(str, enum.Enum):
@@ -31,10 +31,12 @@ class LinkSuggestion(Base):
     requirement_id = Column(GUID(), ForeignKey("requirements.id", ondelete="CASCADE"), nullable=False)
     test_case_id = Column(GUID(), ForeignKey("test_cases.id", ondelete="CASCADE"), nullable=False)
     similarity_score = Column(Float, nullable=False)
-    suggestion_method = Column(Enum(SuggestionMethod), nullable=False)
+    suggestion_method = Column(Enum(SuggestionMethod, values_callable=_enum_values), nullable=False)
     suggestion_reason = Column(Text, nullable=True)
     suggestion_metadata = Column(JSON(), nullable=True)
-    status = Column(Enum(SuggestionStatus), nullable=False, default=SuggestionStatus.PENDING)
+    status = Column(
+        Enum(SuggestionStatus, values_callable=_enum_values), nullable=False, default=SuggestionStatus.PENDING
+    )
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     reviewed_at = Column(DateTime, nullable=True)
     reviewed_by = Column(String(100), nullable=True)

@@ -62,7 +62,7 @@ class TestCaseResponse(TestCaseBase):
 
     id: UUID
     external_id: str | None
-    version: int
+    version: int | None = None
     created_at: datetime
     updated_at: datetime
 

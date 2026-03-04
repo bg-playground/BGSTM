@@ -1,10 +1,10 @@
 # Multi-stage build for production
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files and npm config
+COPY package*.json .npmrc ./
 
 # Install dependencies
 RUN npm ci

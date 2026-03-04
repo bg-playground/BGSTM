@@ -16,10 +16,46 @@ test.describe('Authentication', () => {
     await page.locator('#password').fill('password123');
     await page.locator('#confirmPassword').fill('password123');
 
-    await page.getByRole('button', { name: /create account/i }).click();
+    // Collect diagnostic info for the registration flow
+    const errors: string[] = [];
+    const requestFailures: string[] = [];
 
-    // After registration user should be redirected to the dashboard
-    await expect(page).not.toHaveURL(/\/register/, { timeout: 30_000 });
+    const onPageError = (err: Error) => errors.push(`Page error: ${err.message}`);
+    const onRequestFailed = (req: import('@playwright/test').Request) => {
+      requestFailures.push(`Request failed: ${req.url()} - ${req.failure()?.errorText ?? 'unknown'}`);
+    };
+
+    page.on('pageerror', onPageError);
+    page.on('requestfailed', onRequestFailed);
+
+    try {
+      // Capture any response to the register endpoint
+      const [registerResponse] = await Promise.all([
+        page.waitForResponse(
+          (resp) => resp.url().includes('/api/v1/auth/register'),
+          { timeout: 30_000 }
+        ),
+        page.getByRole('button', { name: /create account/i }).click(),
+      ]);
+
+      const registerStatus = registerResponse.status();
+      if (registerStatus !== 200 && registerStatus !== 201) {
+        let body = '';
+        try { body = await registerResponse.text(); } catch { /* ignore */ }
+        throw new Error(
+          `Registration failed: POST /api/v1/auth/register returned ${registerStatus}.\n` +
+          `Response body: ${body}\n` +
+          `Page errors: ${errors.join('; ') || 'none'}\n` +
+          `Request failures: ${requestFailures.join('; ') || 'none'}`
+        );
+      }
+
+      // After registration user should be redirected to the dashboard
+      await expect(page).not.toHaveURL(/\/register/, { timeout: 30_000 });
+    } finally {
+      page.off('pageerror', onPageError);
+      page.off('requestfailed', onRequestFailed);
+    }
   });
 
   test('login with valid credentials', async ({ page }) => {
