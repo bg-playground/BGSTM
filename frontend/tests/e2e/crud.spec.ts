@@ -63,9 +63,9 @@ test.describe('Requirements CRUD', () => {
       return;
     }
 
-    // Grab the text of the item about to be deleted for later assertion
-    const row = deleteBtn.locator('..').first();
-    const itemText = await row.textContent().catch(() => '');
+    // Grab the title from the h3 heading within the requirement card
+    const card = deleteBtn.locator('../..').first();
+    const itemTitle = await card.locator('h3').first().textContent().catch(() => '');
 
     await deleteBtn.click();
 
@@ -76,8 +76,8 @@ test.describe('Requirements CRUD', () => {
     }
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
-    if (itemText) {
-      await expect(page.getByText(itemText.trim().slice(0, 30))).toHaveCount(0);
+    if (itemTitle) {
+      await expect(page.getByText(itemTitle.trim(), { exact: true })).toHaveCount(0);
     }
   });
 });
