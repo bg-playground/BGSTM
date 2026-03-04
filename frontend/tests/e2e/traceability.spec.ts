@@ -25,10 +25,10 @@ test.describe('Traceability Matrix', () => {
     await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('seeded test case "TC-001" is visible in the matrix', async ({ page }) => {
+  test('seeded test case "TC-001: Login with valid credentials" is visible in the matrix', async ({ page }) => {
     const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
     await expect(dataContainer).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('TC-001: Login with valid credentials')).toBeVisible({ timeout: 10_000 });
   });
 
   test('filtering by requirement title updates results', async ({ page }) => {

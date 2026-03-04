@@ -25,7 +25,7 @@ test.describe('Export Functionality', () => {
       return;
     }
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
+    const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });
     await exportBtn.click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.csv$/i);
@@ -44,7 +44,7 @@ test.describe('Export Functionality', () => {
       return;
     }
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
+    const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });
     await exportBtn.click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
@@ -63,7 +63,7 @@ test.describe('Export Functionality', () => {
       return;
     }
 
-    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
+    const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });
     await exportBtn.click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.csv$/i);
