@@ -26,17 +26,20 @@ test.describe('Traceability Matrix', () => {
     await expect(page.getByRole('heading', { name: /traceability matrix/i })).toBeVisible({ timeout: 10_000 });
   });
 
-  test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
-    // Verify the table has rendered with data rows
+  test('seeded requirement "Role-Based Access Control" is visible in the matrix', async ({ page }) => {
+    // "Role-Based Access Control" is not modified by the CRUD tests,
+    // so it reliably survives test pollution from earlier spec files.
     const dataRows = page.locator('table tbody tr');
     await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Role-Based Access Control')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('seeded test case "TC-001" is visible in the matrix', async ({ page }) => {
+  test('seeded test case "TC-004" is visible in the matrix', async ({ page }) => {
+    // TC-004 is linked to "Role-Based Access Control" and is not
+    // touched by CRUD tests, so it remains stable across runs.
     const dataRows = page.locator('table tbody tr');
     await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/TC-001/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/TC-004/i)).toBeVisible({ timeout: 10_000 });
   });
 
   test('filtering by requirement title updates results', async ({ page }) => {
@@ -46,10 +49,10 @@ test.describe('Traceability Matrix', () => {
       return;
     }
 
-    await filterInput.fill('User Authentication');
+    await filterInput.fill('Role-Based Access Control');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Role-Based Access Control')).toBeVisible({ timeout: 10_000 });
   });
 
   test('Export PDF button is present', async ({ page }) => {
