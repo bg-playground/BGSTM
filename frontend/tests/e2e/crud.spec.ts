@@ -22,6 +22,12 @@ test.describe('Requirements CRUD', () => {
 
     await page.getByRole('button', { name: /save|create|submit/i }).click();
 
+    // Wait for the modal to close before checking for toast
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible().catch(() => false)) {
+      await dialog.waitFor({ state: 'hidden', timeout: 10_000 });
+    }
+
     await expect(page.getByText('E2E Test Requirement')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
       timeout: 10_000,
@@ -93,6 +99,12 @@ test.describe('Test Cases CRUD', () => {
     await page.getByLabel(/description/i).fill('Created by Playwright end-to-end test.');
 
     await page.getByRole('button', { name: /save|create|submit/i }).click();
+
+    // Wait for the modal to close before checking for toast
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible().catch(() => false)) {
+      await dialog.waitFor({ state: 'hidden', timeout: 10_000 });
+    }
 
     await expect(page.getByText('E2E Test Case')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/created successfully|saved successfully/i)).toBeVisible({
