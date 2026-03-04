@@ -15,7 +15,7 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('matrix page loads and heading contains "traceability"', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /traceability/i })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: /traceability matrix/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
