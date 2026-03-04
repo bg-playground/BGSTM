@@ -10,7 +10,15 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 test.describe('Traceability Matrix', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    // Start listening for the matrix API response BEFORE navigating,
+    // so we don't miss the XHR if it completes before goto resolves.
+    const matrixResponse = page.waitForResponse(
+      (resp) => resp.url().includes('/api/v1/traceability-matrix') && resp.status() === 200,
+      { timeout: 30_000 }
+    );
     await page.goto('/traceability');
+    await matrixResponse;
+    // Wait for React to re-render with the data
     await page.waitForLoadState('networkidle');
   });
 
@@ -18,17 +26,20 @@ test.describe('Traceability Matrix', () => {
     await expect(page.getByRole('heading', { name: /traceability matrix/i })).toBeVisible({ timeout: 10_000 });
   });
 
-  test('seeded requirement "User Authentication" is visible in the matrix', async ({ page }) => {
-    // Wait for matrix data to load (table, grid, or list)
-    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
-    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+  test('seeded requirement "Role-Based Access Control" is visible in the matrix', async ({ page }) => {
+    // "Role-Based Access Control" is not modified by the CRUD tests,
+    // so it reliably survives test pollution from earlier spec files.
+    const dataRows = page.locator('table tbody tr');
+    await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Role-Based Access Control')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('seeded test case "TC-001: Login with valid credentials" is visible in the matrix', async ({ page }) => {
-    const dataContainer = page.locator('table, [role="grid"], [class*="matrix"], [class*="traceability"]').first();
-    await expect(dataContainer).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('TC-001: Login with valid credentials')).toBeVisible({ timeout: 10_000 });
+  test('seeded test case "TC-004" is visible in the matrix', async ({ page }) => {
+    // TC-004 is linked to "Role-Based Access Control" and is not
+    // touched by CRUD tests, so it remains stable across runs.
+    const dataRows = page.locator('table tbody tr');
+    await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/TC-004/i)).toBeVisible({ timeout: 10_000 });
   });
 
   test('filtering by requirement title updates results', async ({ page }) => {
@@ -38,10 +49,10 @@ test.describe('Traceability Matrix', () => {
       return;
     }
 
-    await filterInput.fill('User Authentication');
+    await filterInput.fill('Role-Based Access Control');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByText('User Authentication')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Role-Based Access Control')).toBeVisible({ timeout: 10_000 });
   });
 
   test('Export PDF button is present', async ({ page }) => {
