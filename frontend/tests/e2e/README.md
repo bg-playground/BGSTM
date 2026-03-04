@@ -122,16 +122,17 @@ This opens an interactive report in your browser showing passed/failed tests, tr
 
 ```
 frontend/tests/e2e/
-├── auth.spec.ts          # Login, register, logout, protected route access
-├── suggestions.spec.ts   # Suggestion dashboard: filters, accept, reject
-├── crud.spec.ts          # Requirements and test case CRUD operations
-├── exports.spec.ts       # CSV and PDF export downloads
-├── notifications.spec.ts # Notification bell lifecycle
 ├── helpers/
-│   ├── auth.ts           # Reusable login() / logout() helpers
-│   └── api.ts            # Direct API call helpers for setup/cleanup
-└── fixtures/
-    └── seed.sql          # SQL seed for the test database
+│   └── auth.ts               # Reusable login/logout helper functions
+├── fixtures/
+│   └── seed.sql              # Test data seeded into PostgreSQL for E2E runs
+├── auth.spec.ts              # Registration, login, logout, protected route access
+├── suggestions.spec.ts       # Suggestion dashboard: filters, accept, reject
+├── crud.spec.ts              # Requirements & test case CRUD (create, edit, delete)
+├── traceability.spec.ts      # Traceability matrix data, filtering, export buttons
+├── exports.spec.ts           # CSV and PDF export downloads
+├── rbac.spec.ts              # Role-based access control: viewer, reviewer, admin
+└── notifications.spec.ts     # Notification bell, mark-as-read, lifecycle
 ```
 
 ---
@@ -161,3 +162,25 @@ The `.github/workflows/e2e-tests.yml` workflow runs on every pull request and pu
 2. Waits for health checks to pass.
 3. Runs Playwright against Chromium only (to keep CI fast).
 4. Uploads the HTML report and screenshots as artifacts on failure.
+
+---
+
+## Known Caveats
+
+### Test data pollution across spec files
+
+The E2E tests share a single database instance within a CI run. CRUD tests (`crud.spec.ts`) create, update, and delete records, which can affect assertions in later spec files (e.g., `traceability.spec.ts`). To avoid flaky tests:
+
+- **Don't assert against data that CRUD tests modify** — use records the CRUD tests don't touch (e.g., "Role-Based Access Control" instead of "User Authentication")
+- **Consider adding a DB reset** — a `globalSetup` script that re-seeds the database between spec files would make tests fully isolated
+
+### Playwright configuration highlights
+
+| Setting | CI Value | Local Value |
+|---|---|---|
+| Timeout | 60s | 30s |
+| Retries | 2 | 0 |
+| Workers | 1 (serial) | Auto (parallel) |
+| Browsers | Chromium only | Chromium + Firefox + WebKit |
+| Screenshots | On failure only | On failure only |
+| Traces | On first retry | On first retry |
