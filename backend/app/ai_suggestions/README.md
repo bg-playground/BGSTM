@@ -136,9 +136,11 @@ For **HuggingFace**:
 3. No API key required (runs locally)
 
 **Performance Considerations:**
-- **Caching**: Embeddings are cached in memory by default to avoid redundant API calls/computations
+- **Persistent DB Cache**: Embeddings are stored in the `embedding_cache` database table keyed by SHA-256 hash of the input text and the model name. On subsequent runs, previously computed embeddings are loaded from the DB before calling the API — so only new or changed texts incur API costs. The cache survives server restarts.
+- **In-memory Cache**: On top of the DB cache, embeddings are also held in an in-memory dict for the lifetime of the process so repeated calls within the same run are instant.
 - **Batch Pre-embedding**: When using the `llm` algorithm, the engine pre-computes embeddings for all unique requirement and test-case texts in a single batched API call before the pairwise comparison loop. This reduces N+M individual API calls to just a handful of batched calls and dramatically lowers latency and cost.
 - **Batch Size**: The OpenAI embeddings API supports up to 2048 texts per request. The engine automatically chunks larger workloads. The default batch size can be tuned via `llm_batch_size` in `SuggestionConfig`.
+- **Cache Cleanup**: Use `delete_stale_embeddings(db, older_than_days=90)` from `app.crud.embedding_cache` to prune entries that haven't been accessed in *N* days (default 90).
 - **OpenAI Costs**: OpenAI charges per embedding (~$0.0001 per 1K tokens for text-embedding-3-small)
 - **HuggingFace**: First run downloads model (~90MB for all-MiniLM-L6-v2), subsequent runs are faster
 - **Batch Processing**: For large datasets, consider processing in batches during off-peak hours
@@ -336,6 +338,7 @@ pytest tests/test_ai_suggestions.py -v
   - `hybrid` is in between
   - `llm` has the highest accuracy but also highest latency and potential costs
 - **LLM batch pre-embedding**: When using the `llm` algorithm, all unique texts are embedded in bulk before the pairwise loop. This replaces N+M sequential API calls with a small number of batched calls, significantly reducing latency and API cost.
+- **Persistent embedding cache**: A dedicated `embedding_cache` table stores embeddings by SHA-256 hash of the input text and model name. Embeddings computed in one run are reused in future runs — even after a server restart — eliminating redundant API calls for unchanged texts. Disable this per-run with `llm_db_cache_enabled=False` in `SuggestionConfig`.
 
 For large datasets (>1000 requirements or test cases), consider:
 - Running generation during off-peak hours

@@ -1,5 +1,6 @@
 """Simplified Tests for AI Suggestions Module"""
 
+import hashlib
 import uuid
 from unittest.mock import MagicMock, patch
 
@@ -11,10 +12,12 @@ from app.ai_suggestions.algorithms import (
     KeywordSimilarity,
     LLMEmbeddingSimilarity,
     TFIDFSimilarity,
+    compute_text_hash,
 )
 from app.ai_suggestions.config import SuggestionConfig
 from app.ai_suggestions.engine import SuggestionEngine
 from app.models.base import Base
+from app.models.embedding_cache import EmbeddingCache
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
 from app.models.requirement import (
     PriorityLevel,
@@ -552,3 +555,370 @@ async def test_engine_skips_existing_links():
         assert result["suggestions_created"] == 0
 
     await engine.dispose()
+
+
+# ── Embedding Cache Tests ──────────────────────────────────────────────────────
+
+
+def test_compute_text_hash_deterministic():
+    """compute_text_hash returns the same SHA-256 hex for the same text."""
+    text = "hello world"
+    expected = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    assert compute_text_hash(text) == expected
+    assert compute_text_hash(text) == compute_text_hash(text)
+
+
+def test_compute_text_hash_different_texts():
+    """Different texts produce different hashes."""
+    assert compute_text_hash("text A") != compute_text_hash("text B")
+
+
+@pytest.mark.asyncio
+async def test_db_embedding_cache_save_and_retrieve():
+    """Embeddings saved to the DB can be retrieved in a subsequent session."""
+    from app.crud.embedding_cache import get_cached_embeddings_batch, save_embeddings_batch
+
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    text = "User authentication login"
+    embedding = [0.1, 0.2, 0.3]
+    text_hash = compute_text_hash(text)
+    model_name = "text-embedding-3-small"
+
+    async with AsyncSessionLocal() as session:
+        await save_embeddings_batch(
+            session,
+            [{"text_hash": text_hash, "embedding": embedding, "model_name": model_name, "provider": "openai"}],
+        )
+        await session.commit()
+
+    # New session — simulates a server restart
+    async with AsyncSessionLocal() as session:
+        hits = await get_cached_embeddings_batch(session, [text_hash], model_name)
+        assert text_hash in hits
+        assert hits[text_hash] == embedding
+
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_db_embedding_cache_upsert():
+    """Saving the same (text_hash, model_name) twice updates the embedding."""
+    from app.crud.embedding_cache import get_cached_embeddings_batch, save_embeddings_batch
+
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    text_hash = compute_text_hash("some text")
+    model_name = "text-embedding-3-small"
+
+    async with AsyncSessionLocal() as session:
+        await save_embeddings_batch(
+            session,
+            [{"text_hash": text_hash, "embedding": [0.1, 0.2], "model_name": model_name, "provider": "openai"}],
+        )
+        await session.commit()
+
+    async with AsyncSessionLocal() as session:
+        await save_embeddings_batch(
+            session,
+            [{"text_hash": text_hash, "embedding": [0.9, 0.8], "model_name": model_name, "provider": "openai"}],
+        )
+        await session.commit()
+
+    async with AsyncSessionLocal() as session:
+        hits = await get_cached_embeddings_batch(session, [text_hash], model_name)
+        assert hits[text_hash] == [0.9, 0.8]
+
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_db_embedding_cache_different_models():
+    """The same text embedded by different models gets separate cache entries."""
+    from app.crud.embedding_cache import get_cached_embeddings_batch, save_embeddings_batch
+
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    text_hash = compute_text_hash("some text")
+    emb_small = [0.1, 0.2]
+    emb_large = [0.3, 0.4]
+
+    async with AsyncSessionLocal() as session:
+        await save_embeddings_batch(
+            session,
+            [
+                {
+                    "text_hash": text_hash,
+                    "embedding": emb_small,
+                    "model_name": "text-embedding-3-small",
+                    "provider": "openai",
+                },
+                {
+                    "text_hash": text_hash,
+                    "embedding": emb_large,
+                    "model_name": "text-embedding-3-large",
+                    "provider": "openai",
+                },
+            ],
+        )
+        await session.commit()
+
+    async with AsyncSessionLocal() as session:
+        hits_small = await get_cached_embeddings_batch(session, [text_hash], "text-embedding-3-small")
+        hits_large = await get_cached_embeddings_batch(session, [text_hash], "text-embedding-3-large")
+
+    assert hits_small[text_hash] == emb_small
+    assert hits_large[text_hash] == emb_large
+
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_db_embedding_cache_delete_stale():
+    """delete_stale_embeddings removes old entries and returns the deleted count."""
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import update
+
+    from app.crud.embedding_cache import delete_stale_embeddings, save_embeddings_batch
+
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with AsyncSessionLocal() as session:
+        await save_embeddings_batch(
+            session,
+            [
+                {
+                    "text_hash": compute_text_hash("old text"),
+                    "embedding": [0.1],
+                    "model_name": "m",
+                    "provider": "openai",
+                },
+                {
+                    "text_hash": compute_text_hash("new text"),
+                    "embedding": [0.2],
+                    "model_name": "m",
+                    "provider": "openai",
+                },
+            ],
+        )
+        await session.commit()
+
+    # Back-date the "old text" entry so it looks stale
+    old_hash = compute_text_hash("old text")
+    async with AsyncSessionLocal() as session:
+        await session.execute(
+            update(EmbeddingCache)
+            .where(EmbeddingCache.text_hash == old_hash)
+            .values(updated_at=datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=100))
+        )
+        await session.commit()
+
+    async with AsyncSessionLocal() as session:
+        deleted = await delete_stale_embeddings(session, older_than_days=90)
+        await session.commit()
+
+    assert deleted == 1
+
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_llm_load_cached_embeddings_populates_in_memory_cache():
+    """load_cached_embeddings fetches DB hits and warms the in-memory cache."""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+
+            AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+            text = "pre-cached requirement text"
+            stored_embedding = [0.7] * 1536
+            text_hash = compute_text_hash(text)
+
+            # Pre-populate the DB cache
+            from app.crud.embedding_cache import save_embeddings_batch
+
+            async with AsyncSessionLocal() as session:
+                await save_embeddings_batch(
+                    session,
+                    [
+                        {
+                            "text_hash": text_hash,
+                            "embedding": stored_embedding,
+                            "model_name": algo.model,
+                            "provider": "openai",
+                        }
+                    ],
+                )
+                await session.commit()
+
+            # load_cached_embeddings should populate in-memory cache from DB
+            async with AsyncSessionLocal() as session:
+                hits = await algo.load_cached_embeddings(session, [text])
+
+            assert text in hits
+            assert hits[text] == stored_embedding
+            assert algo._embedding_cache[text] == stored_embedding
+
+            # precompute_embeddings should NOT call the API for the cached text
+            algo.precompute_embeddings([text])
+            assert mock_client.embeddings.create.call_count == 0
+
+            await engine.dispose()
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+@pytest.mark.asyncio
+async def test_llm_save_embeddings_to_db():
+    """save_embeddings_to_db persists in-memory cached embeddings to the DB."""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        embedding = [0.5] * 8
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=embedding)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+
+            AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+            algo = LLMEmbeddingSimilarity(provider="openai", cache_embeddings=True)
+            text = "requirement to embed"
+
+            # Compute embedding (warms in-memory cache)
+            algo.precompute_embeddings([text])
+
+            # Persist to DB
+            async with AsyncSessionLocal() as session:
+                await algo.save_embeddings_to_db(session, [text])
+                await session.commit()
+
+            # Verify DB has the entry
+            from app.crud.embedding_cache import get_cached_embeddings_batch
+
+            async with AsyncSessionLocal() as session:
+                hits = await get_cached_embeddings_batch(session, [compute_text_hash(text)], algo.model)
+
+            assert compute_text_hash(text) in hits
+            assert hits[compute_text_hash(text)] == embedding
+
+            await engine.dispose()
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]
+
+
+@pytest.mark.asyncio
+async def test_engine_llm_uses_db_cache_on_second_run():
+    """Second generate_suggestions run with LLM loads embeddings from DB, skipping API calls."""
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        mock_openai_module = MagicMock()
+        mock_client = MagicMock()
+        mock_openai_module.OpenAI.return_value = mock_client
+
+        emb = [0.5] * 8
+        mock_response = MagicMock()
+        mock_response.data = [MagicMock(embedding=emb), MagicMock(embedding=emb)]
+        mock_client.embeddings.create.return_value = mock_response
+
+        import sys
+
+        sys.modules["openai"] = mock_openai_module
+
+        try:
+            db_engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+            async with db_engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+
+            AsyncSessionLocal = async_sessionmaker(db_engine, class_=AsyncSession, expire_on_commit=False)
+
+            req = Requirement(
+                id=uuid.uuid4(),
+                external_id="REQ-LLM-01",
+                title="Authentication requirement",
+                description="Users must authenticate",
+                type=RequirementType.FUNCTIONAL,
+                priority=PriorityLevel.HIGH,
+                status=RequirementStatus.APPROVED,
+            )
+            tc = TestCase(
+                id=uuid.uuid4(),
+                external_id="TC-LLM-01",
+                title="Test authentication",
+                description="Verify login flow",
+                type=TestCaseType.FUNCTIONAL,
+                priority=PriorityLevel.HIGH,
+                status=TestCaseStatus.READY,
+                automation_status=AutomationStatus.AUTOMATED,
+            )
+
+            async with AsyncSessionLocal() as session:
+                session.add(req)
+                session.add(tc)
+                await session.commit()
+
+            config = SuggestionConfig(
+                default_algorithm="llm",
+                min_confidence_threshold=0.0,
+                llm_db_cache_enabled=True,
+            )
+
+            # First run: embeddings computed via API and persisted to DB
+            async with AsyncSessionLocal() as session:
+                sug_engine = SuggestionEngine(config=config)
+                await sug_engine.generate_suggestions(session)
+
+            api_calls_after_first_run = mock_client.embeddings.create.call_count
+            assert api_calls_after_first_run >= 1
+
+            # Second run: embeddings should be loaded from DB — no new API calls
+            async with AsyncSessionLocal() as session:
+                sug_engine2 = SuggestionEngine(config=config)
+                await sug_engine2.generate_suggestions(session)
+
+            assert mock_client.embeddings.create.call_count == api_calls_after_first_run
+
+            await db_engine.dispose()
+        finally:
+            if "openai" in sys.modules:
+                del sys.modules["openai"]

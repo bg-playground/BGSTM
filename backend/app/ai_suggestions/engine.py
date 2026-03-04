@@ -13,7 +13,7 @@ from app.models.suggestion import LinkSuggestion, SuggestionMethod, SuggestionSt
 from app.models.test_case import TestCase
 from app.schemas.link import SuggestionCreate
 
-from .algorithms import get_algorithm
+from .algorithms import LLMEmbeddingSimilarity, get_algorithm
 from .config import SuggestionConfig, default_config
 
 logger = logging.getLogger(__name__)
@@ -203,9 +203,16 @@ class SuggestionEngine:
         tc_texts = {tc.id: self._combine_test_case_text(tc) for tc in test_cases}
 
         # Pre-embed all texts in a single batched API call when using the LLM algorithm
-        if self.config.default_algorithm == "llm":
+        if self.config.default_algorithm == "llm" and isinstance(self.algorithm, LLMEmbeddingSimilarity):
             all_texts = list({*req_texts.values(), *tc_texts.values()})
+            if getattr(self.config, "llm_db_cache_enabled", True):
+                # Step 1: Load existing embeddings from DB cache
+                await self.algorithm.load_cached_embeddings(db, all_texts)
+            # Step 2: Compute remaining embeddings via API (only uncached ones)
             self.algorithm.precompute_embeddings(all_texts)
+            if getattr(self.config, "llm_db_cache_enabled", True):
+                # Step 3: Persist newly computed embeddings to DB
+                await self.algorithm.save_embeddings_to_db(db, all_texts)
 
         pairs_analyzed = 0
         suggestions_created = 0

@@ -1,7 +1,13 @@
 """Similarity algorithms for link suggestion"""
 
+import hashlib
 import re
 from collections import Counter
+
+
+def compute_text_hash(text: str) -> str:
+    """Return the SHA-256 hex digest of *text* (UTF-8 encoded)."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 class SimilarityAlgorithm:
@@ -468,6 +474,81 @@ class LLMEmbeddingSimilarity(SimilarityAlgorithm):
     def precompute_embeddings(self, texts: list[str]) -> None:
         """Pre-compute and cache embeddings for a list of texts in a single batched API call."""
         self.get_embeddings_batch(texts)
+
+    async def load_cached_embeddings(self, db: object, texts: list[str]) -> dict[str, list[float]]:
+        """
+        Load embeddings from the persistent DB cache into the in-memory cache.
+
+        For each text whose SHA-256 hash is found in the ``embedding_cache`` table,
+        the embedding is stored in ``self._embedding_cache`` so that subsequent
+        calls to :meth:`precompute_embeddings` / :meth:`get_embeddings_batch` will
+        skip the API call entirely.
+
+        Args:
+            db: An async SQLAlchemy ``AsyncSession``.
+            texts: Texts to look up.
+
+        Returns:
+            Mapping of ``text → embedding`` for every cache hit.
+        """
+        if not texts or self._embedding_cache is None:
+            return {}
+
+        try:
+            from app.crud.embedding_cache import get_cached_embeddings_batch
+
+            hash_to_text = {compute_text_hash(t): t for t in texts}
+            hits = await get_cached_embeddings_batch(db, list(hash_to_text.keys()), self.model)
+
+            result: dict[str, list[float]] = {}
+            for text_hash, embedding in hits.items():
+                text = hash_to_text[text_hash]
+                self._embedding_cache[text] = embedding
+                result[text] = embedding
+            return result
+        except Exception:
+            # Gracefully degrade — DB cache unavailable, fall back to in-memory only.
+            import logging
+
+            logging.getLogger(__name__).warning("DB embedding cache unavailable; using in-memory cache only.")
+            return {}
+
+    async def save_embeddings_to_db(self, db: object, texts: list[str]) -> None:
+        """
+        Persist embeddings for *texts* that are already in the in-memory cache to the DB.
+
+        Only texts present in ``self._embedding_cache`` are saved — this is called
+        after :meth:`precompute_embeddings` so all freshly computed embeddings are
+        written through to the persistent store.
+
+        Args:
+            db: An async SQLAlchemy ``AsyncSession``.
+            texts: Texts whose embeddings should be saved.
+        """
+        if not texts or self._embedding_cache is None:
+            return
+
+        try:
+            from app.crud.embedding_cache import save_embeddings_batch
+
+            entries = []
+            for text in texts:
+                embedding = self._embedding_cache.get(text)
+                if embedding is not None:
+                    entries.append(
+                        {
+                            "text_hash": compute_text_hash(text),
+                            "embedding": embedding,
+                            "model_name": self.model,
+                            "provider": self.provider,
+                        }
+                    )
+
+            await save_embeddings_batch(db, entries)
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).warning("Failed to persist embeddings to DB cache; continuing without save.")
 
     def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Compute cosine similarity between two vectors"""
