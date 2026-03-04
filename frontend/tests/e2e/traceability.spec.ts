@@ -10,13 +10,14 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 test.describe('Traceability Matrix', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
-    // Navigate and wait for the traceability matrix API to respond
-    await page.goto('/traceability');
-    // Wait for the matrix API call that the component makes on mount
-    await page.waitForResponse(
+    // Start listening for the matrix API response BEFORE navigating,
+    // so we don't miss the XHR if it completes before goto resolves.
+    const matrixResponse = page.waitForResponse(
       (resp) => resp.url().includes('/api/v1/traceability-matrix') && resp.status() === 200,
       { timeout: 30_000 }
     );
+    await page.goto('/traceability');
+    await matrixResponse;
     // Wait for React to re-render with the data
     await page.waitForLoadState('networkidle');
   });
