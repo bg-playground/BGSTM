@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-03-05
+
+### Fixed
+- Fixed Docker backend failing to start on Windows clones due to CRLF line endings in `entrypoint.sh` (`exec /app/entrypoint.sh: no such file or directory`)
+- Added `.gitattributes` to enforce LF line endings for shell scripts and all source files, preventing cross-platform line ending issues
+
 ## [2.0.0] - 2026-03-04
 
 ### Added
@@ -53,5 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Standardized all phase documentation to follow a uniform structure
 
+[2.0.1]: https://github.com/bg-playground/BGSTM/releases/tag/v2.0.1
 [2.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v2.0.0
 [1.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v1.0.0
