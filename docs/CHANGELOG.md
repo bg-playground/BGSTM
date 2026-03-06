@@ -9,9 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2026-03-05
 
+### Added
+- Batch embedding for LLM similarity — `precompute_embeddings()` and `get_embeddings_batch()` methods to batch OpenAI API calls (up to 2048 texts per request) instead of N+M individual calls (#242)
+- Persistent DB-backed embedding cache — new `embedding_cache` table, CRUD module, `load_cached_embeddings`/`save_embeddings_to_db` async methods, `compute_text_hash` utility (#243)
+- Application documentation pages — new `docs/application/` section with authentication, API reference, notifications, audit logging, and deployment guides; fixed MkDocs license footer; removed dead `mike` config (#246)
+- Automated GitHub Release workflow — tag-triggered `.github/workflows/release.yml` that extracts changelog sections and creates GitHub Releases; added "Releasing" section to CONTRIBUTING.md (#247)
+- E2E test README and root README updates — added E2E badge, `🧪 Testing` section with all 7 spec files, environment variables, and Playwright instructions (#241)
+- Enum binding regression tests — new `test_enum_binding.py` covering all enum columns (#231)
+
 ### Fixed
-- Fixed Docker backend failing to start on Windows clones due to CRLF line endings in `entrypoint.sh` (`exec /app/entrypoint.sh: no such file or directory`)
-- Added `.gitattributes` to enforce LF line endings for shell scripts and all source files, preventing cross-platform line ending issues
+- Fixed PostgreSQL UUID type mismatch — `get_user` in `crud/user.py` now converts string IDs to `uuid.UUID`; `GUID.process_bind_param` coerces non-UUID values on PostgreSQL dialect (#226)
+- Fixed SQLAlchemy enum case mismatch in core models — added `values_callable` to all `Enum()` column definitions in `requirement.py`, `test_case.py`, `suggestion.py`, `link.py` so lowercase values are sent to PostgreSQL (#230)
+- Fixed SQLAlchemy enum case mismatch for `NotificationType` — applied same `values_callable` fix to `notification.py` (#231)
+- Fixed remaining `notificationtype` enum mismatch and changed `version: int` to `version: int | None = None` in Pydantic schemas (#232)
+- Fixed E2E test reliability: Playwright CI — Chromium-only in CI, fixed traceability test assertion, modal close race condition, increased download timeouts (#234)
+- Fixed E2E test reliability: native dialog handling — delete confirmation now uses `page.once('dialog')` instead of DOM button lookup; fixed card title extraction; tightened traceability heading locator (#237)
+- Fixed E2E test reliability: traceability matrix race condition — added `waitForResponse` for traceability API before `networkidle` (#240)
+- Fixed mypy type errors — resolved `Result[Any].rowcount` attr-defined and `SimilarityAlgorithm` missing method errors with `isinstance` guard (#244)
+- Fixed Docker backend failing to start on Windows clones due to CRLF line endings in `entrypoint.sh` (`exec /app/entrypoint.sh: no such file or directory`) (#248)
+- Added `.gitattributes` to enforce LF line endings for shell scripts and all source files, preventing cross-platform line ending issues (#248)
+
+### Changed
+- Upgraded ESLint to v10 — bumped `eslint` to 10.0.2 and `@eslint/js` to 10.0.1 in frontend; added `.npmrc` with `legacy-peer-deps=true` (#233)
+
+### Dependencies
+- Bumped `fastapi` from 0.129.0 to 0.133.1 (#174)
+- Bumped `email-validator` from 2.2.0 to 2.3.0 (#165)
+- Bumped `@types/react-window` from 1.8.8 to 2.0.0 (#182)
 
 ## [2.0.0] - 2026-03-04
 
