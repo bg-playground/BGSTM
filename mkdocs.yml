@@ -186,3 +186,6 @@ nav:
     - Changelog: CHANGELOG.md
     - Custom Domain Setup: custom-domain-setup.md
     - Site Assets: assets/README.md
+
+  - Specs:
+    - External Results v1: specs/external_results_v1.md
