@@ -279,6 +279,11 @@ npx playwright test --project=chromium # Chromium only (default in CI)
 
 For full details, see the [E2E Test README](frontend/tests/e2e/README.md).
 
+## Related projects
+
+- **[bg-playground/bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks)** — Domain-specific Playwright automation frameworks with native BGSTM traceability. Apache-2.0. Public.
+  - Tracking issue for the v0.1 `@bgstm/playwright-core` MVP: [`bgstm-playwright-frameworks#3`](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3) — *blocked by [BGSTM#291](https://github.com/bg-playground/BGSTM/issues/291) (Reporter API contract)*.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to:
