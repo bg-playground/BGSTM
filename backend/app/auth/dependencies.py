@@ -1,9 +1,13 @@
-from fastapi import Depends, HTTPException, status
+from collections.abc import Callable
+from typing import Any
+
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.security import decode_access_token
+from app.auth.security import decode_access_token, hash_runner_token
 from app.db.session import get_db
+from app.models.runner_token import RunnerToken
 from app.models.user import User, UserRole
 
 bearer_scheme = HTTPBearer()
@@ -59,3 +63,77 @@ async def require_admin(current_user: User = Depends(get_current_user)) -> User:
             detail="Admin role required",
         )
     return current_user
+
+
+# ---------------------------------------------------------------------------
+# Runner-token dependencies
+# ---------------------------------------------------------------------------
+
+_RUNNER_TOKEN_PREFIX = "bgstm_runner_"
+
+
+async def get_current_runner_token(
+    authorization: str = Header(...),
+    db: AsyncSession = Depends(get_db),
+) -> RunnerToken:
+    """Resolve ``Authorization: Bearer bgstm_runner_<...>`` to a RunnerToken.
+
+    Raises 401 if the header is missing/malformed, the token is unknown, or it
+    has been revoked.  Updates ``last_used_at`` on every successful resolution.
+    """
+    from app.crud.runner_token import update_last_used
+
+    # Parse "Bearer <value>"
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+
+    raw_token = parts[1]
+    if not raw_token.startswith(_RUNNER_TOKEN_PREFIX):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not a runner token")
+
+    # We need the salt to re-derive the hash, so we must look up by prefix scan.
+    # The stored hash was derived as SHA-256(salt + plaintext).  Because we only
+    # store the hash (not the plaintext), we cannot do a single-step lookup.
+    # Instead we perform a linear scan over *active* tokens — acceptable given the
+    # small expected cardinality of runner tokens.
+    from sqlalchemy import select
+
+    from app.models.runner_token import RunnerToken as RT
+
+    result = await db.execute(select(RT))
+    all_tokens = list(result.scalars().all())
+
+    matched: RunnerToken | None = None
+    for candidate in all_tokens:
+        if hash_runner_token(raw_token, candidate.salt) == candidate.hashed_token:
+            matched = candidate
+            break
+
+    if matched is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid runner token")
+
+    if matched.revoked_at is not None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Revoked runner token")
+
+    await update_last_used(db, matched)
+    return matched
+
+
+def require_runner_scope(scope: str) -> Callable[..., Any]:
+    """Return a FastAPI dependency that requires *scope* on the resolved runner token.
+
+    Usage::
+
+        @router.post(..., dependencies=[Depends(require_runner_scope("external_results:write"))])
+    """
+
+    async def _dependency(token: RunnerToken = Depends(get_current_runner_token)) -> RunnerToken:
+        if scope not in (token.scopes or []):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Runner token does not have the required scope: {scope!r}",
+            )
+        return token
+
+    return _dependency
