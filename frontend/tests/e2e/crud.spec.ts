@@ -3,6 +3,7 @@ import { login } from './helpers/auth';
 
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
+const ITEM_ROW_SELECTOR = 'tr, [data-testid*="row"], div.bg-white.rounded-lg.shadow-md.p-6';
 
 // ---------------------------------------------------------------------------
 // Requirements CRUD
@@ -35,37 +36,51 @@ test.describe('Requirements CRUD', () => {
   });
 
   test('edit an existing requirement', async ({ page }) => {
-    // Click the edit button on the first visible requirement
-    const editBtn = page.getByRole('button', { name: /edit/i }).first();
-    if (!(await editBtn.isVisible().catch(() => false))) {
-      test.skip();
-      return;
+    const seedTitle = `E2E Edit Req Target ${Date.now()}`;
+
+    await page.getByRole('button', { name: /add requirement|new requirement|\+ requirement/i }).click();
+    await page.getByLabel(/title/i).fill(seedTitle);
+    await page.getByLabel(/description/i).fill('Throwaway requirement target for edit test.');
+    await page.getByRole('button', { name: /save|create|submit/i }).click();
+
+    const createDialog = page.locator('[role="dialog"]');
+    if (await createDialog.isVisible().catch(() => false)) {
+      await createDialog.waitFor({ state: 'hidden', timeout: 10_000 });
     }
-    await editBtn.click();
+
+    const requirementRow = page.locator(ITEM_ROW_SELECTOR).filter({ hasText: seedTitle }).first();
+    await expect(requirementRow).toBeVisible({ timeout: 10_000 });
+    await requirementRow.getByRole('button', { name: /edit/i }).click();
 
     const titleInput = page.getByLabel(/title/i);
+    const updatedTitle = `${seedTitle} (edited)`;
     await titleInput.clear();
-    await titleInput.fill('Updated Requirement Title');
+    await titleInput.fill(updatedTitle);
 
     await page.getByRole('button', { name: /save|update|submit/i }).click();
 
-    await expect(page.getByText('Updated Requirement Title')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(updatedTitle)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/updated successfully|saved successfully/i)).toBeVisible({
       timeout: 10_000,
     });
   });
 
   test('delete a requirement', async ({ page }) => {
-    // Find a requirement row and click its delete button
-    const deleteBtn = page.getByRole('button', { name: /delete/i }).first();
-    if (!(await deleteBtn.isVisible().catch(() => false))) {
-      test.skip();
-      return;
+    const seedTitle = `E2E Delete Req Target ${Date.now()}`;
+
+    await page.getByRole('button', { name: /add requirement|new requirement|\+ requirement/i }).click();
+    await page.getByLabel(/title/i).fill(seedTitle);
+    await page.getByLabel(/description/i).fill('Throwaway requirement target for delete test.');
+    await page.getByRole('button', { name: /save|create|submit/i }).click();
+
+    const createDialog = page.locator('[role="dialog"]');
+    if (await createDialog.isVisible().catch(() => false)) {
+      await createDialog.waitFor({ state: 'hidden', timeout: 10_000 });
     }
 
-    // Grab the title from the h3 heading within the requirement card
-    const card = deleteBtn.locator('../..').first();
-    const itemTitle = await card.locator('h3').first().textContent().catch(() => '');
+    const requirementRow = page.locator(ITEM_ROW_SELECTOR).filter({ hasText: seedTitle }).first();
+    await expect(requirementRow).toBeVisible({ timeout: 10_000 });
+    const deleteBtn = requirementRow.getByRole('button', { name: /delete/i });
 
     // Handle the native confirm() dialog BEFORE clicking delete
     page.once('dialog', async (dialog) => {
@@ -75,9 +90,7 @@ test.describe('Requirements CRUD', () => {
     await deleteBtn.click();
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
-    if (itemTitle) {
-      await expect(page.getByText(itemTitle.trim(), { exact: true })).toHaveCount(0);
-    }
+    await expect(page.getByText(seedTitle, { exact: true })).toHaveCount(0);
   });
 });
 
@@ -112,31 +125,51 @@ test.describe('Test Cases CRUD', () => {
   });
 
   test('edit an existing test case', async ({ page }) => {
-    const editBtn = page.getByRole('button', { name: /edit/i }).first();
-    if (!(await editBtn.isVisible().catch(() => false))) {
-      test.skip();
-      return;
+    const seedTitle = `E2E Edit TC Target ${Date.now()}`;
+
+    await page.getByRole('button', { name: /add test case|new test case|\+ test case/i }).click();
+    await page.getByLabel(/title/i).fill(seedTitle);
+    await page.getByLabel(/description/i).fill('Throwaway test case target for edit test.');
+    await page.getByRole('button', { name: /save|create|submit/i }).click();
+
+    const createDialog = page.locator('[role="dialog"]');
+    if (await createDialog.isVisible().catch(() => false)) {
+      await createDialog.waitFor({ state: 'hidden', timeout: 10_000 });
     }
-    await editBtn.click();
+
+    const testCaseRow = page.locator(ITEM_ROW_SELECTOR).filter({ hasText: seedTitle }).first();
+    await expect(testCaseRow).toBeVisible({ timeout: 10_000 });
+    await testCaseRow.getByRole('button', { name: /edit/i }).click();
 
     const titleInput = page.getByLabel(/title/i);
+    const updatedTitle = `${seedTitle} (edited)`;
     await titleInput.clear();
-    await titleInput.fill('Updated Test Case Title');
+    await titleInput.fill(updatedTitle);
 
     await page.getByRole('button', { name: /save|update|submit/i }).click();
 
-    await expect(page.getByText('Updated Test Case Title')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(updatedTitle)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/updated successfully|saved successfully/i)).toBeVisible({
       timeout: 10_000,
     });
   });
 
   test('delete a test case', async ({ page }) => {
-    const deleteBtn = page.getByRole('button', { name: /delete/i }).first();
-    if (!(await deleteBtn.isVisible().catch(() => false))) {
-      test.skip();
-      return;
+    const seedTitle = `E2E Delete TC Target ${Date.now()}`;
+
+    await page.getByRole('button', { name: /add test case|new test case|\+ test case/i }).click();
+    await page.getByLabel(/title/i).fill(seedTitle);
+    await page.getByLabel(/description/i).fill('Throwaway test case target for delete test.');
+    await page.getByRole('button', { name: /save|create|submit/i }).click();
+
+    const createDialog = page.locator('[role="dialog"]');
+    if (await createDialog.isVisible().catch(() => false)) {
+      await createDialog.waitFor({ state: 'hidden', timeout: 10_000 });
     }
+
+    const testCaseRow = page.locator(ITEM_ROW_SELECTOR).filter({ hasText: seedTitle }).first();
+    await expect(testCaseRow).toBeVisible({ timeout: 10_000 });
+    const deleteBtn = testCaseRow.getByRole('button', { name: /delete/i });
 
     // Handle the native confirm() dialog BEFORE clicking delete
     page.once('dialog', async (dialog) => {
@@ -146,5 +179,6 @@ test.describe('Test Cases CRUD', () => {
     await deleteBtn.click();
 
     await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(seedTitle, { exact: true })).toHaveCount(0);
   });
 });

@@ -35,8 +35,9 @@ test.describe('Traceability Matrix', () => {
   });
 
   test('seeded test case "TC-004" is visible in the matrix', async ({ page }) => {
-    // TC-004 is linked to "Role-Based Access Control" and is not
-    // touched by CRUD tests, so it remains stable across runs.
+    // TC-004 is a seeded test case linked to "Role-Based Access Control".
+    // CRUD tests in crud.spec.ts now create their own throwaway targets
+    // (see #308) so seeded TC-00X rows remain intact across the suite.
     const dataRows = page.locator('table tbody tr');
     await expect(dataRows.first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/TC-004/i)).toBeVisible({ timeout: 10_000 });
