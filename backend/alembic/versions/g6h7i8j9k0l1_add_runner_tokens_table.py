@@ -1,7 +1,7 @@
 """add runner_tokens table
 
 Revision ID: g6h7i8j9k0l1
-Revises: f5a6b7c8d9e0
+Revises: b2c3d4e5f6a7
 Create Date: 2026-05-06 00:00:00.000000
 
 """
@@ -15,7 +15,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "g6h7i8j9k0l1"
-down_revision: Union[str, None] = "f5a6b7c8d9e0"
+down_revision: Union[str, None] = "b2c3d4e5f6a7"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
