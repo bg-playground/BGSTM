@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -27,3 +29,29 @@ def decode_access_token(token: str) -> dict | None:
         return payload
     except jwt.PyJWTError:
         return None
+
+
+# ---------------------------------------------------------------------------
+# Runner-token helpers
+# ---------------------------------------------------------------------------
+
+_RUNNER_TOKEN_PREFIX = "bgstm_runner_"
+
+
+def generate_runner_token() -> str:
+    """Generate a new plaintext runner token with the ``bgstm_runner_`` prefix."""
+    return _RUNNER_TOKEN_PREFIX + secrets.token_urlsafe(32)
+
+
+def generate_token_salt() -> str:
+    """Generate a fresh 16-byte hex salt for a runner token."""
+    return secrets.token_bytes(16).hex()
+
+
+def hash_runner_token(plaintext: str, salt: str) -> str:
+    """Return the salted SHA-256 hex digest of *plaintext*.
+
+    The salt is prepended to the plaintext before hashing so that two tokens
+    with identical values produce different digests.
+    """
+    return hashlib.sha256((salt + plaintext).encode("utf-8")).hexdigest()
