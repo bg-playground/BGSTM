@@ -43,18 +43,17 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
     )
     op.create_index("idx_external_case_results_session_id", "external_case_results", ["session_id"])
-    op.create_index(
+    op.create_unique_constraint(
         "uq_external_case_results_project_external_id",
         "external_case_results",
         ["project_id", "external_id"],
-        unique=True,
     )
 
     op.alter_column("test_cases", "auto_registered", server_default=None)
 
 
 def downgrade() -> None:
-    op.drop_index("uq_external_case_results_project_external_id", table_name="external_case_results")
+    op.drop_constraint("uq_external_case_results_project_external_id", "external_case_results", type_="unique")
     op.drop_index("idx_external_case_results_session_id", table_name="external_case_results")
     op.drop_table("external_case_results")
     op.execute("DROP TYPE IF EXISTS caseoutcome")
