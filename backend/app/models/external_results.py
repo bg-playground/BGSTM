@@ -2,7 +2,7 @@
 
 import enum
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String
 
@@ -22,6 +22,10 @@ class RunStatus(str, enum.Enum):
     failed = "failed"
     skipped = "skipped"
     aborted = "aborted"
+
+
+def _utcnow():
+    return datetime.now(tz=timezone.utc).replace(tzinfo=None)
 
 
 class ExternalRunSession(Base):
@@ -45,7 +49,7 @@ class ExternalRunSession(Base):
     git_branch = Column(String(255), nullable=True)
     ci_url = Column(String(2048), nullable=True)
     run_metadata = Column(JSON(), nullable=True)
-    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    started_at = Column(DateTime, default=_utcnow, nullable=False)
     finished_at = Column(DateTime, nullable=True)
     summary = Column(JSON(), nullable=True)
     created_by_runner_token_id = Column(GUID(), ForeignKey("runner_tokens.id"), nullable=False, index=True)

@@ -68,7 +68,7 @@ async def create_session(
         git_branch=payload.git_branch,
         ci_url=ci_url_str,
         run_metadata=payload.metadata,
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(tz=timezone.utc).replace(tzinfo=None),
         created_by_runner_token_id=runner_token_id,
     )
     db.add(session)
@@ -114,7 +114,7 @@ async def finish_session_db(
 
     session.status = payload.status
     session.summary = payload.summary
-    session.finished_at = datetime.utcnow()
+    session.finished_at = datetime.now(tz=timezone.utc).replace(tzinfo=None)
     await db.commit()
     await db.refresh(session)
     return session
