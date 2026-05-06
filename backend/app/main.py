@@ -7,6 +7,7 @@ from app.api import (
     analytics,
     audit_log,
     auth,
+    external_results,
     links,
     notifications,
     requirements,
@@ -40,6 +41,7 @@ app.include_router(analytics.router, prefix=settings.API_V1_PREFIX, tags=["analy
 app.include_router(audit_log.router, prefix=settings.API_V1_PREFIX, tags=["audit_log"])
 app.include_router(users.router, prefix=settings.API_V1_PREFIX, tags=["users"])
 app.include_router(notifications.router, prefix=settings.API_V1_PREFIX, tags=["notifications"])
+app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=["external_results"])
 
 
 @app.on_event("startup")
