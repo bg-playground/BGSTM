@@ -1,12 +1,43 @@
 """CRUD operations for Audit Log"""
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.audit_log import AuditLog
+
+
+async def write_audit(
+    db: AsyncSession,
+    *,
+    actor_kind: Literal["user", "runner_token"],
+    actor_id: UUID,
+    action: str,
+    resource_type: str,
+    resource_id: str | UUID,
+    details: dict | None = None,
+) -> AuditLog:
+    """Create a new audit log entry for a user or runner token actor."""
+    entry_kwargs = {
+        "actor_kind": actor_kind,
+        "action": action,
+        "resource_type": resource_type,
+        "resource_id": str(resource_id),
+        "details": details,
+    }
+    if actor_kind == "user":
+        entry_kwargs["user_id"] = actor_id
+    else:
+        entry_kwargs["actor_token_id"] = actor_id
+
+    entry = AuditLog(**entry_kwargs)
+    db.add(entry)
+    await db.commit()
+    await db.refresh(entry)
+    return entry
 
 
 async def create_audit_entry(
@@ -17,23 +48,23 @@ async def create_audit_entry(
     resource_id: str,
     details: dict | None = None,
 ) -> AuditLog:
-    """Create a new audit log entry."""
-    entry = AuditLog(
-        user_id=user_id,
+    """Backward-compatible user-actor shim for audit writes."""
+    return await write_audit(
+        db,
+        actor_kind="user",
+        actor_id=user_id,
         action=action,
         resource_type=resource_type,
         resource_id=resource_id,
         details=details,
     )
-    db.add(entry)
-    await db.commit()
-    await db.refresh(entry)
-    return entry
 
 
 async def get_audit_logs(
     db: AsyncSession,
     user_id: UUID | None = None,
+    actor_kind: str | None = None,
+    actor_token_id: UUID | None = None,
     action: str | None = None,
     resource_type: str | None = None,
     date_from: datetime | None = None,
@@ -46,6 +77,10 @@ async def get_audit_logs(
 
     if user_id is not None:
         query = query.where(AuditLog.user_id == user_id)
+    if actor_kind is not None:
+        query = query.where(AuditLog.actor_kind == actor_kind)
+    if actor_token_id is not None:
+        query = query.where(AuditLog.actor_token_id == actor_token_id)
     if action is not None:
         query = query.where(AuditLog.action == action)
     if resource_type is not None:

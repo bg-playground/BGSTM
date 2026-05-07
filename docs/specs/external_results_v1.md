@@ -483,7 +483,7 @@ All error responses share a single envelope:
 
 ### Audit log
 
-Every state-changing call writes an **audit log entry** recording the caller's token identity, action, and affected resource. The audit-log integration is tracked in [BGSTM#297](https://github.com/bg-playground/BGSTM/issues/297).
+Every state-changing call now writes an **audit log entry** recording actor identity, action, and affected resource (implemented in [BGSTM#297](https://github.com/bg-playground/BGSTM/issues/297)).
 
 ### Action taxonomy
 
@@ -497,12 +497,16 @@ Every state-changing call writes an **audit log entry** recording the caller's t
 
 Each audit entry records:
 
+- `actor_kind` — `user` or `runner_token`.
+- `user_id` — UUID for user actors, nullable for runner-token actors.
+- `actor_token_id` — UUID for runner-token actors, nullable for user actors (never the raw token string).
 - `action` — one of the values above.
 - `resource_type` — `external_session`, `case_result`, or `artifact`.
 - `resource_id` — UUID of the created/updated resource.
-- `actor_token_id` — UUID of the runner token (never the raw token string).
 - `project_id` — UUID of the project.
 - `details` — JSON snapshot of the mutation (before/after where applicable).
+
+Action taxonomy is enforced on the write paths: no state-changing External Results endpoint may skip audit emission.
 
 ---
 

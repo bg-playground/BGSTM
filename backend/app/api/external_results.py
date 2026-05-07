@@ -19,6 +19,7 @@ from app.auth.dependencies import (
     get_current_runner_token,  # noqa: F401 — used inside _get_session_auth
     require_runner_scope,
 )
+from app.crud.audit_log import write_audit
 from app.crud.external_results import create_session, finish_session_db, get_session
 from app.db.session import get_db
 from app.models.runner_token import RunnerToken
@@ -72,6 +73,20 @@ async def create_external_session(
     last 60 seconds (idempotency window).
     """
     session = await create_session(db, payload=payload, runner_token_id=token.id)
+    await write_audit(
+        db,
+        actor_kind="runner_token",
+        actor_id=token.id,
+        action="external_results.session.start",
+        resource_type="external_session",
+        resource_id=session.id,
+        details={
+            "project_id": str(payload.project_id),
+            "git_sha": payload.git_sha,
+            "git_branch": payload.git_branch,
+            "runner": payload.runner,
+        },
+    )
     return _session_to_response(session)
 
 
@@ -88,7 +103,7 @@ async def finish_external_session(
     session_id: UUID,
     payload: SessionFinish,
     db: AsyncSession = Depends(get_db),
-    token: RunnerToken = Depends(require_runner_scope(_WRITE_SCOPE)),  # noqa: ARG001
+    token: RunnerToken = Depends(require_runner_scope(_WRITE_SCOPE)),
 ) -> SessionResponse:
     """Set the terminal status of a session.
 
@@ -106,6 +121,19 @@ async def finish_external_session(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": "session.not_found", "message": f"Session {session_id} does not exist.", "details": None},
         )
+
+    await write_audit(
+        db,
+        actor_kind="runner_token",
+        actor_id=token.id,
+        action="external_results.session.finish",
+        resource_type="external_session",
+        resource_id=session.id,
+        details={
+            "status": session.status.value,
+            "finished_at": session.finished_at.isoformat() if session.finished_at else None,
+        },
+    )
 
     return _session_to_response(session)
 

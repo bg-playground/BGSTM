@@ -7,7 +7,9 @@ from pydantic import BaseModel, ConfigDict
 
 class AuditLogResponse(BaseModel):
     id: UUID
-    user_id: UUID
+    actor_kind: str
+    user_id: UUID | None
+    actor_token_id: UUID | None
     action: str
     resource_type: str
     resource_id: str

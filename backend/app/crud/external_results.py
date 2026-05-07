@@ -30,7 +30,6 @@ async def create_session(
     seconds by the same runner token, the existing session is returned instead
     of creating a duplicate.
 
-    # TODO(#297): Write audit entry ``external_results.session.start`` here.
     """
     cutoff = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(seconds=_IDEMPOTENCY_WINDOW_SECONDS)
 
@@ -90,7 +89,6 @@ async def finish_session_db(
     Raises ``ValueError`` with a structured dict payload on transition
     violations so the API layer can return the appropriate 409.
 
-    # TODO(#297): Write audit entry ``external_results.session.finish`` here.
     """
     result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
     session = result.scalar_one_or_none()

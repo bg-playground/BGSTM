@@ -17,7 +17,9 @@ router = APIRouter()
 
 @router.get("/audit-log", response_model=AuditLogListResponse)
 async def list_audit_logs(
+    actor_kind: str | None = Query(None, description="Filter by actor kind ('user' or 'runner_token')"),
     user_id: UUID | None = Query(None, description="Filter by user ID"),
+    actor_token_id: UUID | None = Query(None, description="Filter by runner token ID"),
     action: str | None = Query(None, description="Filter by action (e.g. 'requirement.created')"),
     resource_type: str | None = Query(None, description="Filter by resource type"),
     date_from: datetime | None = Query(None, description="Filter entries on or after this datetime"),
@@ -30,7 +32,9 @@ async def list_audit_logs(
     """List audit log entries (admin only)."""
     entries, total = await get_audit_logs(
         db,
+        actor_kind=actor_kind,
         user_id=user_id,
+        actor_token_id=actor_token_id,
         action=action,
         resource_type=resource_type,
         date_from=date_from,
