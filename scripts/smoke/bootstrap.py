@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import os
 import uuid
+from typing import Any
 
 import httpx
 
 
-def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict:
+def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict[str, Any]:
     response = client.request(method, path, **kwargs)
     response.raise_for_status()
     data = response.json()
@@ -16,7 +17,7 @@ def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict:
     return data
 
 
-def _create_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
+def _get_or_create_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
     response = client.post("/api/v1/projects", headers=headers, json={"name": "smoke-project"})
     if response.status_code < 300:
         payload = response.json()
@@ -47,7 +48,7 @@ def main() -> None:
         admin_jwt = login["access_token"]
         headers = {"Authorization": f"Bearer {admin_jwt}"}
 
-        project_id = _create_project_id(client, headers)
+        project_id = _get_or_create_project_id(client, headers)
 
         token_payload = {
             "label": "smoke",

@@ -4,6 +4,7 @@ from copy import deepcopy
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 import sys
+from typing import Any
 
 _MODULE_PATH = Path(__file__).with_name("assert.py")
 _SPEC = spec_from_file_location("smoke_assert", _MODULE_PATH)
@@ -21,7 +22,7 @@ SESSION_ID = "00000000-0000-0000-0000-000000000333"
 FAILED_CASE_ID = "00000000-0000-0000-0000-000000000444"
 
 
-def _snapshot() -> dict:
+def _snapshot() -> dict[str, Any]:
     return {
         "sessions": [
             {
