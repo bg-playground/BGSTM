@@ -7,15 +7,18 @@ Implements:
   POST   /external-results/case             – submit case result
   PATCH  /external-results/case/{id}        – update case result
   GET    /external-results/case/{id}        – read case result
+  POST   /external-results/artifact         – upload artifact (BGSTM#298)
 
-Artifact endpoints     → BGSTM#298
 Audit-log integration  → BGSTM#297
 """
 
+import io
+import re
+import uuid
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, Header, HTTPException, Response, status
+from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException, Response, UploadFile, status
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +26,8 @@ from app.auth.dependencies import (
     get_current_runner_token,  # noqa: F401 — used inside _get_session_auth
     require_runner_scope,
 )
+from app.config import settings
+from app.crud.external_artifact import create_artifact
 from app.crud.external_results import (
     create_case_result,
     create_session,
@@ -33,8 +38,10 @@ from app.crud.external_results import (
     update_case_result,
 )
 from app.db.session import get_db
+from app.models.external_artifact import ArtifactKind
 from app.models.runner_token import RunnerToken
 from app.schemas.external_results import (
+    ArtifactResponse,
     CaseResultCreate,
     CaseResultResponse,
     CaseResultUpdate,
@@ -42,6 +49,7 @@ from app.schemas.external_results import (
     SessionFinish,
     SessionResponse,
 )
+from app.storage import StorageBackend, get_storage_backend
 
 router = APIRouter()
 
@@ -331,3 +339,126 @@ async def read_external_case_result(
             },
         )
     return await _case_to_response(db, case_result)
+
+
+# ---------------------------------------------------------------------------
+# POST /external-results/artifact — upload an artifact
+# ---------------------------------------------------------------------------
+
+_UNSAFE_FILENAME_RE = re.compile(r"[^\w.\-]")
+_CHUNK_SIZE = 65_536  # 64 KB
+
+
+def _safe_filename(name: str) -> str:
+    """Sanitize a filename by replacing unsafe characters with underscores."""
+    sanitized = _UNSAFE_FILENAME_RE.sub("_", name)
+    return sanitized or "file"
+
+
+@router.post(
+    "/external-results/artifact",
+    response_model=ArtifactResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_external_artifact(
+    case_result_id: UUID = Form(..., description="Case result this artifact belongs to."),
+    kind: ArtifactKind = Form(..., description="Artifact kind: screenshot | trace | video | log | other"),
+    filename: str | None = Form(None, description="Original filename; defaults to the upload's filename."),
+    file: UploadFile = File(..., description="The artifact binary."),
+    db: AsyncSession = Depends(get_db),
+    token: RunnerToken = Depends(require_runner_scope(_WRITE_SCOPE)),
+    backend: StorageBackend = Depends(get_storage_backend),
+) -> ArtifactResponse:
+    """Upload an artifact file and associate it with a case result.
+
+    Validates:
+    - ``case_result_id`` must exist in ``external_case_results`` (404 on miss).
+    - ``kind`` must be a valid ``ArtifactKind`` enum value (422 on miss).
+    - ``Content-Type`` must be in ``settings.STORAGE_ALLOWED_CONTENT_TYPES`` (415 on miss).
+    - Upload must not exceed ``settings.STORAGE_MAX_UPLOAD_BYTES`` (413 on overflow).
+
+    The upload is streamed — the full body is never loaded into memory beyond the
+    configured limit.
+
+    Returns 201 with the persisted artifact row and a permanent download URL.
+    """
+    # 1. Validate case_result_id exists.
+    case_result = await get_case_result(db, case_result_id)
+    if case_result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "case_result.not_found",
+                "message": f"Case result {case_result_id} does not exist.",
+                "details": None,
+            },
+        )
+
+    # 2. Validate content type.
+    content_type = file.content_type or "application/octet-stream"
+    if content_type not in settings.STORAGE_ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail={
+                "code": "artifact.unsupported_content_type",
+                "message": (
+                    f"Content-Type '{content_type}' is not allowed. "
+                    f"Allowed types: {settings.STORAGE_ALLOWED_CONTENT_TYPES}"
+                ),
+                "details": None,
+            },
+        )
+
+    # 3. Stream the upload, enforcing the size limit.
+    safe_name = _safe_filename(filename or file.filename or "file")
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(_CHUNK_SIZE)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > settings.STORAGE_MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={
+                    "code": "artifact.too_large",
+                    "message": (
+                        f"Upload exceeds the maximum allowed size of {settings.STORAGE_MAX_UPLOAD_BYTES} bytes."
+                    ),
+                    "details": None,
+                },
+            )
+        chunks.append(chunk)
+
+    size_bytes = total
+
+    # 4. Store the artifact.
+    storage_key = f"external-artifacts/{case_result_id}/{uuid.uuid4()}-{safe_name}"
+    body_buf = io.BytesIO(b"".join(chunks))
+    url = await backend.put(storage_key, body_buf, content_type)
+
+    # 5. Persist artifact metadata.
+    # TODO(BGSTM#297): write_audit(...) for external_results.artifact.upload here.
+    artifact = await create_artifact(
+        db,
+        case_result_id=case_result_id,
+        kind=kind,
+        filename=filename or file.filename or safe_name,
+        content_type=content_type,
+        size_bytes=size_bytes,
+        storage_key=storage_key,
+        url=url,
+        runner_token_id=token.id,
+    )
+
+    return ArtifactResponse(
+        id=artifact.id,
+        case_result_id=artifact.case_result_id,
+        kind=artifact.kind,
+        filename=artifact.filename,
+        content_type=artifact.content_type,
+        size_bytes=artifact.size_bytes,
+        url=url,
+        uploaded_at=artifact.uploaded_at,
+    )

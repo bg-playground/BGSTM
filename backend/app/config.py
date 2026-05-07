@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 
 
@@ -23,6 +26,21 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-me-in-production-use-a-real-secret-key"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
+
+    # Storage (artifact uploads — BGSTM#298)
+    STORAGE_BACKEND: Literal["local", "s3"] = "local"
+    STORAGE_LOCAL_ROOT: Path = Path("./var/artifacts")
+    STORAGE_LOCAL_PUBLIC_BASE_URL: str = "http://localhost:8000/artifacts"
+    STORAGE_MAX_UPLOAD_BYTES: int = 52_428_800  # 50 MB
+    STORAGE_ALLOWED_CONTENT_TYPES: list[str] = [
+        "image/png",
+        "image/jpeg",
+        "video/mp4",
+        "video/webm",
+        "application/zip",
+        "text/plain",
+        "application/json",
+    ]
 
     class Config:
         env_file = ".env"

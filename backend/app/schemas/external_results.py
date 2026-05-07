@@ -202,7 +202,7 @@ class ArtifactResponse(ArtifactCreate):
 
     id: UUID
     url: HttpUrl = Field(..., description="Presigned or permanent download URL.")
-    created_at: datetime
+    uploaded_at: datetime
 
 
 # ---------------------------------------------------------------------------

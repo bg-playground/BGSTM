@@ -1,7 +1,9 @@
 import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api import (
     analytics,
@@ -42,6 +44,20 @@ app.include_router(audit_log.router, prefix=settings.API_V1_PREFIX, tags=["audit
 app.include_router(users.router, prefix=settings.API_V1_PREFIX, tags=["users"])
 app.include_router(notifications.router, prefix=settings.API_V1_PREFIX, tags=["notifications"])
 app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=["external_results"])
+
+# Static-file serving for local artifact backend (dev only).
+# Gated so production with S3 does not expose a local directory.
+if settings.STORAGE_BACKEND == "local":
+    from urllib.parse import urlparse
+
+    _artifacts_path = urlparse(settings.STORAGE_LOCAL_PUBLIC_BASE_URL).path.lstrip("/") or "artifacts"
+    _artifacts_root = settings.STORAGE_LOCAL_ROOT
+    Path(_artifacts_root).mkdir(parents=True, exist_ok=True)
+    app.mount(
+        f"/{_artifacts_path}",
+        StaticFiles(directory=str(_artifacts_root)),
+        name="artifacts",
+    )
 
 
 @app.on_event("startup")

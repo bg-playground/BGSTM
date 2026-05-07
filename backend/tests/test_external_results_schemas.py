@@ -258,7 +258,7 @@ class TestRoundTrip:
             content_type="application/zip",
             size_bytes=1024,
             url="https://storage.example.com/artifacts/trace.zip",  # type: ignore[arg-type]
-            created_at=self._now,
+            uploaded_at=self._now,
         )
         restored = ArtifactResponse.model_validate_json(obj.model_dump_json())
         assert restored.id == obj.id
