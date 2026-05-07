@@ -136,8 +136,9 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
             sessions.append(_get_json(f"/api/v1/external-results/session/{session_id}"))
 
         case_results: list[dict[str, Any]] = []
-        # `/api/v1/external-results/case/{id}` is not available on main yet, so
-        # reconstruct case rows from audit entries emitted on case creation.
+        # `/api/v1/external-results/case/{id}` is not available on main yet
+        # (tracked for v0.2 follow-up #315), so reconstruct case rows from
+        # audit entries emitted on case creation.
         for entry in audit_entries:
             if entry.get("action") != "external_results.case.create":
                 continue
