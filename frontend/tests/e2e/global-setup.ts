@@ -56,7 +56,7 @@ export default async function globalSetup(): Promise<void> {
   const availableIds = new Set(
     testCases.items
       .map((testCase) => testCase.external_id)
-      .filter((externalId): externalId is string => typeof externalId === 'string' && externalId.length > 0),
+      .filter((externalId): externalId is string => typeof externalId === 'string'),
   );
 
   const missingSeededCases = REQUIRED_TEST_CASE_IDS.filter((requiredId) => !availableIds.has(requiredId));
