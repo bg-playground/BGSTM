@@ -10,7 +10,12 @@ import httpx
 
 def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict[str, Any]:
     response = client.request(method, path, **kwargs)
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        raise RuntimeError(
+            f"{method} {path} failed with status={exc.response.status_code}, body={exc.response.text}"
+        ) from exc
     data = response.json()
     if not isinstance(data, dict):
         raise ValueError(f"Expected object response from {path}, got {type(data).__name__}")

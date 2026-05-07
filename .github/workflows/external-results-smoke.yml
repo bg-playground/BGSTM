@@ -77,6 +77,39 @@ jobs:
           docker compose -f bgstm/docker-compose.test.yml logs backend || true
           exit 1
 
+      - name: Normalize runner token scopes column type for smoke
+        run: |
+          docker compose -f bgstm/docker-compose.test.yml exec -T db psql \
+            -U bgstm_test \
+            -d bgstm_test \
+            -v ON_ERROR_STOP=1 \
+            -c "DO \$\$
+            BEGIN
+              IF EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = 'runner_tokens'
+                  AND column_name = 'scopes'
+                  AND udt_name IN ('json', 'jsonb')
+              ) THEN
+                CREATE OR REPLACE FUNCTION _bgstm_json_to_text_array(j json)
+                RETURNS text[]
+                LANGUAGE sql
+                IMMUTABLE
+                AS \$fn\$
+                  SELECT COALESCE(array_agg(value), ARRAY[]::text[])
+                  FROM json_array_elements_text(j) AS t(value);
+                \$fn\$;
+
+                ALTER TABLE runner_tokens
+                ALTER COLUMN scopes TYPE text[]
+                USING _bgstm_json_to_text_array(scopes);
+
+                DROP FUNCTION _bgstm_json_to_text_array(json);
+              END IF;
+            END
+            \$\$;"
+
       - name: Bootstrap project and runner token
         run: python bgstm/scripts/smoke/bootstrap.py
 
