@@ -1,6 +1,7 @@
 -- E2E test seed data
 -- Passwords are bcrypt hashes of "password123"
 -- This file is run AFTER alembic upgrade head via the backend entrypoint
+\set ON_ERROR_STOP on
 
 -- ============================================================
 -- Users
@@ -60,29 +61,76 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- Test Cases (5 sample)
 -- ============================================================
-INSERT INTO test_cases (id, title, description, type, priority, status, automation_status, created_at, updated_at)
-VALUES
-  ('20000000-0000-0000-0000-000000000001'::uuid,
-   'TC-001: Login with valid credentials',
-   'Verify that a user can log in with valid email and password.',
-   'functional', 'high', 'ready', 'automated', NOW(), NOW()),
-  ('20000000-0000-0000-0000-000000000002'::uuid,
-   'TC-002: Login with invalid credentials',
-   'Verify that an error message is shown for invalid credentials.',
-   'functional', 'high', 'ready', 'automated', NOW(), NOW()),
-  ('20000000-0000-0000-0000-000000000003'::uuid,
-   'TC-003: Export PDF report',
-   'Verify that the traceability matrix can be exported as a PDF.',
-   'functional', 'medium', 'draft', 'manual', NOW(), NOW()),
-  ('20000000-0000-0000-0000-000000000004'::uuid,
-   'TC-004: Role enforcement for admin actions',
-   'Verify that only admin users can access administrative features.',
-   'functional', 'high', 'ready', 'manual', NOW(), NOW()),
-  ('20000000-0000-0000-0000-000000000005'::uuid,
-   'TC-005: API response time under load',
-   'Measure API response times with 100 concurrent requests.',
-   'performance', 'low', 'draft', 'manual', NOW(), NOW())
-ON CONFLICT (id) DO NOTHING;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'test_cases'
+      AND column_name = 'auto_registered'
+  ) THEN
+    INSERT INTO test_cases
+      (id, external_id, title, description, type, priority, status, automation_status, auto_registered, created_at, updated_at)
+    VALUES
+      ('20000000-0000-0000-0000-000000000001'::uuid,
+       'TC-001',
+       'TC-001: Login with valid credentials',
+       'Verify that a user can log in with valid email and password.',
+       'functional', 'high', 'ready', 'automated', false, NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000002'::uuid,
+       'TC-002',
+       'TC-002: Login with invalid credentials',
+       'Verify that an error message is shown for invalid credentials.',
+       'functional', 'high', 'ready', 'automated', false, NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000003'::uuid,
+       'TC-003',
+       'TC-003: Export PDF report',
+       'Verify that the traceability matrix can be exported as a PDF.',
+       'functional', 'medium', 'draft', 'manual', false, NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000004'::uuid,
+       'TC-004',
+       'TC-004: Role enforcement for admin actions',
+       'Verify that only admin users can access administrative features.',
+       'functional', 'high', 'ready', 'manual', false, NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000005'::uuid,
+       'TC-005',
+       'TC-005: API response time under load',
+       'Measure API response times with 100 concurrent requests.',
+       'performance', 'low', 'draft', 'manual', false, NOW(), NOW())
+    ON CONFLICT (id) DO NOTHING;
+  ELSE
+    INSERT INTO test_cases
+      (id, external_id, title, description, type, priority, status, automation_status, created_at, updated_at)
+    VALUES
+      ('20000000-0000-0000-0000-000000000001'::uuid,
+       'TC-001',
+       'TC-001: Login with valid credentials',
+       'Verify that a user can log in with valid email and password.',
+       'functional', 'high', 'ready', 'automated', NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000002'::uuid,
+       'TC-002',
+       'TC-002: Login with invalid credentials',
+       'Verify that an error message is shown for invalid credentials.',
+       'functional', 'high', 'ready', 'automated', NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000003'::uuid,
+       'TC-003',
+       'TC-003: Export PDF report',
+       'Verify that the traceability matrix can be exported as a PDF.',
+       'functional', 'medium', 'draft', 'manual', NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000004'::uuid,
+       'TC-004',
+       'TC-004: Role enforcement for admin actions',
+       'Verify that only admin users can access administrative features.',
+       'functional', 'high', 'ready', 'manual', NOW(), NOW()),
+      ('20000000-0000-0000-0000-000000000005'::uuid,
+       'TC-005',
+       'TC-005: API response time under load',
+       'Measure API response times with 100 concurrent requests.',
+       'performance', 'low', 'draft', 'manual', NOW(), NOW())
+    ON CONFLICT (id) DO NOTHING;
+  END IF;
+END $$;
 
 -- ============================================================
 -- Existing links (3)
