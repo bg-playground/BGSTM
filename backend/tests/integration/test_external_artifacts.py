@@ -13,12 +13,13 @@ Covers all 7 acceptance scenarios from the issue:
 from __future__ import annotations
 
 import uuid
+from urllib.parse import urlparse
 
 import pytest
 import pytest_asyncio
 from fastapi.staticfiles import StaticFiles
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.crud.runner_token import create_runner_token
@@ -49,8 +50,6 @@ async def db_session():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
 
     # Enable SQLite foreign-key enforcement so ON DELETE CASCADE is honoured.
-    from sqlalchemy import event
-
     @event.listens_for(engine.sync_engine, "connect")
     def _set_sqlite_pragma(dbapi_con, _connection_record):
         cursor = dbapi_con.cursor()
@@ -277,8 +276,6 @@ class TestArtifactHappyPath:
 
             url = upload_resp.json()["url"]
             # Strip the scheme+host to get the path for TestClient
-            from urllib.parse import urlparse
-
             path = urlparse(url).path
             get_resp = client.get(path)
 

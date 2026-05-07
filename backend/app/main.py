@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,8 +49,6 @@ app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=
 # Static-file serving for local artifact backend (dev only).
 # Gated so production with S3 does not expose a local directory.
 if settings.STORAGE_BACKEND == "local":
-    from urllib.parse import urlparse
-
     _artifacts_path = urlparse(settings.STORAGE_LOCAL_PUBLIC_BASE_URL).path.lstrip("/") or "artifacts"
     _artifacts_root = settings.STORAGE_LOCAL_ROOT
     Path(_artifacts_root).mkdir(parents=True, exist_ok=True)
