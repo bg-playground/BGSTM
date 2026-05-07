@@ -23,7 +23,11 @@ def _create_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
         project_id = payload.get("id")
         if isinstance(project_id, str) and project_id:
             return project_id
-    return str(uuid.uuid4())
+        raise RuntimeError("Project creation succeeded but no project id was returned.")
+    if response.status_code == 404:
+        print("Project creation endpoint not available; using generated project_id for external-results smoke run.")
+        return str(uuid.uuid4())
+    raise RuntimeError(f"Project creation failed: status={response.status_code}, body={response.text}")
 
 
 def main() -> None:
