@@ -70,7 +70,7 @@ jobs:
               echo "Backend is healthy"
               exit 0
             fi
-            echo "Attempt $i/30 — backend not ready yet, waiting 5s..."
+            echo "Attempt $i/30 -- backend not ready yet, waiting 5s..."
             sleep 5
           done
           echo "Backend failed to become healthy"

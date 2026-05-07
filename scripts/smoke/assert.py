@@ -108,12 +108,21 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
     headers = {"Authorization": f"Bearer {admin_jwt}"}
 
     with httpx.Client(base_url=api_url, headers=headers, timeout=30.0) as client:
-        audit_response = client.get(
+        def _get_json(path: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
+            response = client.get(path, params=params)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                raise RuntimeError(f"Request failed for {path}: {exc.response.status_code} {exc.response.text}") from exc
+            payload = response.json()
+            if not isinstance(payload, dict):
+                raise RuntimeError(f"Unexpected response shape from {path}: {type(payload).__name__}")
+            return payload
+
+        audit_entries = _get_json(
             "/api/v1/audit-log",
             params={"actor_kind": "runner_token", "actor_token_id": actor_token_id, "limit": 500},
-        )
-        audit_response.raise_for_status()
-        audit_entries = audit_response.json().get("entries", [])
+        ).get("entries", [])
 
         session_ids = {
             entry.get("resource_id")
@@ -124,9 +133,7 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
 
         sessions: list[dict[str, Any]] = []
         for session_id in sorted(str(sid) for sid in session_ids if sid):
-            session_response = client.get(f"/api/v1/external-results/session/{session_id}")
-            session_response.raise_for_status()
-            sessions.append(session_response.json())
+            sessions.append(_get_json(f"/api/v1/external-results/session/{session_id}"))
 
         case_ids = {
             entry.get("resource_id")
@@ -136,9 +143,7 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
 
         case_results: list[dict[str, Any]] = []
         for case_id in sorted(str(cid) for cid in case_ids if cid):
-            case_response = client.get(f"/api/v1/external-results/case/{case_id}")
-            case_response.raise_for_status()
-            case_results.append(case_response.json())
+            case_results.append(_get_json(f"/api/v1/external-results/case/{case_id}"))
 
         artifacts: list[dict[str, Any]] = []
         for entry in audit_entries:
