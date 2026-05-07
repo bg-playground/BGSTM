@@ -19,6 +19,7 @@ const allProjects = [
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   timeout: process.env.CI ? 60_000 : 30_000,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
