@@ -3,6 +3,7 @@
 from .audit_log import AuditLog
 from .base import Base, TimestampMixin
 from .embedding_cache import EmbeddingCache
+from .external_results import CaseOutcome, ExternalCaseResult, ExternalRunSession, RunStatus
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
@@ -16,6 +17,10 @@ __all__ = [
     "Base",
     "TimestampMixin",
     "EmbeddingCache",
+    "ExternalRunSession",
+    "ExternalCaseResult",
+    "RunStatus",
+    "CaseOutcome",
     "Notification",
     "NotificationType",
     "Requirement",
