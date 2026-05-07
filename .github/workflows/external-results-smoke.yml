@@ -1,0 +1,104 @@
+name: External Results Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'backend/app/api/external_results.py'
+      - 'backend/app/schemas/external_*.py'
+      - 'backend/app/models/external_*.py'
+      - 'backend/app/crud/external_*.py'
+      - 'backend/alembic/versions/**'
+      - 'docs/specs/external_results_v1.md'
+      - '.github/workflows/external-results-smoke.yml'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: external-results-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: External Results contract smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout BGSTM
+        uses: actions/checkout@v4
+        with:
+          path: bgstm
+
+      - name: Checkout bgstm-playwright-frameworks (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: bg-playground/bgstm-playwright-frameworks
+          ref: 98027ad2126cde2a87392564828f10709612142e
+          path: frameworks
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: frameworks/pnpm-lock.yaml
+
+      - name: Set up pnpm 9
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install smoke script dependencies
+        run: python -m pip install --quiet httpx
+
+      - name: Start BGSTM backend + Postgres
+        run: docker compose -f bgstm/docker-compose.test.yml up -d db backend
+
+      - name: Wait for BGSTM health
+        run: |
+          echo "Waiting for backend health check..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8001/health > /dev/null; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+            echo "Attempt $i/30 — backend not ready yet, waiting 5s..."
+            sleep 5
+          done
+          echo "Backend failed to become healthy"
+          docker compose -f bgstm/docker-compose.test.yml logs backend || true
+          exit 1
+
+      - name: Bootstrap project and runner token
+        run: python bgstm/scripts/smoke/bootstrap.py
+
+      - name: Install frameworks dependencies
+        run: pnpm -C frameworks install --frozen-lockfile
+
+      - name: Build frameworks workspace
+        run: pnpm -C frameworks build
+
+      - name: Install Chromium for crm-example
+        run: pnpm -C frameworks/examples/crm-example exec playwright install --with-deps chromium
+
+      - name: Run crm-example smoke fixture
+        run: |
+          # Playwright fails-by-design (smoke fixture has 1 intentional failure). The real pass/fail signal is the assertion step below.
+          pnpm --filter crm-example -C frameworks smoke || true
+
+      - name: Assert BGSTM persisted expected smoke results
+        run: python bgstm/scripts/smoke/assert.py
+
+      - name: Tear down BGSTM stack
+        if: always()
+        run: docker compose -f bgstm/docker-compose.test.yml down -v
