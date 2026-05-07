@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.auth.dependencies import get_current_user
-from app.crud.audit_log import create_audit_entry, get_audit_logs
+from app.crud.audit_log import create_audit_entry, get_audit_logs, write_audit
+from app.crud.runner_token import create_runner_token
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
@@ -79,6 +80,9 @@ async def test_create_audit_entry(db_session):
     )
 
     assert entry.id is not None
+    assert entry.actor_kind == "user"
+    assert entry.user_id == admin.id
+    assert entry.actor_token_id is None
     assert entry.action == "requirement.created"
     assert entry.resource_type == "requirement"
     assert entry.details == {"title": "My Req"}
@@ -137,6 +141,47 @@ async def test_get_audit_logs_filter_by_resource_type(db_session):
     entries, total = await get_audit_logs(db_session, resource_type="link")
     assert total == 1
     assert entries[0].resource_type == "link"
+
+
+@pytest.mark.asyncio
+async def test_get_audit_logs_filter_by_actor_kind(db_session):
+    """get_audit_logs filters by actor kind."""
+    admin = _make_admin()
+    db_session.add(admin)
+    await db_session.commit()
+    token_model, _plaintext = await create_runner_token(
+        db_session,
+        label="audit-filter-token",
+        scopes=["external_results:write"],
+        created_by_user_id=admin.id,
+    )
+
+    await create_audit_entry(
+        db_session,
+        user_id=admin.id,
+        action="requirement.created",
+        resource_type="requirement",
+        resource_id="1",
+    )
+    await write_audit(
+        db_session,
+        actor_kind="runner_token",
+        actor_id=token_model.id,
+        action="external_results.session.start",
+        resource_type="external_session",
+        resource_id=uuid.uuid4(),
+    )
+
+    user_entries, user_total = await get_audit_logs(db_session, actor_kind="user")
+    runner_entries, runner_total = await get_audit_logs(db_session, actor_kind="runner_token")
+    token_entries, token_total = await get_audit_logs(db_session, actor_token_id=token_model.id)
+
+    assert user_total == 1
+    assert user_entries[0].actor_kind == "user"
+    assert runner_total == 1
+    assert runner_entries[0].actor_kind == "runner_token"
+    assert token_total == 1
+    assert token_entries[0].actor_token_id == token_model.id
 
 
 # ── API endpoint tests ────────────────────────────────────────────────────────
