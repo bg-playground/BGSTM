@@ -111,7 +111,12 @@ jobs:
             \$\$;"
 
       - name: Bootstrap project and runner token
+        id: bootstrap
         run: python bgstm/scripts/smoke/bootstrap.py
+
+      - name: Dump backend logs on bootstrap failure
+        if: failure() && steps.bootstrap.outcome == 'failure'
+        run: docker compose -f bgstm/docker-compose.test.yml logs backend
 
       - name: Install frameworks dependencies
         run: pnpm -C frameworks install --frozen-lockfile
@@ -128,7 +133,12 @@ jobs:
           pnpm --filter crm-example -C frameworks smoke || true
 
       - name: Assert BGSTM persisted expected smoke results
+        id: assert_results
         run: python bgstm/scripts/smoke/assert.py
+
+      - name: Dump backend logs on assertion failure
+        if: failure() && steps.assert_results.outcome == 'failure'
+        run: docker compose -f bgstm/docker-compose.test.yml logs backend
 
       - name: Tear down BGSTM stack
         if: always()

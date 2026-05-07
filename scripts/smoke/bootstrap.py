@@ -23,6 +23,10 @@ def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict[str, An
 
 
 def _get_or_generate_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
+    # NOTE: /api/v1/projects does not exist on main as of v0.1, so this 404
+    # fallback is expected on every run until the v0.2 follow-up (#315).
+    # A synthetic UUID is sufficient because session writes currently do not
+    # enforce a foreign-key relationship on project_id.
     response = client.post("/api/v1/projects", headers=headers, json={"name": "smoke-project"})
     if response.status_code < 300:
         payload = response.json()
