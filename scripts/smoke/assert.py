@@ -135,15 +135,24 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
         for session_id in sorted(str(sid) for sid in session_ids if sid):
             sessions.append(_get_json(f"/api/v1/external-results/session/{session_id}"))
 
-        case_ids = {
-            entry.get("resource_id")
-            for entry in audit_entries
-            if entry.get("action") == "external_results.case.create"
-        }
-
         case_results: list[dict[str, Any]] = []
-        for case_id in sorted(str(cid) for cid in case_ids if cid):
-            case_results.append(_get_json(f"/api/v1/external-results/case/{case_id}"))
+        # `/api/v1/external-results/case/{id}` is not available on main yet, so
+        # reconstruct case rows from audit entries emitted on case creation.
+        for entry in audit_entries:
+            if entry.get("action") != "external_results.case.create":
+                continue
+            details = entry.get("details") or {}
+            payload = details.get("payload")
+            source = payload if isinstance(payload, dict) else details
+            case_results.append(
+                {
+                    "id": entry.get("resource_id"),
+                    "session_id": source.get("session_id"),
+                    "external_id": source.get("external_id") or source.get("title"),
+                    "outcome": source.get("outcome"),
+                    "requirement_ids": source.get("requirement_ids") or [],
+                }
+            )
 
         artifacts: list[dict[str, Any]] = []
         for entry in audit_entries:
