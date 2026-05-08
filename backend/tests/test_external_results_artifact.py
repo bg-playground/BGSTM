@@ -208,18 +208,20 @@ class TestHappyPath:
 class TestSizeEnforcement:
     @pytest.mark.asyncio
     async def test_oversized_file_returns_413_and_cleans_up(self, db_session, write_token, tmp_path, monkeypatch):
-        """413 on oversized upload; partial temp file is cleaned up; no DB record created.
+        """413 on oversized upload; Starlette-managed temp file is cleaned up; no DB record created.
 
-        To exercise the streaming/partial-write path, we set:
-          - BGSTM_ARTIFACT_MAX_BYTES = 10
-          - _ARTIFACT_CHUNK_SIZE = 8
+        Note: FastAPI/Starlette fully parses the multipart body via python-multipart
+        **before** the handler is invoked — by the time the chunk loop runs, ``file``
+        is already a SpooledTemporaryFile containing the entire upload.  The 413
+        enforcement happens post-buffer (reading from the spooled file in chunks),
+        not mid-wire.  True in-stream early-abort is a follow-up improvement; deploy
+        behind a reverse-proxy ``client_max_body_size`` for first-line DoS protection.
 
-        The 20-byte payload triggers:
-          chunk 1 (8 bytes): written → total = 8 ≤ 10 → continue
-          chunk 2 (8 bytes): written → total = 16 > 10 → 413 + cleanup
-
-        This asserts that only a partial chunk is written before 413 fires,
-        catching any "looks streaming, actually buffers" regression.
+        This test verifies:
+          - 413 is returned when the spooled content exceeds BGSTM_ARTIFACT_MAX_BYTES.
+          - The handler's own temp file (bgstm_artifact_*) is cleaned up on 413.
+          - No artifact row is written to the DB.
+          - No file is left in the artifacts directory.
         """
         _token_model, plaintext = write_token
 
@@ -331,6 +333,66 @@ class TestContentTypeEnforcement:
 
         assert resp.status_code == 201, resp.text
         assert resp.json()["kind"] == "other"
+
+
+# ---------------------------------------------------------------------------
+# Path traversal (filename sanitization)
+# ---------------------------------------------------------------------------
+
+
+class TestFilenameValidation:
+    """Verify that malicious filenames are rejected before any file is written."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "bad_filename",
+        [
+            "../etc/passwd",
+            "../../tmp/pwned.png",
+            "/etc/shadow",
+            "subdir/file.png",
+            "file\x00.png",  # null byte
+            "file\\path.png",  # backslash (also disallowed by regex)
+            "a" * 256,  # too long
+        ],
+    )
+    async def test_unsafe_filename_returns_422_and_writes_nothing(
+        self, db_session, write_token, tmp_path, monkeypatch, bad_filename
+    ):
+        _token_model, plaintext = write_token
+        monkeypatch.setattr(settings, "BGSTM_ARTIFACTS_DIR", str(tmp_path))
+        monkeypatch.setattr(settings, "BGSTM_STORAGE_BACKEND", "local")
+
+        with TestClient(app) as client:
+            session_id = _create_session(client, plaintext)
+            case_result_id = _create_case_result(client, plaintext, session_id)
+
+            resp = client.post(
+                "/api/v1/external-results/artifact",
+                data={
+                    "case_result_id": case_result_id,
+                    "kind": "screenshot",
+                    "filename": bad_filename,
+                },
+                files={"file": ("payload", io.BytesIO(b"\x89PNG"), "image/png")},
+                headers=_auth_header(plaintext),
+            )
+
+        assert resp.status_code == 422, f"Expected 422 for filename={bad_filename!r}, got {resp.status_code}"
+        assert resp.json()["detail"]["code"] == "validation_error"
+
+        # Nothing should be written to the artifacts directory
+        written = list(tmp_path.rglob("*"))
+        assert written == [], f"Files written for malicious filename {bad_filename!r}: {written}"
+
+    @pytest.mark.asyncio
+    async def test_local_backend_rejects_escaped_key_directly(self, tmp_path):
+        """LocalFsBackend second-line defense: ValueError if key escapes root."""
+        from app.storage.local import LocalFsBackend
+
+        backend = LocalFsBackend(root=tmp_path, url_prefix="http://testserver/artifacts")
+        with pytest.raises(ValueError, match="escapes artifact root"):
+            backend.save(io.BytesIO(b"data"), key="../outside/file.txt", content_type="text/plain")
 
 
 # ---------------------------------------------------------------------------

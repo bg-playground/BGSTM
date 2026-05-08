@@ -4,7 +4,7 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Index, Integer, String
 
 from .base import Base
 from .requirement import GUID
@@ -28,13 +28,13 @@ class ArtifactKind(str, enum.Enum):
 
 class ExternalCaseArtifact(Base):
     __tablename__ = "external_case_artifacts"
+    __table_args__ = (Index("idx_external_case_artifacts_case_result_id", "case_result_id"),)
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     case_result_id = Column(
         GUID(),
         ForeignKey("external_case_results.id", ondelete="CASCADE", name="fk_external_case_artifacts_case_result_id"),
         nullable=False,
-        index=True,
     )
     kind = Column(
         Enum(

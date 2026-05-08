@@ -369,7 +369,9 @@ text/plain  application/json
 
 #### Size enforcement
 
-The server streams the upload in 64 KiB chunks.  Once the running total exceeds `BGSTM_ARTIFACT_MAX_BYTES` (default 50 MiB), the server stops reading, deletes the partial temp file, and returns `413`.  The full body is **never** buffered into memory.
+The server enforces `BGSTM_ARTIFACT_MAX_BYTES` (default 50 MiB) by reading the upload in 64 KiB chunks and accumulating a byte count.  Once the running total exceeds the limit, the server deletes its own temp copy and returns `413`.
+
+> **Note on buffering:** FastAPI/Starlette parses the full multipart body via `python-multipart` before the handler runs, spooling to a temp file if the payload exceeds ~1 MiB.  The 413 check therefore operates on the spooled copy, not the live network stream.  For first-line DoS protection, configure your reverse proxy (e.g. nginx `client_max_body_size`, AWS ALB) to reject oversized bodies before they reach the application.  True in-stream early-abort (aborting mid-wire) is tracked as a follow-up improvement.
 
 #### Success response — `201 Created`
 

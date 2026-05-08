@@ -13,6 +13,7 @@ Audit-log integration  → BGSTM#297
 """
 
 import os
+import re
 import tempfile
 import uuid as _uuid_module
 from uuid import UUID
@@ -77,6 +78,9 @@ _ALLOWED_CONTENT_TYPES: frozenset[str] = frozenset(
         "application/json",
     }
 )
+
+# Filename allowlist: only safe characters, max 255 chars, no path separators or control chars.
+_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,255}$")
 
 
 def _session_to_response(session) -> SessionResponse:
@@ -436,6 +440,24 @@ async def upload_artifact(
             },
         )
 
+    # --- Sanitize and validate filename (path-traversal defense) ---
+    # Reject if the filename differs from its own basename OR fails the allowlist regex.
+    # This catches directory components (`../`, `subdir/`, `/etc/`) as well as
+    # dangerous characters (null bytes, backslashes, spaces, etc.).
+    safe_filename = os.path.basename(filename)
+    if safe_filename != filename or not _SAFE_FILENAME_RE.fullmatch(safe_filename):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "validation_error",
+                "message": (
+                    f"filename {filename!r} is not safe.  filename must contain only "
+                    "[A-Za-z0-9._-] characters (1–255) with no path separators."
+                ),
+                "details": None,
+            },
+        )
+
     # --- Validate case_result_id ---
     try:
         case_result_uuid = _uuid_module.UUID(case_result_id)
@@ -509,7 +531,7 @@ async def upload_artifact(
 
     # --- Persist via storage backend ---
     storage = get_storage()
-    storage_key = f"{case_result_id}/{_uuid_module.uuid4().hex}/{filename}"
+    storage_key = f"{case_result_id}/{_uuid_module.uuid4().hex}/{safe_filename}"
 
     try:
         with open(tmp_path, "rb") as fp:
@@ -522,7 +544,7 @@ async def upload_artifact(
         db,
         case_result_id=case_result_uuid,
         kind=artifact_kind,
-        filename=filename,
+        filename=safe_filename,
         content_type=content_type,
         size_bytes=result.size_bytes,
         storage_key=result.key,
@@ -541,7 +563,7 @@ async def upload_artifact(
             "case_result_id": str(case_result_uuid),
             "kind": artifact_kind.value,
             "size_bytes": result.size_bytes,
-            "filename": filename,
+            "filename": safe_filename,
             "content_type": content_type,
         },
     )

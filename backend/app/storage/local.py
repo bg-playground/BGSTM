@@ -28,7 +28,10 @@ class LocalFsBackend(StorageBackend):
         self._url_prefix = url_prefix.rstrip("/")
 
     def save(self, stream, *, key: str, content_type: str) -> StorageResult:
-        dest = self._root / key
+        dest = (self._root / key).resolve()
+        # Second line of defense: reject keys that escape the artifact root.
+        if not dest.is_relative_to(self._root.resolve()):
+            raise ValueError(f"storage key {key!r} escapes artifact root")
         dest.parent.mkdir(parents=True, exist_ok=True)
         with dest.open("wb") as fp:
             shutil.copyfileobj(stream, fp)
