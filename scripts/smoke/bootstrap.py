@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import uuid
 from typing import Any
 
 import httpx
@@ -22,11 +21,7 @@ def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict[str, An
     return data
 
 
-def _get_or_generate_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
-    # NOTE: /api/v1/projects currently 404s on main as of v0.1, so this fallback
-    # is expected on every smoke run until the v0.2 follow-up (#315).
-    # A synthetic UUID is sufficient because session writes currently do not
-    # enforce a foreign-key relationship on project_id.
+def _create_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
     response = client.post("/api/v1/projects", headers=headers, json={"name": "smoke-project"})
     if response.status_code < 300:
         payload = response.json()
@@ -34,9 +29,6 @@ def _get_or_generate_project_id(client: httpx.Client, headers: dict[str, str]) -
         if isinstance(project_id, str) and project_id:
             return project_id
         raise RuntimeError("Project creation succeeded but no project id was returned.")
-    if response.status_code == 404:
-        print("Project creation endpoint not available; using generated project_id for external-results smoke run.")
-        return str(uuid.uuid4())
     raise RuntimeError(f"Project creation failed: status={response.status_code}, body={response.text}")
 
 
@@ -57,7 +49,7 @@ def main() -> None:
         admin_jwt = login["access_token"]
         headers = {"Authorization": f"Bearer {admin_jwt}"}
 
-        project_id = _get_or_generate_project_id(client, headers)
+        project_id = _create_project_id(client, headers)
 
         token_payload = {
             "label": "smoke",

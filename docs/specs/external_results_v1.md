@@ -71,6 +71,14 @@ Read-only endpoints also accept a standard user JWT (`Authorization: Bearer <jwt
 
 ## c. Endpoints
 
+### 0. Project lifecycle
+
+Projects are created through `POST /api/v1/projects` before sessions are submitted. Every session references a project
+by `project_id`, and session creation validates that the project exists. Project reads are available to any
+authenticated user, while project writes require `reviewer` or `admin`.
+
+---
+
 ### 1. Create session
 
 ```
@@ -124,6 +132,9 @@ Opens a new test-run session. Call this once at the beginning of the suite.
 ```
 
 #### Error codes
+
+`session.project_not_found` is enforced server-side: session creation now fails fast when the supplied `project_id`
+does not resolve to an existing project.
 
 | Status | `code` | Cause |
 |---|---|---|

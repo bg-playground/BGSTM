@@ -17,9 +17,12 @@ from app.models.audit_log import AuditLog
 from app.models.base import Base
 from app.models.external_case_result import CaseStatus, ExternalCaseResult
 from app.models.link import RequirementTestCaseLink
+from app.models.project import Project
 from app.models.requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from app.models.test_case import TestCase, TestCaseStatus, TestCaseType
 from app.models.user import User, UserRole
+
+_PROJECT_ID = str(uuid.uuid4())
 
 
 def _auth_header(plaintext: str) -> dict[str, str]:
@@ -40,7 +43,7 @@ def _make_user(role: UserRole = UserRole.admin) -> User:
 def _session_payload() -> dict[str, str | dict[str, str]]:
     return {
         "runner": "pytest-bgstm@1.0.0",
-        "project_id": str(uuid.uuid4()),
+        "project_id": _PROJECT_ID,
         "git_sha": "abc123",
         "git_branch": "main",
         "ci_url": f"https://ci.example.com/runs/{uuid.uuid4()}",
@@ -56,6 +59,9 @@ async def db_session():
 
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as session:
+        project = Project(id=uuid.UUID(_PROJECT_ID), name=f"project-{uuid.uuid4().hex[:6]}")
+        session.add(project)
+        await session.commit()
 
         async def _override_get_db():
             yield session

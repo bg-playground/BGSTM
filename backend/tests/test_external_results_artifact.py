@@ -31,12 +31,15 @@ from app.main import app
 from app.models.audit_log import AuditLog
 from app.models.base import Base
 from app.models.external_case_artifact import ExternalCaseArtifact
+from app.models.project import Project
 from app.models.user import User, UserRole
 from app.storage.s3 import S3Backend
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+_PROJECT_ID = str(uuid.uuid4())
 
 
 def _auth_header(plaintext: str) -> dict[str, str]:
@@ -67,6 +70,9 @@ async def db_session():
 
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as session:
+        project = Project(id=uuid.UUID(_PROJECT_ID), name=f"project-{uuid.uuid4().hex[:6]}")
+        session.add(project)
+        await session.commit()
 
         async def _override_get_db():
             yield session
@@ -99,7 +105,7 @@ async def write_token(db_session, admin_user):
 def _session_payload() -> dict:
     return {
         "runner": "pytest-bgstm@1.0.0",
-        "project_id": str(uuid.uuid4()),
+        "project_id": _PROJECT_ID,
         "git_sha": "abc123",
         "git_branch": "main",
         "ci_url": f"https://ci.example.com/runs/{uuid.uuid4()}",

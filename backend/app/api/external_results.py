@@ -145,7 +145,13 @@ async def create_external_session(
     normalized_payload = payload.model_copy(
         update={"runner": payload.runner if payload.runner is not None else _DEFAULT_RUNNER}
     )
-    session = await create_session(db, payload=normalized_payload, runner_token_id=token.id)
+    try:
+        session = await create_session(db, payload=normalized_payload, runner_token_id=token.id)
+    except ValueError as exc:
+        detail = exc.args[0]
+        if isinstance(detail, dict) and detail.get("code") == "session.project_not_found":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail) from exc
+        raise
     await write_audit(
         db,
         actor_kind="runner_token",
