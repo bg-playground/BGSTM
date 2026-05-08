@@ -167,5 +167,5 @@ async def get_runner_or_user_auth(
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail={"code": "runner_token.invalid", "message": "Missing or invalid credentials.", "details": None},
+        detail={"code": "auth.invalid", "message": "Missing or invalid credentials.", "details": None},
     )
