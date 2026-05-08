@@ -27,6 +27,7 @@ from app.crud.runner_token import create_runner_token
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
+from app.models.project import Project
 from app.models.user import User, UserRole
 
 # ---------------------------------------------------------------------------
@@ -94,15 +95,24 @@ async def read_only_token(db_session):
     )
 
 
-_PROJECT_ID = str(uuid.uuid4())
-_SESSION_PAYLOAD = {
-    "runner": "pytest-bgstm@1.0.0",
-    "project_id": _PROJECT_ID,
-    "git_sha": "abc123",
-    "git_branch": "main",
-    "ci_url": "https://ci.example.com/runs/1",
-    "metadata": {"os": "ubuntu-22.04"},
-}
+@pytest_asyncio.fixture
+async def project_id(db_session) -> str:
+    project = Project(id=uuid.uuid4(), name=f"project-{uuid.uuid4().hex[:6]}")
+    db_session.add(project)
+    await db_session.commit()
+    return str(project.id)
+
+
+def _session_payload(project_id: str) -> dict[str, str | dict[str, str]]:
+    return {
+        "runner": "pytest-bgstm@1.0.0",
+        "project_id": project_id,
+        "git_sha": "abc123",
+        "git_branch": "main",
+        "ci_url": "https://ci.example.com/runs/1",
+        "metadata": {"os": "ubuntu-22.04"},
+    }
+
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -119,13 +129,13 @@ def _auth_header(plaintext: str) -> dict[str, str]:
 
 
 class TestSessionHappyPath:
-    def test_create_finish_fetch(self, db_session, write_token):
+    def test_create_finish_fetch(self, db_session, write_token, project_id):
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
 
         with TestClient(app) as client:
             # 1. Create
-            resp = client.post("/api/v1/external-results/session", json=_SESSION_PAYLOAD, headers=headers)
+            resp = client.post("/api/v1/external-results/session", json=_session_payload(project_id), headers=headers)
             assert resp.status_code == 201, resp.text
             data = resp.json()
             assert data["status"] == "started"
@@ -151,10 +161,10 @@ class TestSessionHappyPath:
             assert data3["status"] == "passed"
             assert data3["id"] == session_id
 
-    def test_create_without_runner_defaults_to_bgstm_playwright_core(self, db_session, write_token):
+    def test_create_without_runner_defaults_to_bgstm_playwright_core(self, db_session, write_token, project_id):
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
-        payload = dict(_SESSION_PAYLOAD)
+        payload = _session_payload(project_id)
         payload.pop("runner")
 
         with TestClient(app) as client:
@@ -171,9 +181,9 @@ class TestSessionHappyPath:
 
 
 class TestSessionAuth401:
-    def test_create_without_auth_returns_401(self, db_session):
+    def test_create_without_auth_returns_401(self, db_session, project_id):
         with TestClient(app) as client:
-            resp = client.post("/api/v1/external-results/session", json=_SESSION_PAYLOAD)
+            resp = client.post("/api/v1/external-results/session", json=_session_payload(project_id))
         # get_current_runner_token uses Header(...) (required); FastAPI returns 422 when
         # the Authorization header is absent before the dependency can raise 401.
         assert resp.status_code in (401, 422)
@@ -200,17 +210,17 @@ class TestSessionAuth401:
 
 
 class TestSessionAuth403:
-    def test_create_read_only_token_returns_403(self, db_session, read_only_token):
+    def test_create_read_only_token_returns_403(self, db_session, read_only_token, project_id):
         _model, plaintext = read_only_token
         with TestClient(app) as client:
             resp = client.post(
                 "/api/v1/external-results/session",
-                json=_SESSION_PAYLOAD,
+                json=_session_payload(project_id),
                 headers=_auth_header(plaintext),
             )
         assert resp.status_code == 403
 
-    def test_patch_read_only_token_returns_403(self, db_session, write_token, read_only_token):
+    def test_patch_read_only_token_returns_403(self, db_session, write_token, read_only_token, project_id):
         _wm, write_pt = write_token
         _rm, read_pt = read_only_token
 
@@ -218,7 +228,7 @@ class TestSessionAuth403:
             # Create with write token
             resp = client.post(
                 "/api/v1/external-results/session",
-                json=_SESSION_PAYLOAD,
+                json=_session_payload(project_id),
                 headers=_auth_header(write_pt),
             )
             assert resp.status_code == 201
@@ -239,10 +249,10 @@ class TestSessionAuth403:
 
 
 class TestSessionTransitions:
-    def _create_and_finish(self, client, headers, finish_status: str) -> str:
+    def _create_and_finish(self, client, headers, finish_status: str, project_id: str) -> str:
         """Helper: create a session and finish it; return session_id."""
         # Use a unique ci_url to avoid idempotency collision across tests.
-        payload = dict(_SESSION_PAYLOAD, ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}")
+        payload = dict(_session_payload(project_id), ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}")
         resp = client.post("/api/v1/external-results/session", json=payload, headers=headers)
         assert resp.status_code == 201
         session_id = resp.json()["id"]
@@ -255,12 +265,12 @@ class TestSessionTransitions:
         assert resp2.status_code == 200
         return session_id
 
-    def test_patch_aborted_session_returns_409(self, db_session, write_token):
+    def test_patch_aborted_session_returns_409(self, db_session, write_token, project_id):
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
 
         with TestClient(app) as client:
-            session_id = self._create_and_finish(client, headers, "aborted")
+            session_id = self._create_and_finish(client, headers, "aborted", project_id)
 
             # Attempt to transition again
             resp = client.patch(
@@ -270,12 +280,12 @@ class TestSessionTransitions:
             )
         assert resp.status_code == 409
 
-    def test_patch_passed_session_returns_409(self, db_session, write_token):
+    def test_patch_passed_session_returns_409(self, db_session, write_token, project_id):
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
 
         with TestClient(app) as client:
-            session_id = self._create_and_finish(client, headers, "passed")
+            session_id = self._create_and_finish(client, headers, "passed", project_id)
 
             # Attempt to transition again (failed is also terminal → 409)
             resp = client.patch(
@@ -285,13 +295,13 @@ class TestSessionTransitions:
             )
         assert resp.status_code == 409
 
-    def test_patch_started_to_started_returns_422(self, db_session, write_token):
+    def test_patch_started_to_started_returns_422(self, db_session, write_token, project_id):
         """SessionFinish rejects non-terminal statuses at the Pydantic layer (422)."""
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
 
         with TestClient(app) as client:
-            payload = dict(_SESSION_PAYLOAD, ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}")
+            payload = dict(_session_payload(project_id), ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}")
             resp = client.post("/api/v1/external-results/session", json=payload, headers=headers)
             assert resp.status_code == 201
             session_id = resp.json()["id"]
@@ -311,16 +321,16 @@ class TestSessionTransitions:
 
 
 class TestSessionIdempotency:
-    def test_duplicate_post_returns_same_session(self, db_session, write_token):
+    def test_duplicate_post_returns_same_session(self, db_session, write_token, project_id):
         _model, plaintext = write_token
         headers = _auth_header(plaintext)
 
         with TestClient(app) as client:
-            resp1 = client.post("/api/v1/external-results/session", json=_SESSION_PAYLOAD, headers=headers)
+            resp1 = client.post("/api/v1/external-results/session", json=_session_payload(project_id), headers=headers)
             assert resp1.status_code == 201
             id1 = resp1.json()["id"]
 
-            resp2 = client.post("/api/v1/external-results/session", json=_SESSION_PAYLOAD, headers=headers)
+            resp2 = client.post("/api/v1/external-results/session", json=_session_payload(project_id), headers=headers)
             assert resp2.status_code == 201
             id2 = resp2.json()["id"]
 

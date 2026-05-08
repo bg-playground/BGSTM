@@ -7,6 +7,7 @@ from .external_case_artifact import ArtifactKind, ExternalCaseArtifact
 from .external_case_result import ExternalCaseResult
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
+from .project import Project
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from .runner_token import RunnerToken
 from .suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
@@ -23,6 +24,7 @@ __all__ = [
     "ExternalCaseResult",
     "Notification",
     "NotificationType",
+    "Project",
     "Requirement",
     "RequirementType",
     "PriorityLevel",

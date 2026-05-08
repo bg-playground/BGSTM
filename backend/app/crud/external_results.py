@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.external_results import ExternalRunSession, RunStatus
+from app.models.project import Project
 from app.schemas.external_results import SessionCreate, SessionFinish
 
 # Terminal statuses — no further transitions allowed once reached.
@@ -31,6 +32,17 @@ async def create_session(
     of creating a duplicate.
 
     """
+    project_result = await db.execute(select(Project.id).where(Project.id == payload.project_id))
+    project_id = project_result.scalar_one_or_none()
+    if project_id is None:
+        raise ValueError(
+            {
+                "code": "session.project_not_found",
+                "message": f"Project {payload.project_id} does not exist.",
+                "details": None,
+            }
+        )
+
     cutoff = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(seconds=_IDEMPOTENCY_WINDOW_SECONDS)
 
     # Normalise ci_url to a plain string so we can compare it.

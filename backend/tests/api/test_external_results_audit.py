@@ -16,7 +16,10 @@ from app.crud.runner_token import create_runner_token
 from app.db.session import get_db
 from app.main import app
 from app.models.base import Base
+from app.models.project import Project
 from app.models.user import User, UserRole
+
+_PROJECT_ID = str(uuid.uuid4())
 
 
 def _make_user(role: UserRole = UserRole.admin) -> User:
@@ -37,7 +40,7 @@ def _auth_header(plaintext: str) -> dict[str, str]:
 def _session_payload() -> dict[str, str | dict[str, str]]:
     return {
         "runner": "pytest-bgstm@1.0.0",
-        "project_id": str(uuid.uuid4()),
+        "project_id": _PROJECT_ID,
         "git_sha": "abc123",
         "git_branch": "main",
         "ci_url": f"https://ci.example.com/runs/{uuid.uuid4()}",
@@ -53,6 +56,9 @@ async def db_session():
 
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as session:
+        project = Project(id=uuid.UUID(_PROJECT_ID), name=f"project-{uuid.uuid4().hex[:6]}")
+        session.add(project)
+        await session.commit()
 
         async def _override_get_db():
             yield session
