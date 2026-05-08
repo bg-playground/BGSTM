@@ -21,6 +21,32 @@ def _outcome_value(outcome: Any) -> str:
     return getattr(outcome, "value", str(outcome))
 
 
+def _dedupe_requirement_ids(requirement_ids: list[UUID]) -> list[UUID]:
+    seen_requirement_ids: set[UUID] = set()
+    deduped_requirement_ids: list[UUID] = []
+
+    for requirement_id in requirement_ids:
+        if requirement_id in seen_requirement_ids:
+            continue
+        seen_requirement_ids.add(requirement_id)
+        deduped_requirement_ids.append(requirement_id)
+
+    return deduped_requirement_ids
+
+
+def _dedupe_requirement_external_ids(requirement_external_ids: list[str]) -> list[str]:
+    seen_external_ids: set[str] = set()
+    deduped_external_ids: list[str] = []
+
+    for external_id in requirement_external_ids:
+        if external_id in seen_external_ids:
+            continue
+        seen_external_ids.add(external_id)
+        deduped_external_ids.append(external_id)
+
+    return deduped_external_ids
+
+
 async def _get_requirement_ids_for_test_case(
     db: AsyncSession,
     *,
@@ -90,7 +116,7 @@ async def _link_requirements(
     if not requirement_ids:
         return [], []
 
-    deduped_ids = list(dict.fromkeys(requirement_ids))
+    deduped_ids = _dedupe_requirement_ids(requirement_ids)
     resolvable_ids, unresolved_ids = await _resolve_requirement_ids(db, requirement_ids=deduped_ids)
 
     values = [
@@ -147,10 +173,7 @@ async def _resolve_requirement_external_ids(
     if not requirement_external_ids:
         return [], []
 
-    deduped_external_ids: list[str] = []
-    for submitted_external_id in requirement_external_ids:
-        if submitted_external_id not in deduped_external_ids:
-            deduped_external_ids.append(submitted_external_id)
+    deduped_external_ids = _dedupe_requirement_external_ids(requirement_external_ids)
     requirement_rows = await db.execute(select(Requirement).where(Requirement.external_id.in_(deduped_external_ids)))
     requirements_by_external_id: dict[str, Requirement] = {}
     for requirement in requirement_rows.scalars().all():
@@ -257,7 +280,7 @@ async def create_case_result(
     await _link_requirements(
         db,
         test_case_id=test_case.id,
-        requirement_ids=list(dict.fromkeys(resolvable_ids + resolved_external_ids)),
+        requirement_ids=_dedupe_requirement_ids(resolvable_ids + resolved_external_ids),
     )
     await db.commit()
     await db.refresh(case_result)
