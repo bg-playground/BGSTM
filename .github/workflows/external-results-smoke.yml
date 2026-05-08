@@ -10,6 +10,7 @@ on:
       - 'backend/alembic/versions/**'
       - 'docs/specs/external_results_v1.md'
       - '.github/workflows/external-results-smoke.yml'
+      - 'scripts/smoke/**'
   push:
     branches:
       - main
@@ -38,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: bg-playground/bgstm-playwright-frameworks
-          ref: ab5d7c1b0740cfbb5004cb6a14851c541364451e
+          ref: 942416538dc5d9a23895c9f601e4e4f2d152e7e5
           path: frameworks
 
       - name: Set up Python 3.11

@@ -55,21 +55,54 @@ def validate_snapshot(snapshot: dict[str, Any], project_id: str, actor_token_id:
     skipped_case = _find_case("skipped — exercises skip path")
 
     checks.append(Check("passed case exists", passed_case is not None, "expected suffix=passes — homepage loads"))
-    # v0.1: reporter does not yet transmit requirement annotations and BGSTM does
-    # not yet resolve external IDs to UUID requirement links for case results.
-    # Both halves are tracked under #316.
+
+    audit_details_by_case_id = {
+        entry["resource_id"]: (entry.get("details") or {})
+        for entry in snapshot["audit_entries"]
+        if entry.get("action") == "external_results.case.create"
+    }
+
+    passed_audit = audit_details_by_case_id.get((passed_case or {}).get("id"), {})
+    passed_submitted = passed_audit.get("requirement_external_ids_submitted")
+    passed_unresolved = passed_audit.get("unresolved_requirement_external_ids")
     checks.append(
         Check(
-            "passed case requirement_ids well-formed",
-            isinstance((passed_case or {}).get("requirement_ids"), list),
-            f"requirement_ids={(passed_case or {}).get('requirement_ids', [])}",
+            "passed case submitted REQ-CRM-HOMEPAGE",
+            passed_submitted == ["REQ-CRM-HOMEPAGE"],
+            f"requirement_external_ids_submitted={passed_submitted!r}",
         )
     )
+    checks.append(
+        Check(
+            "passed case resolved REQ-CRM-HOMEPAGE (no unresolved)",
+            passed_unresolved == [],
+            f"unresolved_requirement_external_ids={passed_unresolved!r}",
+        )
+    )
+
     checks.append(
         Check(
             "failed case exists",
             failed_case is not None,
             "expected suffix=fails — intentional assertion failure to exercise artifact upload",
+        )
+    )
+
+    failed_audit = audit_details_by_case_id.get((failed_case or {}).get("id"), {})
+    failed_submitted = failed_audit.get("requirement_external_ids_submitted")
+    failed_unresolved = failed_audit.get("unresolved_requirement_external_ids")
+    checks.append(
+        Check(
+            "failed case submitted REQ-CRM-FAIL-PROBE",
+            failed_submitted == ["REQ-CRM-FAIL-PROBE"],
+            f"requirement_external_ids_submitted={failed_submitted!r}",
+        )
+    )
+    checks.append(
+        Check(
+            "failed case left REQ-CRM-FAIL-PROBE unresolved",
+            failed_unresolved == ["REQ-CRM-FAIL-PROBE"],
+            f"unresolved_requirement_external_ids={failed_unresolved!r}",
         )
     )
     checks.append(Check("skipped case exists", skipped_case is not None, "expected suffix=skipped — exercises skip path"))
