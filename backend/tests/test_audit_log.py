@@ -288,7 +288,7 @@ async def test_audit_log_endpoint_with_filters(db_session):
 
 
 @pytest.mark.asyncio
-async def test_audit_log_endpoint_parses_string_details(db_session):
+async def test_audit_log_endpoint_parses_string_details(db_session, monkeypatch):
     """Audit log endpoint normalizes JSON-string details into dictionaries."""
     admin = _make_admin()
     db_session.add(admin)
@@ -316,7 +316,6 @@ async def test_audit_log_endpoint_parses_string_details(db_session):
         return admin
 
     app.dependency_overrides[get_current_user] = override_admin
-    monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr("app.api.audit_log.get_audit_logs", fake_get_audit_logs)
     try:
         with TestClient(app) as client:
@@ -325,5 +324,4 @@ async def test_audit_log_endpoint_parses_string_details(db_session):
         data = response.json()
         assert data["entries"][0]["details"]["project_id"] == "smoke-project"
     finally:
-        monkeypatch.undo()
         app.dependency_overrides.pop(get_current_user, None)
