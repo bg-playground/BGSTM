@@ -512,7 +512,7 @@ Action taxonomy is enforced on the write paths: no state-changing External Resul
 
 ## h. Reference implementation
 
-The TypeScript reference reporter lives in [`bgstm-playwright-frameworks`](https://github.com/bg-playground/bgstm-playwright-frameworks). BGSTM smoke validation is pinned to the latest reference reporter merge commit `ab5d7c1b0740cfbb5004cb6a14851c541364451e` to keep contract verification deterministic.
+The TypeScript reference reporter lives in [`bgstm-playwright-frameworks`](https://github.com/bg-playground/bgstm-playwright-frameworks). BGSTM smoke validation is pinned to reference reporter merge commit `ab5d7c1b0740cfbb5004cb6a14851c541364451e` to keep contract verification deterministic.
 
 The BGSTM workflow [`.github/workflows/external-results-smoke.yml`](../../.github/workflows/external-results-smoke.yml) runs this pinned reporter against a live BGSTM stack on relevant pull requests, every push to `main`, and manual dispatch. It validates persisted session/case/artifact/audit outcomes end-to-end for the External Results v1 contract.
 
