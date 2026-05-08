@@ -1,7 +1,7 @@
 """Tests for Audit Log functionality"""
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -306,7 +306,7 @@ async def test_audit_log_endpoint_parses_string_details(db_session, monkeypatch)
                     resource_type="external_session",
                     resource_id=str(uuid.uuid4()),
                     details='{"project_id":"smoke-project"}',
-                    created_at=datetime.now(),
+                    created_at=datetime.now(timezone.utc),
                 )
             ],
             1,
