@@ -25,10 +25,7 @@ test.describe('RBAC – Viewer role', () => {
     // 3. Redirect to login
     const url = page.url();
     const wasRedirected = !url.includes('/admin') || url.includes('/login');
-    const showsForbidden = await page
-      .getByText(/403|unauthorized|forbidden|access denied|not authorized/i)
-      .isVisible()
-      .catch(() => false);
+    const showsForbidden = await page.getByTestId('admin-route-forbidden').isVisible().catch(() => false);
     const showsEmptyOrError = await page
       .getByText(/no users|error|something went wrong/i)
       .isVisible()
@@ -94,7 +91,7 @@ test.describe('RBAC – Admin role', () => {
     expect(page.url()).not.toMatch(/\/login/);
 
     // Should NOT see a 403/forbidden page
-    const isForbidden = await page.getByText(/403|forbidden|access denied/i).isVisible().catch(() => false);
+    const isForbidden = await page.getByTestId('admin-route-forbidden').isVisible().catch(() => false);
     expect(isForbidden).toBe(false);
   });
 });

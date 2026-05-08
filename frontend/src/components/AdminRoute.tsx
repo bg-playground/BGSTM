@@ -9,7 +9,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== 'admin') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+      <div data-testid="admin-route-forbidden" className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">403</h1>
         <p className="text-lg text-gray-600">Access Denied — Admin only.</p>
       </div>
