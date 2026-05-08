@@ -146,7 +146,12 @@ async def get_runner_or_user_auth(
     authorization: str | None = Header(None),
     db: AsyncSession = Depends(get_db),
 ) -> RunnerToken | User:
-    """Accept either a runner token or a user JWT for read access."""
+    """Accept either a runner token or a user JWT for read access.
+
+    Returns a RunnerToken when a valid runner bearer token is provided.
+    Returns a User when a valid user JWT is provided.
+    Raises HTTP 401 when credentials are missing or invalid.
+    """
     if authorization and authorization.lower().startswith("bearer bgstm_runner_"):
         try:
             return await get_current_runner_token(authorization=authorization, db=db)

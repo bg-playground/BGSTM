@@ -89,10 +89,7 @@ async def _link_requirements(
         return [], []
 
     deduped_ids = list(dict.fromkeys(requirement_ids))
-    existing_requirements = await db.execute(select(Requirement.id).where(Requirement.id.in_(deduped_ids)))
-    existing_requirement_ids = set(existing_requirements.scalars().all())
-    unresolved_ids = [req_id for req_id in deduped_ids if req_id not in existing_requirement_ids]
-    resolvable_ids = [req_id for req_id in deduped_ids if req_id in existing_requirement_ids]
+    resolvable_ids, unresolved_ids = await _resolve_requirement_ids(db, requirement_ids=deduped_ids)
 
     values = [
         {
@@ -122,6 +119,23 @@ async def _link_requirements(
     return list(linked_rows.scalars().all()), unresolved_ids
 
 
+async def _resolve_requirement_ids(
+    db: AsyncSession,
+    *,
+    requirement_ids: list[UUID],
+) -> tuple[list[UUID], list[UUID]]:
+    if not requirement_ids:
+        return [], []
+
+    requirement_rows = await db.execute(select(Requirement.id).where(Requirement.id.in_(requirement_ids)))
+    known_requirement_ids = set(requirement_rows.scalars().all())
+    resolvable_ids = [requirement_id for requirement_id in requirement_ids if requirement_id in known_requirement_ids]
+    unresolved_ids = [
+        requirement_id for requirement_id in requirement_ids if requirement_id not in known_requirement_ids
+    ]
+    return resolvable_ids, unresolved_ids
+
+
 async def create_case_result(
     db: AsyncSession,
     *,
@@ -138,15 +152,11 @@ async def create_case_result(
         existing = existing_result.scalar_one_or_none()
         if existing is not None:
             existing.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=existing.test_case_id)
-            requirement_rows = await db.execute(
-                select(Requirement.id).where(Requirement.id.in_(payload.requirement_ids))
+            _resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
+                db,
+                requirement_ids=payload.requirement_ids,
             )
-            known_requirement_ids = set(requirement_rows.scalars().all())
-            existing.unresolved_requirement_ids = [
-                requirement_id
-                for requirement_id in payload.requirement_ids
-                if requirement_id not in known_requirement_ids
-            ]
+            existing.unresolved_requirement_ids = unresolved_ids
             return existing, False
 
     session_result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
