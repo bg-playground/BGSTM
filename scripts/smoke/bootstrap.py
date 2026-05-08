@@ -21,6 +21,36 @@ def _api(client: httpx.Client, method: str, path: str, **kwargs) -> dict[str, An
     return data
 
 
+def _create_requirement(
+    client: httpx.Client,
+    headers: dict[str, str],
+    *,
+    external_id: str,
+    title: str,
+) -> str:
+    response = client.post(
+        "/api/v1/requirements",
+        headers=headers,
+        json={
+            "external_id": external_id,
+            "title": title,
+            "description": f"Pre-created for smoke test ({external_id}).",
+            "type": "functional",
+            "priority": "medium",
+            "status": "draft",
+        },
+    )
+    if response.status_code >= 300:
+        raise RuntimeError(
+            f"Requirement creation failed: status={response.status_code}, body={response.text}"
+        )
+    payload = response.json()
+    requirement_id = payload.get("id")
+    if not isinstance(requirement_id, str) or not requirement_id:
+        raise RuntimeError("Requirement creation succeeded but no id was returned.")
+    return requirement_id
+
+
 def _create_project_id(client: httpx.Client, headers: dict[str, str]) -> str:
     response = client.post("/api/v1/projects", headers=headers, json={"name": "smoke-project"})
     if response.status_code < 300:
@@ -51,6 +81,13 @@ def main() -> None:
 
         project_id = _create_project_id(client, headers)
 
+        homepage_requirement_id = _create_requirement(
+            client,
+            headers,
+            external_id="REQ-CRM-HOMEPAGE",
+            title="CRM homepage loads",
+        )
+
         token_payload = {
             "label": "smoke",
             "scopes": ["external_results:write", "external_results:read"],
@@ -64,7 +101,17 @@ def main() -> None:
         fh.write(f"BGSTM_ADMIN_JWT={admin_jwt}\n")
         fh.write(f"BGSTM_RUNNER_TOKEN_ID={runner_token['id']}\n")
 
-    print(json.dumps({"api_url": api_url, "project_id": project_id, "runner_token_id": runner_token["id"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "api_url": api_url,
+                "project_id": project_id,
+                "homepage_requirement_id": homepage_requirement_id,
+                "runner_token_id": runner_token["id"],
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
