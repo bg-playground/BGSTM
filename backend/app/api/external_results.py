@@ -73,7 +73,9 @@ async def create_external_session(
     Returns the existing session if an identical session was created within the
     last 60 seconds (idempotency window).
     """
-    normalized_payload = payload.model_copy(update={"runner": payload.runner or _DEFAULT_RUNNER})
+    normalized_payload = payload.model_copy(
+        update={"runner": payload.runner if payload.runner is not None else _DEFAULT_RUNNER}
+    )
     session = await create_session(db, payload=normalized_payload, runner_token_id=token.id)
     await write_audit(
         db,
