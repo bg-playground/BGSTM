@@ -55,7 +55,16 @@ def _snapshot() -> dict[str, Any]:
                 "requirement_ids": [],
             },
         ],
-        "artifacts": [{"id": "art-1", "case_result_id": FAILED_CASE_ID, "kind": "screenshot"}],
+        "artifacts": [
+            {
+                "id": "art-1",
+                "case_result_id": FAILED_CASE_ID,
+                "kind": "screenshot",
+                "filename": "failure-state.png",
+                "content_type": "image/png",
+                "size_bytes": 20480,
+            }
+        ],
         "audit_entries": [
             {"actor_kind": "runner_token", "actor_token_id": TOKEN_ID, "action": "external_results.session.start"},
             {"actor_kind": "runner_token", "actor_token_id": TOKEN_ID, "action": "external_results.case.create"},
@@ -90,6 +99,7 @@ def test_validate_snapshot_fails_for_missing_failed_artifact() -> None:
     payload["artifacts"] = []
     checks = validate_snapshot(payload, PROJECT_ID, TOKEN_ID)
     assert any((check.name == "failed case has artifact" and not check.passed) for check in checks)
+    assert any((check.name == "artifact has filename" and not check.passed) for check in checks)
 
 
 def test_validate_snapshot_fails_for_missing_audit_action() -> None:

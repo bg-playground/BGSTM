@@ -86,6 +86,33 @@ def validate_snapshot(snapshot: dict[str, Any], project_id: str, actor_token_id:
             f"kinds={[a.get('kind') for a in failed_case_artifacts]}",
         )
     )
+    screenshot_artifact = next((a for a in failed_case_artifacts if a.get("kind") == "screenshot"), {})
+    screenshot_filename = screenshot_artifact.get("filename")
+    screenshot_content_type = screenshot_artifact.get("content_type")
+    screenshot_size_bytes = screenshot_artifact.get("size_bytes")
+    checks.append(
+        Check(
+            "artifact has filename",
+            isinstance(screenshot_filename, str) and bool(screenshot_filename.strip()),
+            f"filename={screenshot_filename!r}",
+        )
+    )
+    checks.append(
+        Check(
+            "artifact has content_type",
+            isinstance(screenshot_content_type, str)
+            and bool(screenshot_content_type.strip())
+            and screenshot_content_type.startswith("image/"),
+            f"content_type={screenshot_content_type!r}",
+        )
+    )
+    checks.append(
+        Check(
+            "artifact has size_bytes > 0",
+            isinstance(screenshot_size_bytes, int) and screenshot_size_bytes > 0,
+            f"size_bytes={screenshot_size_bytes!r}",
+        )
+    )
 
     audit_entries = [
         entry
@@ -163,11 +190,16 @@ def _fetch_snapshot(api_url: str, admin_jwt: str, project_id: str, actor_token_i
             if entry.get("action") != "external_results.artifact.upload":
                 continue
             details = entry.get("details") or {}
+            payload = details.get("payload")
+            source = payload if isinstance(payload, dict) else details
             artifacts.append(
                 {
                     "id": entry.get("resource_id"),
-                    "case_result_id": details.get("case_result_id"),
-                    "kind": details.get("kind"),
+                    "case_result_id": source.get("case_result_id"),
+                    "kind": source.get("kind"),
+                    "filename": source.get("filename"),
+                    "content_type": source.get("content_type"),
+                    "size_bytes": source.get("size_bytes"),
                 }
             )
 
