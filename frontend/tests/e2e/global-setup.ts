@@ -40,16 +40,23 @@ export default async function globalSetup(): Promise<void> {
   ]);
 
   if (requirements.total < 5) {
-    throw new Error(`[E2E seed smoke check] requirements seed incomplete: expected >= 5, found ${requirements.total}`);
+    throw new Error(
+      `[E2E seed smoke check] requirements seed incomplete: expected >= 5, found ${requirements.total}.\n` +
+        `This usually means seed.sql failed mid-file. Check the bgstm-test-db container logs for the failing INSERT.`,
+    );
   }
 
   if (testCases.total < 5) {
-    throw new Error(`[E2E seed smoke check] test_cases seed incomplete: expected >= 5, found ${testCases.total}`);
+    throw new Error(
+      `[E2E seed smoke check] test_cases seed incomplete: expected >= 5, found ${testCases.total}.\n` +
+        `This usually means seed.sql failed mid-file. Check the bgstm-test-db container logs for the failing INSERT.`,
+    );
   }
 
   if (links.total < 3) {
     throw new Error(
-      `[E2E seed smoke check] requirement_test_case_links seed incomplete: expected >= 3, found ${links.total}`,
+      `[E2E seed smoke check] requirement_test_case_links seed incomplete: expected >= 3, found ${links.total}.\n` +
+        `This usually means seed.sql failed mid-file. Check the bgstm-test-db container logs for the failing INSERT.`,
     );
   }
 
