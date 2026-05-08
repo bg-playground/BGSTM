@@ -276,6 +276,26 @@ async def create_external_case_result(
         raise
 
     if created:
+        details = {
+            "session_id": str(case_result.session_id),
+            "outcome": case_result.outcome.value,
+            "external_id": case_result.external_id,
+            "test_case_id": str(case_result.test_case_id) if case_result.test_case_id is not None else None,
+            "auto_registered": case_result.auto_registered,
+            "unresolved_requirement_ids": [
+                str(requirement_id) for requirement_id in getattr(case_result, "unresolved_requirement_ids", [])
+            ],
+        }
+        if payload.requirement_external_ids:
+            details.update(
+                {
+                    "requirement_external_ids_submitted": payload.requirement_external_ids,
+                    "unresolved_requirement_external_ids": getattr(
+                        case_result, "unresolved_requirement_external_ids", []
+                    ),
+                    "auto_register_requirements": payload.auto_register_requirements,
+                }
+            )
         await write_audit(
             db,
             actor_kind="runner_token",
@@ -283,16 +303,7 @@ async def create_external_case_result(
             action="external_results.case.create",
             resource_type="external_case_result",
             resource_id=case_result.id,
-            details={
-                "session_id": str(case_result.session_id),
-                "outcome": case_result.outcome.value,
-                "external_id": case_result.external_id,
-                "test_case_id": str(case_result.test_case_id) if case_result.test_case_id is not None else None,
-                "auto_registered": case_result.auto_registered,
-                "unresolved_requirement_ids": [
-                    str(requirement_id) for requirement_id in getattr(case_result, "unresolved_requirement_ids", [])
-                ],
-            },
+            details=details,
         )
     else:
         response.status_code = status.HTTP_200_OK

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.external_case_result import CaseStatus, ExternalCaseResult
 from app.models.external_results import ExternalRunSession
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
-from app.models.requirement import PriorityLevel, Requirement
+from app.models.requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from app.models.test_case import TestCase, TestCaseStatus, TestCaseType
 from app.schemas.external_results import CaseResultCreate, CaseResultUpdate
 
@@ -138,6 +138,55 @@ async def _resolve_requirement_ids(
     return resolvable_ids, unresolved_ids
 
 
+async def _resolve_requirement_external_ids(
+    db: AsyncSession,
+    *,
+    requirement_external_ids: list[str] | None,
+    auto_register_requirements: bool,
+) -> tuple[list[UUID], list[str]]:
+    if not requirement_external_ids:
+        return [], []
+
+    deduped_external_ids: list[str] = []
+    for submitted_external_id in requirement_external_ids:
+        if submitted_external_id not in deduped_external_ids:
+            deduped_external_ids.append(submitted_external_id)
+    requirement_rows = await db.execute(select(Requirement).where(Requirement.external_id.in_(deduped_external_ids)))
+    requirements_by_external_id: dict[str, Requirement] = {}
+    for requirement in requirement_rows.scalars().all():
+        external_id = requirement.external_id
+        if isinstance(external_id, str):
+            requirements_by_external_id[external_id] = requirement
+
+    resolved_ids: list[UUID] = []
+    unresolved_ids: list[str] = []
+
+    for submitted_external_id in deduped_external_ids:
+        requirement = requirements_by_external_id.get(submitted_external_id)
+        if requirement is not None:
+            resolved_ids.append(requirement.id)
+            continue
+
+        if not auto_register_requirements:
+            unresolved_ids.append(submitted_external_id)
+            continue
+
+        requirement = Requirement(
+            external_id=submitted_external_id,
+            title=submitted_external_id,
+            description=f"Auto-registered from external ID {submitted_external_id}",
+            type=RequirementType.FUNCTIONAL,
+            priority=PriorityLevel.MEDIUM,
+            status=RequirementStatus.DRAFT,
+        )
+        db.add(requirement)
+        await db.flush()
+        requirements_by_external_id[submitted_external_id] = requirement
+        resolved_ids.append(requirement.id)
+
+    return resolved_ids, unresolved_ids
+
+
 async def create_case_result(
     db: AsyncSession,
     *,
@@ -158,7 +207,13 @@ async def create_case_result(
                 db,
                 requirement_ids=payload.requirement_ids,
             )
+            _resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
+                db,
+                requirement_external_ids=payload.requirement_external_ids,
+                auto_register_requirements=False,
+            )
             existing.unresolved_requirement_ids = unresolved_ids
+            existing.unresolved_requirement_external_ids = unresolved_external_ids
             return existing, False
 
     session_result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
@@ -190,15 +245,25 @@ async def create_case_result(
     )
     db.add(case_result)
     await db.flush()
-    linked_ids, unresolved_ids = await _link_requirements(
+    resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
+        db,
+        requirement_ids=payload.requirement_ids,
+    )
+    resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
+        db,
+        requirement_external_ids=payload.requirement_external_ids,
+        auto_register_requirements=payload.auto_register_requirements,
+    )
+    await _link_requirements(
         db,
         test_case_id=test_case.id,
-        requirement_ids=payload.requirement_ids,
+        requirement_ids=list(dict.fromkeys(resolvable_ids + resolved_external_ids)),
     )
     await db.commit()
     await db.refresh(case_result)
-    case_result.requirement_ids = linked_ids
+    case_result.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=case_result.test_case_id)
     case_result.unresolved_requirement_ids = unresolved_ids
+    case_result.unresolved_requirement_external_ids = unresolved_external_ids
     return case_result, True
 
 
