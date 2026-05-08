@@ -42,6 +42,7 @@ async def _resolve_or_create_test_case(
     *,
     project_id: UUID,
     payload: CaseResultCreate,
+    runner_token_id: UUID,
 ) -> tuple[TestCase, bool]:
     if payload.test_case_id is not None:
         result = await db.execute(select(TestCase).where(TestCase.id == payload.test_case_id))
@@ -73,6 +74,7 @@ async def _resolve_or_create_test_case(
         priority=PriorityLevel.MEDIUM,
         status=TestCaseStatus.DRAFT,
         auto_registered=True,
+        created_by=f"runner_token:{runner_token_id}",
     )
     db.add(test_case)
     await db.flush()
@@ -171,7 +173,10 @@ async def create_case_result(
         )
 
     test_case, was_auto_registered = await _resolve_or_create_test_case(
-        db, project_id=session.project_id, payload=payload
+        db,
+        project_id=session.project_id,
+        payload=payload,
+        runner_token_id=runner_token_id,
     )
     case_result = ExternalCaseResult(
         session_id=session_id,
