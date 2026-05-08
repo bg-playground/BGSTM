@@ -1,6 +1,8 @@
 """Tests for Audit Log functionality"""
 
 import uuid
+from datetime import datetime
+from types import SimpleNamespace
 
 import pytest
 import pytest_asyncio
@@ -282,4 +284,46 @@ async def test_audit_log_endpoint_with_filters(db_session):
         assert data["total"] == 1
         assert data["entries"][0]["resource_type"] == "link"
     finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_audit_log_endpoint_parses_string_details(db_session):
+    """Audit log endpoint normalizes JSON-string details into dictionaries."""
+    admin = _make_admin()
+    db_session.add(admin)
+    await db_session.commit()
+
+    async def fake_get_audit_logs(*_args, **_kwargs):
+        return (
+            [
+                SimpleNamespace(
+                    id=uuid.uuid4(),
+                    actor_kind="runner_token",
+                    user_id=None,
+                    actor_token_id=uuid.uuid4(),
+                    action="external_results.session.start",
+                    resource_type="external_session",
+                    resource_id=str(uuid.uuid4()),
+                    details='{"project_id":"smoke-project"}',
+                    created_at=datetime.now(),
+                )
+            ],
+            1,
+        )
+
+    async def override_admin():
+        return admin
+
+    app.dependency_overrides[get_current_user] = override_admin
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr("app.api.audit_log.get_audit_logs", fake_get_audit_logs)
+    try:
+        with TestClient(app) as client:
+            response = client.get("/api/v1/audit-log?actor_kind=runner_token")
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["entries"][0]["details"]["project_id"] == "smoke-project"
+    finally:
+        monkeypatch.undo()
         app.dependency_overrides.pop(get_current_user, None)

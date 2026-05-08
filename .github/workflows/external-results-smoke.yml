@@ -110,13 +110,14 @@ jobs:
             END
             \$\$;"
 
+      - name: Verify schema matches migrations
+        run: |
+          docker compose -f bgstm/docker-compose.test.yml exec -T backend alembic current
+          docker compose -f bgstm/docker-compose.test.yml exec -T db psql -U bgstm_test -d bgstm_test -c "\d audit_log"
+
       - name: Bootstrap project and runner token
         id: bootstrap
         run: python bgstm/scripts/smoke/bootstrap.py
-
-      - name: Dump backend logs on bootstrap failure
-        if: failure() && steps.bootstrap.outcome == 'failure'
-        run: docker compose -f bgstm/docker-compose.test.yml logs backend
 
       - name: Install frameworks dependencies
         run: pnpm -C frameworks install --frozen-lockfile
@@ -136,8 +137,8 @@ jobs:
         id: assert_results
         run: python bgstm/scripts/smoke/assert.py
 
-      - name: Dump backend logs on assertion failure
-        if: failure() && steps.assert_results.outcome == 'failure'
+      - name: Dump backend logs (always)
+        if: always()
         run: docker compose -f bgstm/docker-compose.test.yml logs backend
 
       - name: Tear down BGSTM stack
