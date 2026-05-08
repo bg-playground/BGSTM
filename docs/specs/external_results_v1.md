@@ -343,26 +343,35 @@ POST /api/v1/external-results/artifact
 
 **Auth scope:** `external_results:write`
 
-Multipart upload (`multipart/form-data`). The metadata part must come first, followed by the binary body part.
+Multipart upload (`multipart/form-data`).  The four form fields below are locked — the reporter at `bgstm-playwright-frameworks` pinned SHA `ab5d7c1` sends exactly these names.
 
-#### Request parts
+#### Request parts (multipart/form-data)
 
-| Part name | Content-Type | Description |
-|---|---|---|
-| `metadata` | `application/json` | JSON object matching `ArtifactCreate` (see schema). |
-| `file` | any | Raw artifact bytes. |
+| Field name | Type | Required | Description |
+|---|---|---|---|
+| `case_result_id` | string (UUID) | ✓ | UUID of the owning `external_case_result`. |
+| `kind` | string | ✓ | Artifact type: `screenshot`, `video`, `trace`, `log`, or `other`. |
+| `filename` | string | ✓ | Original filename, including extension. |
+| `file` | binary | ✓ | Raw artifact bytes.  The HTTP `Content-Type` header of this part is used as the artifact's MIME type. |
 
-**`metadata` JSON example:**
+> **Note:** There is no separate `content_type` or `size_bytes` form field.  The `content_type` is read from the `file` part's `Content-Type` header and the `size_bytes` is counted while streaming the body.
 
-```json
-{
-  "case_result_id": "7f000001-0000-0000-0000-000000000001",
-  "kind": "screenshot",
-  "filename": "failure-state.png",
-  "content_type": "image/png",
-  "size_bytes": 20480
-}
+#### Content-type allowlist
+
+The following MIME types are accepted.  Requests with any other content-type are rejected with `415` **unless** `kind=other`, which bypasses the allowlist entirely.
+
 ```
+image/png  image/jpeg  image/gif  image/webp
+video/webm  video/mp4  video/mpeg
+application/zip  application/x-zip-compressed  application/octet-stream
+text/plain  application/json
+```
+
+#### Size enforcement
+
+The server enforces `BGSTM_ARTIFACT_MAX_BYTES` (default 50 MiB) by reading the upload in 64 KiB chunks and accumulating a byte count.  Once the running total exceeds the limit, the server deletes its own temp copy and returns `413`.
+
+> **Note on buffering:** FastAPI/Starlette parses the full multipart body via `python-multipart` before the handler runs, spooling to a temp file if the payload exceeds ~1 MiB.  The 413 check therefore operates on the spooled copy, not the live network stream.  For first-line DoS protection, configure your reverse proxy (e.g. nginx `client_max_body_size`, AWS ALB) to reject oversized bodies before they reach the application.  True in-stream early-abort (aborting mid-wire) is tracked as a follow-up improvement.
 
 #### Success response — `201 Created`
 
@@ -386,13 +395,24 @@ Multipart upload (`multipart/form-data`). The metadata part must come first, fol
 | `401` | `runner_token.invalid` | Missing or invalid token. |
 | `403` | `runner_token.scope_denied` | Token lacks `external_results:write`. |
 | `404` | `case_result.not_found` | `case_result_id` does not exist. |
-| `409` | `artifact.duplicate` | Same `case_result_id` + same SHA-256 already exists (returns existing artifact). |
 | `413` | `artifact.too_large` | Artifact body exceeds the configured size limit. |
 | `415` | `artifact.unsupported_type` | `content_type` is not in the allowed list. |
-| `422` | `validation_error` | Metadata part fails schema validation. |
+| `422` | `validation_error` | Payload fails schema validation (bad UUID, unknown kind, etc.). |
 | `500` | `internal_error` | Unexpected server error. |
 
-Artifact storage implementation is tracked in [BGSTM#298](https://github.com/bg-playground/BGSTM/issues/298).
+#### Audit log
+
+Every successful upload writes an `external_results.artifact.upload` audit entry.  The `details` JSON always contains these five fields (the smoke workflow at PR #314 reconstructs case-result → artifact relationships from these fields):
+
+```json
+{
+  "case_result_id": "<uuid>",
+  "kind": "<artifact_kind>",
+  "size_bytes": 20480,
+  "filename": "failure-state.png",
+  "content_type": "image/png"
+}
+```
 
 ---
 
@@ -479,7 +499,45 @@ All error responses share a single envelope:
 
 ---
 
-## g. Observability
+## g. Storage abstraction
+
+Artifact binaries are stored via a pluggable `StorageBackend` abstraction (`backend/app/storage/`).
+
+### Backend selection
+
+Controlled by the `BGSTM_STORAGE_BACKEND` environment variable:
+
+| Value | Backend | Notes |
+|---|---|---|
+| `local` | `LocalFsBackend` | Writes to `BGSTM_ARTIFACTS_DIR` (default `./artifacts`). Files are served by a dev-only static route mounted at `/artifacts`. **Do not use in production.** |
+| `s3` | `S3Backend` | Stub only — raises `NotImplementedError` with a clear message. Set `BGSTM_STORAGE_BACKEND=local` for now. |
+
+### Configuration
+
+| Environment variable | Default | Description |
+|---|---|---|
+| `BGSTM_STORAGE_BACKEND` | `local` | Backend selector (`local` or `s3`). |
+| `BGSTM_ARTIFACTS_DIR` | `./artifacts` | Root directory for `LocalFsBackend`. |
+| `BGSTM_ARTIFACT_MAX_BYTES` | `52428800` (50 MiB) | Maximum artifact upload size. |
+| `BGSTM_ARTIFACT_URL_PREFIX` | `http://localhost:8000/artifacts` | Base URL used by `LocalFsBackend` when constructing download URLs. |
+
+### `StorageBackend` ABC
+
+```python
+class StorageBackend(ABC):
+    def save(self, stream, *, key: str, content_type: str) -> StorageResult: ...
+    def url_for(self, key: str) -> str: ...
+```
+
+`get_storage()` (in `backend/app/storage/__init__.py`) is a **function**, not a module-level singleton, so tests can swap settings without import-time side effects.
+
+### Dev-only static route
+
+When `BGSTM_STORAGE_BACKEND=local`, `main.py` mounts a `StaticFiles` route at `/artifacts` pointing at `BGSTM_ARTIFACTS_DIR`.  This route is **not** mounted for any other backend.
+
+---
+
+## h. Observability
 
 ### Audit log
 
@@ -510,7 +568,7 @@ Action taxonomy is enforced on the write paths: no state-changing External Resul
 
 ---
 
-## h. Reference implementation
+## i. Reference implementation
 
 The TypeScript reference reporter is being developed in [bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks) as part of [bgstm-playwright-frameworks#3](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3).
 
