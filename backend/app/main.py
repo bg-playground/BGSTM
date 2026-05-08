@@ -1,7 +1,9 @@
 import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api import (
     analytics,
@@ -42,6 +44,13 @@ app.include_router(audit_log.router, prefix=settings.API_V1_PREFIX, tags=["audit
 app.include_router(users.router, prefix=settings.API_V1_PREFIX, tags=["users"])
 app.include_router(notifications.router, prefix=settings.API_V1_PREFIX, tags=["notifications"])
 app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=["external_results"])
+
+# Dev-only static route: serve local artifact files when BGSTM_STORAGE_BACKEND=local.
+# This is intentionally NOT mounted in production (S3 or other remote backends).
+if settings.BGSTM_STORAGE_BACKEND.lower() == "local":
+    _artifacts_dir = Path(settings.BGSTM_ARTIFACTS_DIR)
+    _artifacts_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/artifacts", StaticFiles(directory=str(_artifacts_dir)), name="artifacts")
 
 
 @app.on_event("startup")

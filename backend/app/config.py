@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
 
+    # Artifact storage
+    BGSTM_STORAGE_BACKEND: str = "local"  # "local" or "s3"
+    BGSTM_ARTIFACTS_DIR: str = "./artifacts"
+    BGSTM_ARTIFACT_MAX_BYTES: int = 52_428_800  # 50 MiB
+    BGSTM_ARTIFACT_URL_PREFIX: str = "http://localhost:8000/artifacts"
+
     class Config:
         env_file = ".env"
 

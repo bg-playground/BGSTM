@@ -3,6 +3,7 @@
 from .audit_log import AuditLog
 from .base import Base, TimestampMixin
 from .embedding_cache import EmbeddingCache
+from .external_case_artifact import ArtifactKind, ExternalCaseArtifact
 from .external_case_result import ExternalCaseResult
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
@@ -17,6 +18,8 @@ __all__ = [
     "Base",
     "TimestampMixin",
     "EmbeddingCache",
+    "ArtifactKind",
+    "ExternalCaseArtifact",
     "ExternalCaseResult",
     "Notification",
     "NotificationType",
