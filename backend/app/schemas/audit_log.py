@@ -32,6 +32,8 @@ class AuditLogResponse(BaseModel):
             try:
                 parsed = json.loads(stripped)
             except json.JSONDecodeError:
+                # Preserve invalid historical payloads as structured data instead of
+                # failing audit-log reads for the entire response page.
                 return {"raw": value}
             if isinstance(parsed, dict):
                 return parsed
