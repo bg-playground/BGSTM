@@ -556,6 +556,6 @@ async def upload_artifact(
         filename=artifact.filename,
         content_type=artifact.content_type,
         size_bytes=artifact.size_bytes,
-        url=artifact.url,  # type: ignore[arg-type]
+        url=artifact.url,
         created_at=artifact.created_at,
     )
