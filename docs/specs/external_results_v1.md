@@ -237,7 +237,11 @@ Records one test-case execution. Duplicate `external_id` within the same `sessio
   "error_message": null,
   "requirement_ids": [
     "c1234567-89ab-cdef-0123-456789abcdef"
-  ]
+  ],
+  "requirement_external_ids": [
+    "REQ-LOGIN-001"
+  ],
+  "auto_register_requirements": false
 }
 ```
 
@@ -251,6 +255,8 @@ Records one test-case execution. Duplicate `external_id` within the same `sessio
 | `duration_ms` | `integer ≥ 0` | ✅ | Wall-clock duration in milliseconds. |
 | `error_message` | `string \| null` | — | First error line or assertion message. |
 | `requirement_ids` | `UUID[]` | — | Requirement UUIDs to link. Duplicate insertions are no-ops. Defaults to `[]`. |
+| `requirement_external_ids` | `string[] \| null` | — | Reporter-supplied requirement external IDs. Values are trimmed; empty/whitespace-only entries are rejected with `422`. |
+| `auto_register_requirements` | `boolean` | — | When `true`, unknown `requirement_external_ids` auto-create stub requirements and link them. Defaults to `false`. |
 
 #### Success response — `201 Created`
 
@@ -271,6 +277,8 @@ Records one test-case execution. Duplicate `external_id` within the same `sessio
 ```
 
 `auto_registered: true` when BGSTM created a new test-case record from `external_id` (i.e. no `test_case_id` was supplied and the `external_id` had not been seen before in this project).
+
+`requirement_external_ids` are resolved against `requirements.external_id` before links are inserted. By default, unknown external IDs are silently dropped from the response and link set, but they are recorded in the create audit entry under `unresolved_requirement_external_ids` for diagnostics. Setting `auto_register_requirements=true` opts into creating stub `Requirement` rows (`external_id` populated, draft/functional/medium defaults) so the resolved UUID is linked immediately and future re-POSTs resolve to the same requirement.
 
 #### Error codes
 
@@ -435,7 +443,7 @@ When a runner POSTs a case result with an `external_id` that already exists for 
 
 ### Traceability links — `requirement_ids`
 
-Inserting a `(test_case_id, requirement_id)` link that already exists is a **no-op**. No error is raised.
+Inserting a `(test_case_id, requirement_id)` link that already exists is a **no-op**. No error is raised. The same rule applies when the caller supplies `requirement_external_ids`: after each external ID is resolved (or auto-registered) to a requirement UUID, duplicate links are ignored.
 
 Artifact uploads are not deduplicated; reporters that retry an upload (for example on transient network errors) may create duplicate artifact rows, and this is acceptable for v0.1.
 

@@ -12,13 +12,39 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.external_case_result import CaseStatus, ExternalCaseResult
 from app.models.external_results import ExternalRunSession
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
-from app.models.requirement import PriorityLevel, Requirement
+from app.models.requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from app.models.test_case import TestCase, TestCaseStatus, TestCaseType
 from app.schemas.external_results import CaseResultCreate, CaseResultUpdate
 
 
 def _outcome_value(outcome: Any) -> str:
     return getattr(outcome, "value", str(outcome))
+
+
+def _dedupe_requirement_ids(requirement_ids: list[UUID]) -> list[UUID]:
+    seen_requirement_ids: set[UUID] = set()
+    deduped_requirement_ids: list[UUID] = []
+
+    for requirement_id in requirement_ids:
+        if requirement_id in seen_requirement_ids:
+            continue
+        seen_requirement_ids.add(requirement_id)
+        deduped_requirement_ids.append(requirement_id)
+
+    return deduped_requirement_ids
+
+
+def _dedupe_requirement_external_ids(requirement_external_ids: list[str]) -> list[str]:
+    seen_external_ids: set[str] = set()
+    deduped_external_ids: list[str] = []
+
+    for external_id in requirement_external_ids:
+        if external_id in seen_external_ids:
+            continue
+        seen_external_ids.add(external_id)
+        deduped_external_ids.append(external_id)
+
+    return deduped_external_ids
 
 
 async def _get_requirement_ids_for_test_case(
@@ -90,7 +116,7 @@ async def _link_requirements(
     if not requirement_ids:
         return [], []
 
-    deduped_ids = list(dict.fromkeys(requirement_ids))
+    deduped_ids = _dedupe_requirement_ids(requirement_ids)
     resolvable_ids, unresolved_ids = await _resolve_requirement_ids(db, requirement_ids=deduped_ids)
 
     values = [
@@ -113,12 +139,7 @@ async def _link_requirements(
             stmt = insert_stmt.on_conflict_do_nothing(index_elements=["requirement_id", "test_case_id"])
         await db.execute(stmt)
 
-    linked_rows = await db.execute(
-        select(RequirementTestCaseLink.requirement_id)
-        .where(RequirementTestCaseLink.test_case_id == test_case_id)
-        .where(RequirementTestCaseLink.requirement_id.in_(deduped_ids))
-    )
-    return list(linked_rows.scalars().all()), unresolved_ids
+    return await _get_requirement_ids_for_test_case(db, test_case_id=test_case_id), unresolved_ids
 
 
 async def _resolve_requirement_ids(
@@ -136,6 +157,52 @@ async def _resolve_requirement_ids(
         requirement_id for requirement_id in requirement_ids if requirement_id not in known_requirement_ids
     ]
     return resolvable_ids, unresolved_ids
+
+
+async def _resolve_requirement_external_ids(
+    db: AsyncSession,
+    *,
+    requirement_external_ids: list[str] | None,
+    auto_register_requirements: bool,
+) -> tuple[list[UUID], list[str]]:
+    if not requirement_external_ids:
+        return [], []
+
+    deduped_external_ids = _dedupe_requirement_external_ids(requirement_external_ids)
+    requirement_rows = await db.execute(select(Requirement).where(Requirement.external_id.in_(deduped_external_ids)))
+    requirements_by_external_id: dict[str, Requirement] = {}
+    for requirement in requirement_rows.scalars().all():
+        external_id = requirement.external_id
+        if isinstance(external_id, str):
+            requirements_by_external_id[external_id] = requirement
+
+    resolved_ids: list[UUID] = []
+    unresolved_ids: list[str] = []
+
+    for submitted_external_id in deduped_external_ids:
+        requirement = requirements_by_external_id.get(submitted_external_id)
+        if requirement is not None:
+            resolved_ids.append(requirement.id)
+            continue
+
+        if not auto_register_requirements:
+            unresolved_ids.append(submitted_external_id)
+            continue
+
+        requirement = Requirement(
+            external_id=submitted_external_id,
+            title=submitted_external_id,
+            description=f"Auto-registered from external ID {submitted_external_id}",
+            type=RequirementType.FUNCTIONAL,
+            priority=PriorityLevel.MEDIUM,
+            status=RequirementStatus.DRAFT,
+        )
+        db.add(requirement)
+        await db.flush()
+        requirements_by_external_id[submitted_external_id] = requirement
+        resolved_ids.append(requirement.id)
+
+    return resolved_ids, unresolved_ids
 
 
 async def create_case_result(
@@ -158,7 +225,13 @@ async def create_case_result(
                 db,
                 requirement_ids=payload.requirement_ids,
             )
+            _resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
+                db,
+                requirement_external_ids=payload.requirement_external_ids,
+                auto_register_requirements=False,
+            )
             existing.unresolved_requirement_ids = unresolved_ids
+            existing.unresolved_requirement_external_ids = unresolved_external_ids
             return existing, False
 
     session_result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
@@ -190,15 +263,25 @@ async def create_case_result(
     )
     db.add(case_result)
     await db.flush()
-    linked_ids, unresolved_ids = await _link_requirements(
+    resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
+        db,
+        requirement_ids=payload.requirement_ids,
+    )
+    resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
+        db,
+        requirement_external_ids=payload.requirement_external_ids,
+        auto_register_requirements=payload.auto_register_requirements,
+    )
+    linked_ids, _ = await _link_requirements(
         db,
         test_case_id=test_case.id,
-        requirement_ids=payload.requirement_ids,
+        requirement_ids=_dedupe_requirement_ids(resolvable_ids + resolved_external_ids),
     )
     await db.commit()
     await db.refresh(case_result)
     case_result.requirement_ids = linked_ids
     case_result.unresolved_requirement_ids = unresolved_ids
+    case_result.unresolved_requirement_external_ids = unresolved_external_ids
     return case_result, True
 
 

@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 # ---------------------------------------------------------------------------
 # Enumerations
@@ -143,6 +143,31 @@ class CaseResultCreate(BaseModel):
         default_factory=list,
         description="Requirement UUIDs to link; duplicate insertion is a no-op.",
     )
+    requirement_external_ids: list[str] | None = Field(
+        default=None,
+        description="Reporter-supplied external IDs. Each is resolved against requirements.external_id; "
+        "unresolved IDs are dropped (or auto-registered if auto_register_requirements=True) and "
+        "recorded in the audit-log details.",
+    )
+    auto_register_requirements: bool = Field(
+        default=False,
+        description="If true, unknown requirement_external_ids cause stub Requirement rows to be created "
+        "and linked. Default false — unknown IDs are dropped silently (with audit-log diagnostics).",
+    )
+
+    @field_validator("requirement_external_ids")
+    @classmethod
+    def _normalize_requirement_external_ids(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return None
+
+        normalized_ids: list[str] = []
+        for external_id in value:
+            stripped_external_id = external_id.strip()
+            if not stripped_external_id:
+                raise ValueError("requirement_external_ids entries must not be empty.")
+            normalized_ids.append(stripped_external_id)
+        return normalized_ids
 
     @model_validator(mode="after")
     def _require_at_least_one_id(self) -> CaseResultCreate:
