@@ -426,9 +426,7 @@ When a runner POSTs a case result with an `external_id` that already exists for 
 
 Inserting a `(test_case_id, requirement_id)` link that already exists is a **no-op**. No error is raised.
 
-### Artifacts — deduplication by SHA-256
-
-If the body of a new artifact upload has the same SHA-256 as an artifact already attached to the same `case_result_id`, BGSTM returns the **existing artifact row** (`200 OK`) rather than creating a second copy. The `409` code in the error table above is the response shape, but the HTTP status is `200` (not an error condition — the caller's intent is fulfilled).
+Artifact uploads are not deduplicated; reporters that retry an upload (for example on transient network errors) may create duplicate artifact rows, and this is acceptable for v0.1.
 
 ---
 
@@ -493,7 +491,6 @@ All error responses share a single envelope:
 | `artifact.not_found` | Artifact UUID does not exist. |
 | `artifact.too_large` | Artifact body exceeds size limit. |
 | `artifact.unsupported_type` | `content_type` is not in the allowed list. |
-| `artifact.duplicate` | Identical artifact already exists (see §d). |
 | `validation_error` | Request body failed Pydantic schema validation. |
 | `internal_error` | Unhandled server-side error. |
 
