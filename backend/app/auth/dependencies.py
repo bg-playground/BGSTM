@@ -73,7 +73,7 @@ _RUNNER_TOKEN_PREFIX = "bgstm_runner_"
 
 
 async def get_current_runner_token(
-    authorization: str = Header(...),
+    authorization: str | None = Header(None),
     db: AsyncSession = Depends(get_db),
 ) -> RunnerToken:
     """Resolve ``Authorization: Bearer bgstm_runner_<...>`` to a RunnerToken.
@@ -82,6 +82,9 @@ async def get_current_runner_token(
     has been revoked.  Updates ``last_used_at`` on every successful resolution.
     """
     from app.crud.runner_token import update_last_used
+
+    if not authorization:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
 
     # Parse "Bearer <value>"
     parts = authorization.split(" ", 1)
@@ -137,3 +140,32 @@ def require_runner_scope(scope: str) -> Callable[..., Any]:
         return token
 
     return _dependency
+
+
+async def get_runner_or_user_auth(
+    authorization: str | None = Header(None),
+    db: AsyncSession = Depends(get_db),
+) -> RunnerToken | User:
+    """Accept either a runner token or a user JWT for read access."""
+    if authorization and authorization.lower().startswith("bearer bgstm_runner_"):
+        try:
+            return await get_current_runner_token(authorization=authorization, db=db)
+        except HTTPException:
+            pass
+
+    if authorization and authorization.lower().startswith("bearer "):
+        raw_token = authorization.split(" ", 1)[1]
+        payload = decode_access_token(raw_token)
+        if payload is not None:
+            user_id = payload.get("sub")
+            if user_id:
+                from app.crud.user import get_user
+
+                user = await get_user(db, user_id)
+                if user and user.is_active:
+                    return user
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={"code": "runner_token.invalid", "message": "Missing or invalid credentials.", "details": None},
+    )

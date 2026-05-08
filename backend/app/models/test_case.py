@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Column, Enum, Integer, String, Text
+from sqlalchemy import Boolean, Column, Enum, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
@@ -44,6 +44,7 @@ class TestCase(Base, TimestampMixin):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     external_id = Column(String(100), unique=True, nullable=True, index=True)
+    auto_registered = Column(Boolean, nullable=False, default=False, server_default="false")
     title = Column(String(500), nullable=False, index=True)
     description = Column(Text, nullable=False)
     type = Column(Enum(TestCaseType, values_callable=_enum_values), nullable=False)
