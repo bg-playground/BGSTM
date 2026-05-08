@@ -138,7 +138,15 @@ async def create_case_result(
         existing = existing_result.scalar_one_or_none()
         if existing is not None:
             existing.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=existing.test_case_id)
-            existing.unresolved_requirement_ids = []
+            requirement_rows = await db.execute(
+                select(Requirement.id).where(Requirement.id.in_(payload.requirement_ids))
+            )
+            known_requirement_ids = set(requirement_rows.scalars().all())
+            existing.unresolved_requirement_ids = [
+                requirement_id
+                for requirement_id in payload.requirement_ids
+                if requirement_id not in known_requirement_ids
+            ]
             return existing, False
 
     session_result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
