@@ -46,7 +46,15 @@ class ExternalCaseResult(Base):
     test_case_id = Column(GUID(), ForeignKey("test_cases.id"), nullable=True)
     external_id = Column(String(500), nullable=True)
     title = Column(String(500), nullable=False)
-    outcome = Column(Enum(CaseStatus, values_callable=_enum_values), nullable=False)
+    outcome = Column(
+        Enum(
+            CaseStatus,
+            name="case_outcome",
+            values_callable=_enum_values,
+            create_type=False,
+        ),
+        nullable=False,
+    )
     duration_ms = Column(Integer, nullable=False)
     error_message = Column(Text, nullable=True)
     auto_registered = Column(Boolean, nullable=False, default=False, server_default="false")

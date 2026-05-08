@@ -37,6 +37,7 @@ def upgrade() -> None:
             "flaky",
             "aborted",
             name="case_outcome",
+            create_type=False,
         )
         case_outcome_enum.create(op.get_bind(), checkfirst=True)
     else:
