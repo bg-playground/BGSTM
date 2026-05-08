@@ -139,12 +139,7 @@ async def _link_requirements(
             stmt = insert_stmt.on_conflict_do_nothing(index_elements=["requirement_id", "test_case_id"])
         await db.execute(stmt)
 
-    linked_rows = await db.execute(
-        select(RequirementTestCaseLink.requirement_id)
-        .where(RequirementTestCaseLink.test_case_id == test_case_id)
-        .where(RequirementTestCaseLink.requirement_id.in_(deduped_ids))
-    )
-    return list(linked_rows.scalars().all()), unresolved_ids
+    return await _get_requirement_ids_for_test_case(db, test_case_id=test_case_id), unresolved_ids
 
 
 async def _resolve_requirement_ids(
@@ -277,14 +272,14 @@ async def create_case_result(
         requirement_external_ids=payload.requirement_external_ids,
         auto_register_requirements=payload.auto_register_requirements,
     )
-    await _link_requirements(
+    linked_ids, _ = await _link_requirements(
         db,
         test_case_id=test_case.id,
         requirement_ids=_dedupe_requirement_ids(resolvable_ids + resolved_external_ids),
     )
     await db.commit()
     await db.refresh(case_result)
-    case_result.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=case_result.test_case_id)
+    case_result.requirement_ids = linked_ids
     case_result.unresolved_requirement_ids = unresolved_ids
     case_result.unresolved_requirement_external_ids = unresolved_external_ids
     return case_result, True
