@@ -29,6 +29,7 @@ router = APIRouter()
 
 _WRITE_SCOPE = "external_results:write"
 _READ_SCOPE = "external_results:read"
+_DEFAULT_RUNNER = "@bgstm/playwright-core@unknown"
 
 
 def _session_to_response(session) -> SessionResponse:
@@ -72,7 +73,8 @@ async def create_external_session(
     Returns the existing session if an identical session was created within the
     last 60 seconds (idempotency window).
     """
-    session = await create_session(db, payload=payload, runner_token_id=token.id)
+    normalized_payload = payload.model_copy(update={"runner": payload.runner or _DEFAULT_RUNNER})
+    session = await create_session(db, payload=normalized_payload, runner_token_id=token.id)
     await write_audit(
         db,
         actor_kind="runner_token",
@@ -81,10 +83,10 @@ async def create_external_session(
         resource_type="external_session",
         resource_id=session.id,
         details={
-            "project_id": str(payload.project_id),
-            "git_sha": payload.git_sha,
-            "git_branch": payload.git_branch,
-            "runner": payload.runner,
+            "project_id": str(normalized_payload.project_id),
+            "git_sha": normalized_payload.git_sha,
+            "git_branch": normalized_payload.git_branch,
+            "runner": normalized_payload.runner,
         },
     )
     return _session_to_response(session)

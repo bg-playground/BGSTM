@@ -151,6 +151,19 @@ class TestSessionHappyPath:
             assert data3["status"] == "passed"
             assert data3["id"] == session_id
 
+    def test_create_without_runner_uses_default_runner(self, db_session, write_token):
+        _model, plaintext = write_token
+        headers = _auth_header(plaintext)
+        payload = dict(_SESSION_PAYLOAD)
+        payload.pop("runner")
+
+        with TestClient(app) as client:
+            resp = client.post("/api/v1/external-results/session", json=payload, headers=headers)
+
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assert data["runner"].startswith("@bgstm/playwright-core@")
+
 
 # ---------------------------------------------------------------------------
 # Auth: 401 without credentials

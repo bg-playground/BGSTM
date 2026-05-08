@@ -72,7 +72,7 @@ class SessionCreate(BaseModel):
         json_schema_extra={"example": _SESSION_EXAMPLE},
     )
 
-    runner: str = Field(..., description="Identifier of the test runner (name + version).")
+    runner: str | None = Field(None, description="Identifier of the test runner (name + version).")
     project_id: UUID = Field(..., description="BGSTM project this session belongs to.")
     git_sha: str | None = Field(None, description="Full or short commit SHA being tested.")
     git_branch: str | None = Field(None, description="Branch name under test.")
