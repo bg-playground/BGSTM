@@ -28,6 +28,8 @@ class ArtifactKind(str, enum.Enum):
 
 class ExternalCaseArtifact(Base):
     __tablename__ = "external_case_artifacts"
+    # Explicit index name matches the migration (idx_external_case_artifacts_case_result_id)
+    # to prevent alembic --autogenerate from proposing a drop+recreate.
     __table_args__ = (Index("idx_external_case_artifacts_case_result_id", "case_result_id"),)
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)

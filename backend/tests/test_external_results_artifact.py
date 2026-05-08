@@ -354,6 +354,9 @@ class TestFilenameValidation:
             "file\x00.png",  # null byte
             "file\\path.png",  # backslash (also disallowed by regex)
             "a" * 256,  # too long
+            ".",  # current directory
+            "..",  # parent directory traversal
+            "...",  # dots-only
         ],
     )
     async def test_unsafe_filename_returns_422_and_writes_nothing(

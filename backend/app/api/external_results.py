@@ -79,8 +79,9 @@ _ALLOWED_CONTENT_TYPES: frozenset[str] = frozenset(
     }
 )
 
-# Filename allowlist: only safe characters, max 255 chars, no path separators or control chars.
-_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,255}$")
+# Filename allowlist: must start with an alphanumeric character, only safe characters, max 255 chars.
+# Requiring an initial alphanumeric char naturally blocks dot-only names like "." and "..".
+_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$")
 
 
 def _session_to_response(session) -> SessionResponse:
