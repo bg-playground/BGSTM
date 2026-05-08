@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: bg-playground/bgstm-playwright-frameworks
-          ref: 98027ad2126cde2a87392564828f10709612142e
+          ref: ab5d7c1b0740cfbb5004cb6a14851c541364451e
           path: frameworks
 
       - name: Set up Python 3.11
