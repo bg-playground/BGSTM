@@ -570,13 +570,8 @@ Action taxonomy is enforced on the write paths: no state-changing External Resul
 
 ## i. Reference implementation
 
-The TypeScript reference reporter is being developed in [bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks) as part of [bgstm-playwright-frameworks#3](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3).
+The TypeScript reference reporter lives in [`bgstm-playwright-frameworks`](https://github.com/bg-playground/bgstm-playwright-frameworks). BGSTM smoke validation is pinned to reference reporter merge commit `ab5d7c1b0740cfbb5004cb6a14851c541364451e` to keep contract verification deterministic.
 
-The reporter:
+The BGSTM workflow [`.github/workflows/external-results-smoke.yml`](../../.github/workflows/external-results-smoke.yml) runs this pinned reporter against a live BGSTM stack on relevant pull requests, every push to `main`, and manual dispatch. It validates persisted session/case/artifact/audit outcomes end-to-end for the External Results v1 contract.
 
-1. Calls `POST /session` at suite start.
-2. Calls `POST /case` for each test result as it completes.
-3. Calls `POST /artifact` for screenshots / traces on failure.
-4. Calls `PATCH /session/{id}` with the terminal status at suite end.
-
-A smoke-test that exercises the full lifecycle against a real BGSTM instance will live in BGSTM CI (tracked in [BGSTM#295](https://github.com/bg-playground/BGSTM/issues/295)).
+When the reporter releases a new version, bump only the pinned `ref` in `external-results-smoke.yml` in a dedicated PR, then confirm the smoke workflow is green at that new SHA before merging. Do not track `main` directly from the frameworks repository.
