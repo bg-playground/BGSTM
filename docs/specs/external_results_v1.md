@@ -566,6 +566,7 @@ Every state-changing call now writes an **audit log entry** recording actor iden
 | `external_results.session.start` | `POST /session` → `201` |
 | `external_results.session.finish` | `PATCH /session/{id}` → `200` |
 | `external_results.case.create` | `POST /case` → `201` |
+| `external_results.case.create.idempotent` | `POST /case` returning `200` (duplicate `external_id`) |
 | `external_results.case.update` | `PATCH /case/{id}` → `200` |
 | `external_results.artifact.upload` | `POST /artifact` → `201` |
 
