@@ -214,17 +214,14 @@ class TestHappyPath:
 class TestSizeEnforcement:
     @pytest.mark.asyncio
     async def test_oversized_file_returns_413_and_cleans_up(self, db_session, write_token, tmp_path, monkeypatch):
-        """413 on oversized upload; Starlette-managed temp file is cleaned up; no DB record created.
+        """413 on oversized upload; streaming abort is now the actual behavior.
 
-        Note: FastAPI/Starlette fully parses the multipart body via python-multipart
-        **before** the handler is invoked — by the time the chunk loop runs, ``file``
-        is already a SpooledTemporaryFile containing the entire upload.  The 413
-        enforcement happens post-buffer (reading from the spooled file in chunks),
-        not mid-wire.  True in-stream early-abort is a follow-up improvement; deploy
-        behind a reverse-proxy ``client_max_body_size`` for first-line DoS protection.
+        The handler uses streaming-form-data to parse the multipart body and raises
+        _SizeLimitExceeded mid-stream as soon as cumulative bytes exceed
+        BGSTM_ARTIFACT_MAX_BYTES — bytes past the limit are never read from the
+        connection.
 
-        This test verifies:
-          - 413 is returned when the spooled content exceeds BGSTM_ARTIFACT_MAX_BYTES.
+        This test exercises the cleanup / DB-row / artifact-dir guarantees post-abort:
           - The handler's own temp file (bgstm_artifact_*) is cleaned up on 413.
           - No artifact row is written to the DB.
           - No file is left in the artifacts directory.
@@ -281,10 +278,128 @@ class TestSizeEnforcement:
         artifact_files = list(tmp_path.rglob("*"))
         assert artifact_files == [], f"Unexpected files in artifacts dir: {artifact_files}"
 
+    @pytest.mark.asyncio
+    async def test_oversized_upload_aborts_stream_without_reading_full_body(
+        self, db_session, write_token, tmp_path, monkeypatch
+    ):
+        """Verify that bytes past BGSTM_ARTIFACT_MAX_BYTES are NEVER read from the
+        request stream. This is the load-bearing test for #320 — it fails against
+        the old buffer-then-reject implementation and passes only when streaming
+        abort is correctly wired.
+        """
+        _token_model, plaintext = write_token
+        monkeypatch.setattr(settings, "BGSTM_ARTIFACT_MAX_BYTES", 1024)
+        monkeypatch.setattr(settings, "BGSTM_ARTIFACTS_DIR", str(tmp_path))
+        monkeypatch.setattr(settings, "BGSTM_ARTIFACT_URL_PREFIX", "http://testserver/artifacts")
+        monkeypatch.setattr(settings, "BGSTM_STORAGE_BACKEND", "local")
+
+        with TestClient(app) as sync_client:
+            session_id = _create_session(sync_client, plaintext)
+            case_result_id = _create_case_result(sync_client, plaintext, session_id)
+
+        # Build a multipart body: small text fields + 100 KiB file (100x the 1024 limit).
+        LIMIT = 1024
+        FILE_SIZE = 100 * LIMIT  # 100 KiB — well past the limit
+        boundary = b"bgstmtestboundary"
+        file_data = b"X" * FILE_SIZE
+
+        def _field_part(name: str, value: str) -> bytes:
+            return (
+                b"--"
+                + boundary
+                + b"\r\n"
+                + b'Content-Disposition: form-data; name="'
+                + name.encode()
+                + b'"\r\n'
+                + b"\r\n"
+                + value.encode()
+                + b"\r\n"
+            )
+
+        full_body = (
+            _field_part("case_result_id", case_result_id)
+            + _field_part("kind", "screenshot")
+            + _field_part("filename", "big.png")
+            + b"--"
+            + boundary
+            + b"\r\n"
+            + b'Content-Disposition: form-data; name="file"; filename="big.png"\r\n'
+            + b"Content-Type: image/png\r\n"
+            + b"\r\n"
+            + file_data
+            + b"\r\n"
+            + b"--"
+            + boundary
+            + b"--\r\n"
+        )
+        body_size = len(full_body)
+
+        # Track how many bytes our generator has yielded — each yield corresponds
+        # to one receive() call from the ASGI server (via ASGITransport).
+        bytes_yielded = 0
+        CHUNK_SIZE = 4096
+
+        async def streaming_body():
+            nonlocal bytes_yielded
+            for i in range(0, len(full_body), CHUNK_SIZE):
+                chunk = full_body[i : i + CHUNK_SIZE]
+                bytes_yielded += len(chunk)
+                yield chunk
+
+        from httpx import ASGITransport, AsyncClient
+
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            resp = await client.post(
+                "/api/v1/external-results/artifact",
+                content=streaming_body(),
+                headers={
+                    "Authorization": f"Bearer {plaintext}",
+                    "Content-Type": f"multipart/form-data; boundary={boundary.decode()}",
+                },
+            )
+
+        assert resp.status_code == 413, resp.text
+        assert resp.json()["detail"]["code"] == "artifact.too_large"
+
+        # The server must have stopped reading well before the full body was sent.
+        # Allow generous slack (limit + 256 KiB for framing + chunks), but assert
+        # well below total body size (100 KiB file ≫ slack).
+        assert bytes_yielded < body_size // 2, (
+            f"Server read {bytes_yielded} of {body_size} body bytes — "
+            "streaming abort is not actually aborting; bytes past the limit are still being read."
+        )
+
 
 # ---------------------------------------------------------------------------
-# Content-type enforcement (415)
+# Malformed multipart body (422 + code=validation_error)
 # ---------------------------------------------------------------------------
+
+
+class TestMalformedMultipart:
+    @pytest.mark.asyncio
+    async def test_malformed_multipart_returns_422(self, db_session, write_token, tmp_path, monkeypatch):
+        """Posting a body that is not valid multipart must return 422 with
+        code=validation_error, never 500.
+        """
+        _token_model, plaintext = write_token
+        monkeypatch.setattr(settings, "BGSTM_ARTIFACTS_DIR", str(tmp_path))
+        monkeypatch.setattr(settings, "BGSTM_STORAGE_BACKEND", "local")
+
+        from httpx import ASGITransport, AsyncClient
+
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            resp = await client.post(
+                "/api/v1/external-results/artifact",
+                content=b"this is not multipart data at all \x00\x01\x02",
+                headers={
+                    "Authorization": f"Bearer {plaintext}",
+                    # Valid multipart content-type but body is garbage
+                    "Content-Type": "multipart/form-data; boundary=correctboundary",
+                },
+            )
+
+        assert resp.status_code == 422, resp.text
+        assert resp.json()["detail"]["code"] == "validation_error"
 
 
 class TestContentTypeEnforcement:
