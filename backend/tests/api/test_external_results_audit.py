@@ -461,7 +461,7 @@ def test_state_changing_endpoint_emits_audit(monkeypatch, db_session, write_toke
     monkeypatch.setattr("app.api.external_results.write_audit", fake_write_audit)
 
     # Mock storage for the artifact upload endpoint.
-    _fake_storage_result = StorageResult(
+    fake_storage_result = StorageResult(
         key="enf/test.png",
         url="http://example.com/enf/test.png",
         size_bytes=72,
@@ -469,7 +469,7 @@ def test_state_changing_endpoint_emits_audit(monkeypatch, db_session, write_toke
     )
     monkeypatch.setattr(
         "app.api.external_results.get_storage",
-        lambda: SimpleNamespace(save=lambda stream, *, key, content_type: _fake_storage_result),
+        lambda: SimpleNamespace(save=lambda stream, *, key, content_type: fake_storage_result),
     )
 
     token_model, plaintext = write_token
