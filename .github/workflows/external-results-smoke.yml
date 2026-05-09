@@ -53,7 +53,7 @@ jobs:
           node-version: '20'
 
       - name: Set up pnpm 9
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 9
 
