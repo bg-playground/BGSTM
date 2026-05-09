@@ -31,12 +31,12 @@ jobs:
 
     steps:
       - name: Checkout BGSTM
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: bgstm
 
       - name: Checkout bgstm-playwright-frameworks (pinned)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: bg-playground/bgstm-playwright-frameworks
           ref: 942416538dc5d9a23895c9f601e4e4f2d152e7e5
