@@ -63,6 +63,7 @@ class TestCase(Base, TimestampMixin):
     source_url = Column(Text, nullable=True)
     created_by = Column(String(100), nullable=True)
     version = Column(Integer, default=1)
+    auto_registered = Column(Boolean, nullable=False, default=False)
 
     # Relationships
     links = relationship("RequirementTestCaseLink", back_populates="test_case", cascade="all, delete-orphan")
