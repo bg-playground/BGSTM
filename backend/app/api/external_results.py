@@ -18,8 +18,10 @@ import tempfile
 import uuid as _uuid_module
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from streaming_form_data import StreamingFormDataParser
+from streaming_form_data.targets import FileTarget, ValueTarget
 
 from app.auth.dependencies import (
     get_runner_or_user_auth,
@@ -51,11 +53,11 @@ _READ_SCOPE = "external_results:read"
 _DEFAULT_RUNNER = "@bgstm/playwright-core@unknown"
 
 # ---------------------------------------------------------------------------
-# Artifact upload constants
+# Artifact upload constants and helpers
 # ---------------------------------------------------------------------------
 
-# Read the upload stream in 64 KiB chunks.  Tests may monkeypatch this value
-# to a smaller number to exercise the streaming / partial-write path.
+# Kept as a module attribute so existing monkeypatch calls in tests don't fail
+# (the streaming implementation uses network-driven chunk sizes, not this value).
 _ARTIFACT_CHUNK_SIZE: int = 65_536  # 64 KiB
 
 # Content-type allowlist (global).  ``artifact_kind.other`` bypasses this check.
@@ -427,16 +429,45 @@ def _safe_unlink(path: str) -> None:
         pass
 
 
+class _SizeLimitExceeded(Exception):
+    """Raised inside ``_SizeLimitedFileTarget.on_data_received`` when the
+    running byte total exceeds ``max_bytes``.  The stream loop catches this
+    sentinel and stops reading immediately — bytes past the limit are never
+    consumed from the request stream.
+    """
+
+
+class _SizeLimitedFileTarget(FileTarget):
+    """``FileTarget`` subclass that aborts mid-stream on size-limit violation."""
+
+    def __init__(self, filename: str, *, max_bytes: int) -> None:
+        super().__init__(filename)
+        self._max_bytes = max_bytes
+        self.size_bytes: int = 0
+        # Redeclare with an explicit type so mypy can resolve it (FileTarget sets it
+        # to None in __init__ but the stubs don't expose its type).
+        self._fd = None  # type: ignore[assignment]
+
+    def on_data_received(self, chunk: bytes) -> None:
+        self.size_bytes += len(chunk)
+        if self.size_bytes > self._max_bytes:
+            # Close the file descriptor before aborting so the caller can safely
+            # unlink the temp file on all platforms.
+            fd = self._fd  # type: ignore[has-type]
+            if fd is not None:
+                fd.close()
+                self._fd = None  # type: ignore[has-type]
+            raise _SizeLimitExceeded()
+        super().on_data_received(chunk)
+
+
 @router.post(
     "/external-results/artifact",
     response_model=ArtifactResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def upload_artifact(
-    case_result_id: str = Form(...),
-    kind: str = Form(...),
-    filename: str = Form(...),
-    file: UploadFile = File(...),
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token: RunnerToken = Depends(require_runner_scope(_WRITE_SCOPE)),
 ) -> ArtifactResponse:
@@ -448,11 +479,75 @@ async def upload_artifact(
     - ``filename``       — original filename including extension.
     - ``file``           — binary body; its ``Content-Type`` part header is used as the
                            artifact content-type.
+
+    The handler uses ``streaming-form-data`` to parse the multipart body chunk by
+    chunk.  As soon as the cumulative byte count of the ``file`` part exceeds
+    ``BGSTM_ARTIFACT_MAX_BYTES``, a ``_SizeLimitExceeded`` sentinel is raised
+    inside the part-data callback, the stream loop exits immediately (no further
+    reads), the temp file is deleted, and 413 is returned.
     """
+    max_bytes: int = settings.BGSTM_ARTIFACT_MAX_BYTES
+
+    # Create the temp file upfront; ``FileTarget`` will reopen it via ``on_start``.
+    fd, tmp_path = tempfile.mkstemp(prefix="bgstm_artifact_")
+    os.close(fd)
+
+    case_result_id_target = ValueTarget()
+    kind_target = ValueTarget()
+    filename_target = ValueTarget()
+    file_target = _SizeLimitedFileTarget(tmp_path, max_bytes=max_bytes)
+
+    parser = StreamingFormDataParser(headers=request.headers)
+    parser.register("case_result_id", case_result_id_target)
+    parser.register("kind", kind_target)
+    parser.register("filename", filename_target)
+    parser.register("file", file_target)
+
+    try:
+        async for chunk in request.stream():
+            parser.data_received(chunk)
+    except _SizeLimitExceeded:
+        _safe_unlink(tmp_path)
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail={
+                "code": "artifact.too_large",
+                "message": f"Artifact exceeds the maximum allowed size of {max_bytes} bytes.",
+                "details": None,
+            },
+        )
+    except Exception as exc:
+        _safe_unlink(tmp_path)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "validation_error",
+                "message": f"Failed to parse multipart body: {exc}",
+                "details": None,
+            },
+        ) from exc
+
+    # --- Decode text fields ---
+    try:
+        case_result_id = case_result_id_target.value.decode("utf-8")
+        kind = kind_target.value.decode("utf-8")
+        filename = filename_target.value.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        _safe_unlink(tmp_path)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "validation_error",
+                "message": f"Multipart text field contains invalid UTF-8: {exc}",
+                "details": None,
+            },
+        ) from exc
+
     # --- Validate kind ---
     try:
         artifact_kind = ArtifactKind(kind)
     except ValueError:
+        _safe_unlink(tmp_path)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
@@ -463,11 +558,9 @@ async def upload_artifact(
         )
 
     # --- Sanitize and validate filename (path-traversal defense) ---
-    # Reject if the filename differs from its own basename OR fails the allowlist regex.
-    # This catches directory components (`../`, `subdir/`, `/etc/`) as well as
-    # dangerous characters (null bytes, backslashes, spaces, etc.).
     safe_filename = os.path.basename(filename)
     if safe_filename != filename or not _SAFE_FILENAME_RE.fullmatch(safe_filename):
+        _safe_unlink(tmp_path)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
@@ -484,6 +577,7 @@ async def upload_artifact(
     try:
         case_result_uuid = _uuid_module.UUID(case_result_id)
     except ValueError:
+        _safe_unlink(tmp_path)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
@@ -496,6 +590,7 @@ async def upload_artifact(
     # --- Verify the case result exists ---
     case_result = await get_case_result(db, case_result_uuid)
     if case_result is None:
+        _safe_unlink(tmp_path)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
@@ -506,10 +601,12 @@ async def upload_artifact(
         )
 
     # --- Derive content-type from the upload part header ---
-    content_type: str = (file.content_type or "application/octet-stream").split(";")[0].strip().lower()
+    raw_ct = getattr(file_target, "multipart_content_type", None) or "application/octet-stream"
+    content_type: str = raw_ct.split(";")[0].strip().lower()
 
     # --- Validate content-type (bypass for kind=other) ---
     if artifact_kind != ArtifactKind.other and content_type not in _ALLOWED_CONTENT_TYPES:
+        _safe_unlink(tmp_path)
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail={
@@ -521,35 +618,6 @@ async def upload_artifact(
                 "details": None,
             },
         )
-
-    # --- Stream to a temp file, enforcing max size ---
-    max_bytes: int = settings.BGSTM_ARTIFACT_MAX_BYTES
-    fd, tmp_path = tempfile.mkstemp(prefix="bgstm_artifact_")
-    total_bytes = 0
-    try:
-        with os.fdopen(fd, "wb") as fp:
-            while True:
-                chunk = await file.read(_ARTIFACT_CHUNK_SIZE)
-                if not chunk:
-                    break
-                fp.write(chunk)
-                total_bytes += len(chunk)
-                if total_bytes > max_bytes:
-                    # Partial data written — clean up and reject
-                    raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        detail={
-                            "code": "artifact.too_large",
-                            "message": (f"Artifact exceeds the maximum allowed size of {max_bytes} bytes."),
-                            "details": None,
-                        },
-                    )
-    except HTTPException:
-        _safe_unlink(tmp_path)
-        raise
-    except Exception:
-        _safe_unlink(tmp_path)
-        raise
 
     # --- Persist via storage backend ---
     storage = get_storage()

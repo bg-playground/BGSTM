@@ -388,9 +388,7 @@ text/plain  application/json
 
 #### Size enforcement
 
-The server enforces `BGSTM_ARTIFACT_MAX_BYTES` (default 50 MiB) by reading the upload in 64 KiB chunks and accumulating a byte count.  Once the running total exceeds the limit, the server deletes its own temp copy and returns `413`.
-
-> **Note on buffering:** FastAPI/Starlette parses the full multipart body via `python-multipart` before the handler runs, spooling to a temp file if the payload exceeds ~1 MiB.  The 413 check therefore operates on the spooled copy, not the live network stream.  For first-line DoS protection, configure your reverse proxy (e.g. nginx `client_max_body_size`, AWS ALB) to reject oversized bodies before they reach the application.  True in-stream early-abort (aborting mid-wire) is tracked as a follow-up improvement.
+The server enforces `BGSTM_ARTIFACT_MAX_BYTES` (default 50 MiB) by parsing the multipart body with `streaming-form-data`. A `_SizeLimitExceeded` sentinel is raised inside the part-data callback the moment the cumulative byte count of the `file` part exceeds the limit — the stream loop exits immediately and the server returns `413` without reading further bytes from the connection. Server aborts streaming parse mid-request when the cumulative byte count exceeds `BGSTM_ARTIFACT_MAX_BYTES`; bytes past the limit are not read from the connection.
 
 #### Success response — `201 Created`
 
@@ -508,7 +506,7 @@ All error responses share a single envelope:
 | `case_result.transition.invalid` | Requested outcome transition is not allowed. |
 | `requirement.not_found` | One or more `requirement_ids` do not exist. |
 | `artifact.not_found` | Artifact UUID does not exist. |
-| `artifact.too_large` | Artifact body exceeds size limit. |
+| `artifact.too_large` | Artifact body exceeds size limit. Server aborts streaming parse mid-request when the cumulative byte count exceeds `BGSTM_ARTIFACT_MAX_BYTES`; bytes past the limit are not read from the connection. |
 | `artifact.unsupported_type` | `content_type` is not in the allowed list. |
 | `validation_error` | Request body failed Pydantic schema validation. |
 | `internal_error` | Unhandled server-side error. |
@@ -536,6 +534,10 @@ Controlled by the `BGSTM_STORAGE_BACKEND` environment variable:
 | `BGSTM_ARTIFACTS_DIR` | `./artifacts` | Root directory for `LocalFsBackend`. |
 | `BGSTM_ARTIFACT_MAX_BYTES` | `52428800` (50 MiB) | Maximum artifact upload size. |
 | `BGSTM_ARTIFACT_URL_PREFIX` | `http://localhost:8000/artifacts` | Base URL used by `LocalFsBackend` when constructing download URLs. |
+
+#### Recommended deploy hardening
+
+Configure your reverse proxy to enforce a body-size cap as first-line DoS defense, e.g. nginx `client_max_body_size 60m;` (slightly larger than `BGSTM_ARTIFACT_MAX_BYTES` to allow multipart framing overhead). The handler also enforces the cap at the application layer via streaming abort, but the proxy cap protects against attackers exhausting Python worker time.
 
 ### `StorageBackend` ABC
 

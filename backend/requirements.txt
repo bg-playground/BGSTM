@@ -17,6 +17,9 @@ PyJWT==2.11.0
 bcrypt>=4.0.0
 email-validator==2.3.0
 reportlab==4.4.10
+# Streaming multipart parser — used by upload_artifact for true mid-wire size-limit abort.
+# Pinned to <2.0 to avoid breaking API changes; Dependabot will bump the minor.
+streaming-form-data>=1.16,<2.0
 
 # Optional dependencies for LLM embeddings
 # Uncomment the lines below if using LLM-based similarity
