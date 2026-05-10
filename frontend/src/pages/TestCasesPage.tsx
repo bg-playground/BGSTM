@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { testCasesApi } from '../api/testCases';
 import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
 import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
@@ -28,14 +29,15 @@ export const TestCasesPage: React.FC = () => {
   const { showToast } = useToast();
   const { isAdmin } = useRoleGate();
 
-  const loadTestCases = useCallback(async (targetPage = page) => {
+  const loadTestCases = useCallback(async (targetPage = page, signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await testCasesApi.list(targetPage, PAGE_SIZE);
+      const data = await testCasesApi.list(targetPage, PAGE_SIZE, { signal });
       setTestCases(data.items);
       setTotal(data.total);
       setPages(data.pages);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Error loading test cases:', error);
       showToast('Failed to load test cases', 'error');
     } finally {
@@ -43,8 +45,8 @@ export const TestCasesPage: React.FC = () => {
     }
   }, [page, showToast]);
 
-  useEffectAsync(async () => {
-    await loadTestCases(page);
+  useEffectAsync(async (signal) => {
+    await loadTestCases(page, signal);
   }, [page, loadTestCases]);
 
   const handleSubmit = async (e: React.FormEvent) => {

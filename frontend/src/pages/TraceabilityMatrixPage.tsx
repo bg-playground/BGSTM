@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { isRequestCanceled } from "../api/client";
 import traceabilityApi, { type TraceabilityMatrix } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -8,14 +9,16 @@ export default function TraceabilityMatrixPage() {
   const [matrix, setMatrix] = useState<TraceabilityMatrix | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const refreshControllerRef = useRef<AbortController | null>(null);
   const { showToast } = useToast();
 
-  const loadMatrix = useCallback(async () => {
+  const loadMatrix = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await traceabilityApi.getMatrix();
+      const data = await traceabilityApi.getMatrix({ signal });
       setMatrix(data);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error("Failed to load traceability matrix:", error);
       showToast("Failed to load traceability matrix", "error");
     } finally {
@@ -23,8 +26,21 @@ export default function TraceabilityMatrixPage() {
     }
   }, [showToast]);
 
-  useEffectAsync(async () => {
-    await loadMatrix();
+  useEffectAsync(async (signal) => {
+    await loadMatrix(signal);
+  }, [loadMatrix]);
+
+  useEffect(() => {
+    return () => {
+      refreshControllerRef.current?.abort();
+    };
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    refreshControllerRef.current?.abort();
+    const controller = new AbortController();
+    refreshControllerRef.current = controller;
+    void loadMatrix(controller.signal);
   }, [loadMatrix]);
 
   const handleExport = async (format: "csv" | "json" | "pdf") => {
@@ -111,7 +127,7 @@ export default function TraceabilityMatrixPage() {
             Export PDF
           </button>
           <button
-            onClick={loadMatrix}
+            onClick={handleRefresh}
             disabled={loading}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
           >

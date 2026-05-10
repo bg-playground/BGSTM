@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import type { AxiosRequestConfig } from "axios";
 
 export interface LinkedTestCase {
   test_case_id: string;
@@ -59,13 +60,13 @@ export interface Metrics {
 }
 
 const traceabilityApi = {
-  async getMatrix(): Promise<TraceabilityMatrix> {
-    const response = await apiClient.get<TraceabilityMatrix>("/traceability-matrix");
+  async getMatrix(config?: AxiosRequestConfig): Promise<TraceabilityMatrix> {
+    const response = await apiClient.get<TraceabilityMatrix>("/traceability-matrix", config);
     return response.data;
   },
 
-  async getMetrics(): Promise<Metrics> {
-    const response = await apiClient.get<Metrics>("/metrics");
+  async getMetrics(config?: AxiosRequestConfig): Promise<Metrics> {
+    const response = await apiClient.get<Metrics>("/metrics", config);
     return response.data;
   },
 

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { usersApi } from '../api/users';
 import type { ManagedUser } from '../api/users';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -39,13 +40,14 @@ export const UserManagementPage: React.FC = () => {
   const [newRole, setNewRole] = useState<'admin' | 'reviewer' | 'viewer'>('viewer');
 
   const loadUsers = useCallback(
-    async () => {
+    async (signal?: AbortSignal) => {
       try {
         setLoading(true);
-        const res = await usersApi.list(0, 500);
+        const res = await usersApi.list(0, 500, { signal });
         setTotal(res.data.total);
         setUsers(res.data.users);
-      } catch {
+      } catch (error) {
+        if (isRequestCanceled(error)) return;
         showToast('Failed to load users', 'error');
       } finally {
         setLoading(false);
@@ -54,8 +56,8 @@ export const UserManagementPage: React.FC = () => {
     [showToast],
   );
 
-  useEffectAsync(async () => {
-    await loadUsers();
+  useEffectAsync(async (signal) => {
+    await loadUsers(signal);
   }, [loadUsers]);
 
   // Client-side search/filter

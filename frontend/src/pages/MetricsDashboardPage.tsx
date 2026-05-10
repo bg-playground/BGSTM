@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { isRequestCanceled } from "../api/client";
 import traceabilityApi, { type Metrics } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -8,14 +9,16 @@ export default function MetricsDashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const refreshControllerRef = useRef<AbortController | null>(null);
   const { showToast } = useToast();
 
-  const loadMetrics = useCallback(async () => {
+  const loadMetrics = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await traceabilityApi.getMetrics();
+      const data = await traceabilityApi.getMetrics({ signal });
       setMetrics(data);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error("Failed to load metrics:", error);
       showToast("Failed to load metrics", "error");
     } finally {
@@ -23,8 +26,21 @@ export default function MetricsDashboardPage() {
     }
   }, [showToast]);
 
-  useEffectAsync(async () => {
-    await loadMetrics();
+  useEffectAsync(async (signal) => {
+    await loadMetrics(signal);
+  }, [loadMetrics]);
+
+  useEffect(() => {
+    return () => {
+      refreshControllerRef.current?.abort();
+    };
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    refreshControllerRef.current?.abort();
+    const controller = new AbortController();
+    refreshControllerRef.current = controller;
+    void loadMetrics(controller.signal);
   }, [loadMetrics]);
 
   const handleExportCsv = useCallback(async () => {
@@ -86,7 +102,7 @@ export default function MetricsDashboardPage() {
             Export CSV
           </button>
           <button
-            onClick={loadMetrics}
+            onClick={handleRefresh}
             disabled={loading}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
           >

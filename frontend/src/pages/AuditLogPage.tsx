@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { auditLogApi } from '../api/auditLog';
 import type { AuditLogEntry } from '../api/auditLog';
 import { usersApi } from '../api/users';
@@ -64,22 +65,23 @@ export const AuditLogPage: React.FC = () => {
 
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (signal?: AbortSignal) => {
     try {
-      const res = await usersApi.list(0, 500);
+      const res = await usersApi.list(0, 500, { signal });
       setUsers(res.data.users);
       const map: Record<string, string> = {};
       for (const u of res.data.users) {
         map[u.id] = u.full_name ?? u.email;
       }
       setUserMap(map);
-    } catch {
+    } catch (error) {
+      if (isRequestCanceled(error)) return;
       // non-fatal
     }
   }, []);
 
   const loadEntries = useCallback(
-    async (targetPage: number) => {
+    async (targetPage: number, signal?: AbortSignal) => {
       try {
         setLoading(true);
         const skip = (targetPage - 1) * pageSize;
@@ -90,10 +92,11 @@ export const AuditLogPage: React.FC = () => {
           action: filterAction || undefined,
           date_from: filterDateFrom || undefined,
           date_to: filterDateTo || undefined,
-        });
+        }, { signal });
         setEntries(res.data.entries);
         setTotal(res.data.total);
-      } catch {
+      } catch (error) {
+        if (isRequestCanceled(error)) return;
         showToast('Failed to load audit log', 'error');
       } finally {
         setLoading(false);
@@ -102,12 +105,12 @@ export const AuditLogPage: React.FC = () => {
     [pageSize, filterUserId, filterAction, filterDateFrom, filterDateTo, showToast],
   );
 
-  useEffectAsync(async () => {
-    await loadUsers();
+  useEffectAsync(async (signal) => {
+    await loadUsers(signal);
   }, [loadUsers]);
 
-  useEffectAsync(async () => {
-    await loadEntries(page);
+  useEffectAsync(async (signal) => {
+    await loadEntries(page, signal);
   }, [page, loadEntries]);
 
   const handleApplyFilters = useCallback(() => {

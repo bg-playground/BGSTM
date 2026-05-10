@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { Suggestion, SuggestionReview, GenerateSuggestionsResponse, SuggestionStatus, PaginatedResponse } from '../types/api';
 
 export const suggestionsApi = {
@@ -18,7 +19,7 @@ export const suggestionsApi = {
     search?: string;
     page?: number;
     pageSize?: number;
-  }): Promise<PaginatedResponse<Suggestion>> => {
+  }, config?: AxiosRequestConfig): Promise<PaginatedResponse<Suggestion>> => {
     const searchParams = new URLSearchParams();
     if (params?.minScore !== undefined) searchParams.append('min_score', params.minScore.toString());
     if (params?.maxScore !== undefined) searchParams.append('max_score', params.maxScore.toString());
@@ -29,7 +30,10 @@ export const suggestionsApi = {
     searchParams.append('page', (params?.page ?? 1).toString());
     searchParams.append('page_size', (params?.pageSize ?? 50).toString());
     
-    const response = await apiClient.get<PaginatedResponse<Suggestion>>(`/suggestions/pending?${searchParams}`);
+    const response = await apiClient.get<PaginatedResponse<Suggestion>>(
+      `/suggestions/pending?${searchParams}`,
+      config
+    );
     return response.data;
   },
 

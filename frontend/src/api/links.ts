@@ -1,10 +1,16 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { Link, LinkCreate, PaginatedResponse } from '../types/api';
 
 export const linksApi = {
-  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<Link>> => {
+  list: async (
+    page = 1,
+    pageSize = 50,
+    config?: AxiosRequestConfig
+  ): Promise<PaginatedResponse<Link>> => {
     const response = await apiClient.get<PaginatedResponse<Link>>(
-      `/links?page=${page}&page_size=${pageSize}`
+      `/links?page=${page}&page_size=${pageSize}`,
+      config
     );
     return response.data;
   },

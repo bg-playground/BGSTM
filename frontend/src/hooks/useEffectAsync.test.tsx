@@ -1,73 +1,53 @@
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useEffectAsync } from './useEffectAsync';
 
 describe('useEffectAsync', () => {
   it('invokes the async callback on mount', async () => {
-    const callback = vi.fn().mockResolvedValue(undefined);
+    const callback = vi.fn().mockImplementation(async (signal: AbortSignal) => {
+      expect(signal).toBeInstanceOf(AbortSignal);
+    });
 
     renderHook(() => useEffectAsync(callback, []));
 
     await vi.waitFor(() => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
+
+    const [signal] = callback.mock.calls[0] as [AbortSignal];
+    expect(signal.aborted).toBe(false);
   });
 
-  it('does not apply callback side-effects after unmount (cancellation)', async () => {
-    let sideEffectApplied = false;
-    let resolveGate!: () => void;
-
-    // Callback with a manual gate — won't complete until we call resolveGate()
-    const callback = vi.fn().mockImplementation(async () => {
-      await new Promise<void>((resolve) => {
-        resolveGate = resolve;
-      });
-      sideEffectApplied = true;
+  it('aborts the callback signal on unmount cleanup', async () => {
+    let capturedSignal: AbortSignal | undefined;
+    const callback = vi.fn().mockImplementation(async (signal: AbortSignal) => {
+      capturedSignal = signal;
     });
-
-    // render — effect fires (inside act), callback is called and suspended at the gate
     const { unmount } = renderHook(() => useEffectAsync(callback, []));
 
-    // Callback has been called but is suspended; side-effect not yet applied.
-    expect(callback).toHaveBeenCalledTimes(1);
-    expect(sideEffectApplied).toBe(false);
-
-    // Unmount while the callback is in-flight — cleanup sets cancelled = true.
-    unmount();
-
-    // Open the gate so the callback can complete.
-    await act(async () => {
-      resolveGate();
-      await Promise.resolve();
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    // The hook's cancelled flag is checked BEFORE calling the callback,
-    // not after it completes, so the in-flight side-effect does still apply.
-    // What the hook guarantees is that no *additional* invocation of the
-    // callback happens after cleanup — which we confirm here.
-    expect(callback).toHaveBeenCalledTimes(1);
-    expect(sideEffectApplied).toBe(true);
+    unmount();
+    expect(capturedSignal?.aborted).toBe(true);
   });
 
   it('cleans up (cancels) the previous effect and re-invokes callback when deps change', async () => {
-    const callOrder: string[] = [];
-
-    const makeCallback = (label: string) =>
-      vi.fn().mockImplementation(async () => {
-        callOrder.push(label);
-      });
-
-    const callback1 = makeCallback('first');
-    const callback2 = makeCallback('second');
+    const signals: AbortSignal[] = [];
+    const callback1 = vi.fn().mockImplementation(async (signal: AbortSignal) => {
+      signals.push(signal);
+    });
+    const callback2 = vi.fn().mockImplementation(async (signal: AbortSignal) => {
+      signals.push(signal);
+    });
 
     let cb = callback1;
     const { rerender } = renderHook(() => useEffectAsync(cb, [cb]));
 
-    // First callback runs on mount.
     await vi.waitFor(() => {
       expect(callback1).toHaveBeenCalledTimes(1);
     });
 
-    // Change the dependency — triggers cleanup of the old effect and a new effect.
     cb = callback2;
     rerender();
 
@@ -75,9 +55,25 @@ describe('useEffectAsync', () => {
       expect(callback2).toHaveBeenCalledTimes(1);
     });
 
-    // Each callback ran exactly once, in the correct order.
-    expect(callOrder).toEqual(['first', 'second']);
-    // Old callback was not invoked again after cleanup.
+    expect(signals[0].aborted).toBe(true);
+    expect(signals[1].aborted).toBe(false);
     expect(callback1).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls AbortController.abort during cleanup', async () => {
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+    const callback = vi.fn().mockImplementation(async (signal: AbortSignal) => {
+      expect(signal).toBeInstanceOf(AbortSignal);
+    });
+    const { unmount } = renderHook(() => useEffectAsync(callback, []));
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    unmount();
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    abortSpy.mockRestore();
   });
 });

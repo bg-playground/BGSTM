@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { isRequestCanceled } from '../api/client';
 import { suggestionsApi } from '../api/suggestions';
 import traceabilityApi from '../api/traceability';
 import { requirementsApi } from '../api/requirements';
@@ -140,7 +141,7 @@ export const SuggestionDashboard: React.FC = () => {
     setSearchParams({}, { replace: true });
   }, [setSearchParams]);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const [suggestionData, reqData, tcData] = await Promise.all([
@@ -152,15 +153,16 @@ export const SuggestionDashboard: React.FC = () => {
           sortOrder: filters.sortOrder,
           search: filters.search || undefined,
           pageSize: 200,
-        }),
-        requirementsApi.list(1, 200),
-        testCasesApi.list(1, 200),
+        }, { signal }),
+        requirementsApi.list(1, 200, { signal }),
+        testCasesApi.list(1, 200, { signal }),
       ]);
 
       setSuggestions(suggestionData.items);
       setRequirements(new Map(reqData.items.map((r) => [r.id, r])));
       setTestCases(new Map(tcData.items.map((tc) => [tc.id, tc])));
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Error loading data:', error);
       showToast('Failed to load suggestions', 'error');
     } finally {
@@ -168,8 +170,8 @@ export const SuggestionDashboard: React.FC = () => {
     }
   }, [filters, showToast]);
 
-  useEffectAsync(async () => {
-    await loadData();
+  useEffectAsync(async (signal) => {
+    await loadData(signal);
   }, [loadData]);
 
   // Reset focus when suggestion list changes

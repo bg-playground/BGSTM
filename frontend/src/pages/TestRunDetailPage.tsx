@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { Link, useParams } from 'react-router-dom';
 import { externalResultsApi, type CaseOutcome, type CaseResult, type RunStatus, type TestSession } from '../api/externalResults';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -45,28 +46,35 @@ const TestRunDetailPage: React.FC = () => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal: AbortSignal) => {
     if (!sessionId) {
       setLoading(false);
       return;
     }
     try {
       setLoading(true);
-      const sessionPromise = externalResultsApi.getSession(sessionId);
+      const sessionPromise = externalResultsApi.getSession(sessionId, { signal });
       const allCases: CaseResult[] = [];
       let skip = 0;
       const limit = 500;
       let total = 0;
       do {
-        const caseRes = await externalResultsApi.listSessionCases(sessionId, { skip, limit });
+        if (signal.aborted) break;
+        const caseRes = await externalResultsApi.listSessionCases(
+          sessionId,
+          { skip, limit },
+          { signal }
+        );
         allCases.push(...caseRes.data.cases);
         total = caseRes.data.total;
         skip += caseRes.data.cases.length;
       } while (skip < total);
+      if (signal.aborted) return;
       const sessionRes = await sessionPromise;
       setSession(sessionRes.data);
       setCases(allCases);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Failed to load test run details:', error);
       showToast('Failed to load test run details', 'error');
     } finally {
@@ -74,8 +82,8 @@ const TestRunDetailPage: React.FC = () => {
     }
   }, [sessionId, showToast]);
 
-  useEffectAsync(async () => {
-    await loadData();
+  useEffectAsync(async (signal) => {
+    await loadData(signal);
   }, [loadData]);
 
   const toggleExpand = useCallback((id: string) => {
