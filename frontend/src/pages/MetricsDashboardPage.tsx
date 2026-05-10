@@ -23,7 +23,15 @@ export default function MetricsDashboardPage() {
   }, [showToast]);
 
   useEffect(() => {
-    loadMetrics();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadMetrics();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadMetrics]);
 
   const handleExportCsv = useCallback(async () => {

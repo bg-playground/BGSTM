@@ -168,12 +168,22 @@ export const SuggestionDashboard: React.FC = () => {
   }, [filters, showToast]);
 
   useEffect(() => {
-    loadData();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadData();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadData]);
 
   // Reset focus when suggestion list changes
   useEffect(() => {
-    setFocusedIndex(-1);
+    queueMicrotask(() => {
+      setFocusedIndex(-1);
+    });
   }, [suggestions]);
 
   // Scroll focused card into view
