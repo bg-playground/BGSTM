@@ -368,7 +368,8 @@ async def list_case_results_for_session(
     count_stmt = select(func.count()).select_from(ExternalCaseResult).where(ExternalCaseResult.session_id == session_id)
     total = (await db.execute(count_stmt)).scalar_one()
     rows = (await db.execute(stmt)).scalars().all()
-    requirement_ids_by_test_case_id: dict[UUID, list[UUID]] = defaultdict(list)
+    # Use dict[Any, list[UUID]] so mypy accepts SQLAlchemy Column[Any] ORM attributes as keys
+    requirement_ids_by_test_case_id: dict[Any, list[UUID]] = defaultdict(list)
     linked_test_case_ids = [row.test_case_id for row in rows if row.test_case_id is not None]
     if linked_test_case_ids:
         requirement_rows = await db.execute(
