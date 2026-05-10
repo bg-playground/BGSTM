@@ -60,7 +60,11 @@ const TestRunDetailPage: React.FC = () => {
       let total = 0;
       do {
         if (signal.aborted) break;
-        const caseRes = await externalResultsApi.listSessionCases(sessionId, { skip, limit }, { signal });
+        const caseRes = await externalResultsApi.listSessionCases(
+          sessionId,
+          { skip, limit },
+          { signal }
+        );
         allCases.push(...caseRes.data.cases);
         total = caseRes.data.total;
         skip += caseRes.data.cases.length;
