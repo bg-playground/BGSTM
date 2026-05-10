@@ -289,8 +289,58 @@ For full details, see the [E2E Test README](frontend/tests/e2e/README.md).
 
 ## Related projects
 
-- **[bg-playground/bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks)** — Domain-specific Playwright automation frameworks with native BGSTM traceability. Apache-2.0. Public.
-  - Tracking issue for the v0.1 `@bgstm/playwright-core` MVP: [`bgstm-playwright-frameworks#3`](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3) — *blocked by [BGSTM#291](https://github.com/bg-playground/BGSTM/issues/291) (Reporter API contract)*.
+### 🎭 [bg-playground/bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks)
+
+A monorepo of **opinionated, domain-specific Playwright automation frameworks** with native BGSTM traceability. Apache-2.0. Public.
+
+Unlike generic Playwright starters, each domain pack ships with:
+
+- **Pre-built page objects** for the common entities of that domain (e.g. CRM: Lead, Opportunity, Account)
+- **Realistic test data factories** for fast, repeatable test setup
+- **Multi-step workflow helpers** that model real business flows
+- **BGSTM-native reporting** — every test result, step, and artifact is automatically linked back to a BGSTM requirement and test case via the Reporter API
+
+#### Packages
+
+| Package | Description | Status |
+|---|---|---|
+| [`@bgstm/playwright-core`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/core) | Shared fixtures, base POM, BGSTM reporter | 🚧 Stub |
+| [`@bgstm/domain-crm`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/domain-crm) | CRM domain pack (Leads, Opportunities, Accounts) | 🚧 Stub |
+| [`@bgstm/domain-accounting`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/domain-accounting) | Accounting domain pack (Ledgers, Journals, Reconciliations) | 🚧 Stub |
+
+#### Linking tests to BGSTM requirements
+
+The BGSTM reporter reads `bgstm:requirement` annotations from each test and forwards results to BGSTM:
+
+```ts
+import { test } from '@playwright/test';
+
+test(
+  'login redirects to dashboard',
+  { annotation: { type: 'bgstm:requirement', description: 'REQ-LOGIN-001' } },
+  async ({ page }) => {
+    await page.goto('/login');
+  },
+);
+```
+
+#### Architecture
+
+```
+BGSTM            ← methodology + traceability platform (this repo, open-source)
+   ▲
+   │ reports via the BGSTM Reporter API
+   │
+bgstm-playwright-frameworks  ← Playwright execution scaffolding (open-source, Apache-2.0)
+   ▲
+   │ runs at scale on
+   │
+NAT              ← managed execution + AI-adaptive testing (commercial, https://nat-testing.io)
+```
+
+> 💼 **Looking for regulated-industry packs** (Healthcare/HIPAA, Financial/SOX, GxP)? Those are available as part of [NAT](https://nat-testing.io).
+
+- Tracking issue for the v0.1 `@bgstm/playwright-core` MVP: [`bgstm-playwright-frameworks#3`](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3) — *blocked by [BGSTM#291](https://github.com/bg-playground/BGSTM/issues/291) (Reporter API contract)*.
 
 ## 🤝 Contributing
 
