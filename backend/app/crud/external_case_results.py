@@ -1,6 +1,7 @@
 """CRUD operations for External Case Results (BGSTM#303)."""
 
 import uuid
+from collections import defaultdict
 from typing import Any
 from uuid import UUID
 
@@ -367,6 +368,16 @@ async def list_case_results_for_session(
     count_stmt = select(func.count()).select_from(ExternalCaseResult).where(ExternalCaseResult.session_id == session_id)
     total = (await db.execute(count_stmt)).scalar_one()
     rows = (await db.execute(stmt)).scalars().all()
+    requirement_ids_by_test_case_id: dict[UUID, list[UUID]] = defaultdict(list)
+    linked_test_case_ids = [row.test_case_id for row in rows if row.test_case_id is not None]
+    if linked_test_case_ids:
+        requirement_rows = await db.execute(
+            select(RequirementTestCaseLink.test_case_id, RequirementTestCaseLink.requirement_id)
+            .where(RequirementTestCaseLink.test_case_id.in_(linked_test_case_ids))
+            .order_by(RequirementTestCaseLink.created_at.asc())
+        )
+        for test_case_id, requirement_id in requirement_rows.all():
+            requirement_ids_by_test_case_id[test_case_id].append(requirement_id)
     for row in rows:
-        row.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=row.test_case_id)
+        row.requirement_ids = requirement_ids_by_test_case_id.get(row.test_case_id, []) if row.test_case_id else []
     return list(rows), total

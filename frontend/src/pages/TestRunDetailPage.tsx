@@ -52,12 +52,20 @@ const TestRunDetailPage: React.FC = () => {
     }
     try {
       setLoading(true);
-      const [sessionRes, casesRes] = await Promise.all([
-        externalResultsApi.getSession(sessionId),
-        externalResultsApi.listSessionCases(sessionId, { skip: 0, limit: 500 }),
-      ]);
+      const sessionPromise = externalResultsApi.getSession(sessionId);
+      const allCases: CaseResult[] = [];
+      let skip = 0;
+      const limit = 500;
+      let total = 0;
+      do {
+        const caseRes = await externalResultsApi.listSessionCases(sessionId, { skip, limit });
+        allCases.push(...caseRes.data.cases);
+        total = caseRes.data.total;
+        skip += caseRes.data.cases.length;
+      } while (skip < total);
+      const sessionRes = await sessionPromise;
       setSession(sessionRes.data);
-      setCases(casesRes.data.cases);
+      setCases(allCases);
     } catch (error) {
       console.error('Failed to load test run details:', error);
       showToast('Failed to load test run details', 'error');

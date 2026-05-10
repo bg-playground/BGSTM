@@ -79,16 +79,18 @@ export const TestRunsPage: React.FC = () => {
     await loadSessions();
   }, [loadSessions]);
 
+  const handleStatusFilterChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(event.target.value as StatusFilter);
+    setPage(1);
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Test Runs</h1>
         <select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value as StatusFilter);
-            setPage(1);
-          }}
+          onChange={handleStatusFilterChange}
           className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
         >
           <option value="all">All</option>

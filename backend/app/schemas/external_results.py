@@ -95,7 +95,7 @@ class SessionResponse(BaseModel):
     git_branch: str | None = None
     ci_url: HttpUrl | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-    summary: dict[str, Any] | None = None
+    summary: dict[str, Any] = Field(default_factory=dict)
 
 
 _TERMINAL_STATUSES = {RunStatus.passed, RunStatus.failed, RunStatus.aborted}
