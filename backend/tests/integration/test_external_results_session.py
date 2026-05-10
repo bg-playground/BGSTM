@@ -174,6 +174,55 @@ class TestSessionHappyPath:
         data = resp.json()
         assert data["runner"].startswith("@bgstm/playwright-core@")
 
+    def test_list_sessions_returns_paginated_and_filtered_data(self, db_session, write_token, project_id):
+        _model, plaintext = write_token
+        headers = _auth_header(plaintext)
+
+        with TestClient(app) as client:
+            first_payload = dict(_session_payload(project_id), ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}")
+            second_payload = dict(
+                _session_payload(project_id),
+                git_branch="release",
+                git_sha="def456",
+                ci_url=f"https://ci.example.com/runs/{uuid.uuid4()}",
+            )
+
+            first_resp = client.post("/api/v1/external-results/session", json=first_payload, headers=headers)
+            second_resp = client.post("/api/v1/external-results/session", json=second_payload, headers=headers)
+            assert first_resp.status_code == 201, first_resp.text
+            assert second_resp.status_code == 201, second_resp.text
+
+            first_id = first_resp.json()["id"]
+            second_id = second_resp.json()["id"]
+
+            finish_resp = client.patch(
+                f"/api/v1/external-results/session/{first_id}",
+                json={"status": "passed", "summary": {"total": 7, "passed": 7}},
+                headers=headers,
+            )
+            assert finish_resp.status_code == 200, finish_resp.text
+
+            list_resp = client.get("/api/v1/external-results/sessions?skip=0&limit=25", headers=headers)
+            assert list_resp.status_code == 200, list_resp.text
+            list_data = list_resp.json()
+            assert list_data["total"] == 2
+            assert list_data["skip"] == 0
+            assert list_data["limit"] == 25
+            returned_ids = [s["id"] for s in list_data["sessions"]]
+            assert first_id in returned_ids
+            assert second_id in returned_ids
+            finished_row = next(s for s in list_data["sessions"] if s["id"] == first_id)
+            assert finished_row["summary"] == {"total": 7, "passed": 7}
+
+            filtered_resp = client.get(
+                "/api/v1/external-results/sessions?status=passed&skip=0&limit=25",
+                headers=headers,
+            )
+            assert filtered_resp.status_code == 200, filtered_resp.text
+            filtered_data = filtered_resp.json()
+            assert filtered_data["total"] == 1
+            assert [s["id"] for s in filtered_data["sessions"]] == [first_id]
+
 
 # ---------------------------------------------------------------------------
 # Auth: 401 without credentials

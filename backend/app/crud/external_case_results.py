@@ -1,10 +1,11 @@
 """CRUD operations for External Case Results (BGSTM#303)."""
 
 import uuid
+from collections import defaultdict
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -347,3 +348,37 @@ async def get_case_result(
 
     case_result.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=case_result.test_case_id)
     return case_result
+
+
+async def list_case_results_for_session(
+    db: AsyncSession,
+    *,
+    session_id: UUID,
+    skip: int = 0,
+    limit: int = 200,
+) -> tuple[list[ExternalCaseResult], int]:
+    """Return all case results for a given session, ordered by created_at asc."""
+    stmt = (
+        select(ExternalCaseResult)
+        .where(ExternalCaseResult.session_id == session_id)
+        .order_by(ExternalCaseResult.created_at.asc())
+        .offset(skip)
+        .limit(limit)
+    )
+    count_stmt = select(func.count()).select_from(ExternalCaseResult).where(ExternalCaseResult.session_id == session_id)
+    total = (await db.execute(count_stmt)).scalar_one()
+    rows = (await db.execute(stmt)).scalars().all()
+    # Use dict[Any, list[UUID]] so mypy accepts SQLAlchemy Column[Any] ORM attributes as keys
+    requirement_ids_by_test_case_id: dict[Any, list[UUID]] = defaultdict(list)
+    linked_test_case_ids = [row.test_case_id for row in rows if row.test_case_id is not None]
+    if linked_test_case_ids:
+        requirement_rows = await db.execute(
+            select(RequirementTestCaseLink.test_case_id, RequirementTestCaseLink.requirement_id)
+            .where(RequirementTestCaseLink.test_case_id.in_(linked_test_case_ids))
+            .order_by(RequirementTestCaseLink.created_at.asc())
+        )
+        for test_case_id, requirement_id in requirement_rows.all():
+            requirement_ids_by_test_case_id[test_case_id].append(requirement_id)
+    for row in rows:
+        row.requirement_ids = requirement_ids_by_test_case_id.get(row.test_case_id, []) if row.test_case_id else []
+    return list(rows), total

@@ -95,6 +95,7 @@ class SessionResponse(BaseModel):
     git_branch: str | None = None
     ci_url: HttpUrl | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    summary: dict[str, Any] = Field(default_factory=dict)
 
 
 _TERMINAL_STATUSES = {RunStatus.passed, RunStatus.failed, RunStatus.aborted}
@@ -195,6 +196,24 @@ class CaseResultResponse(BaseModel):
         False,
         description="True when BGSTM created a new test-case record from external_id.",
     )
+
+
+class SessionListResponse(BaseModel):
+    """Response for GET /external-results/sessions."""
+
+    sessions: list[SessionResponse]
+    total: int
+    skip: int
+    limit: int
+
+
+class CaseResultListResponse(BaseModel):
+    """Response for GET /external-results/session/{id}/cases."""
+
+    cases: list[CaseResultResponse]
+    total: int
+    skip: int
+    limit: int
 
 
 class CaseResultUpdate(BaseModel):
