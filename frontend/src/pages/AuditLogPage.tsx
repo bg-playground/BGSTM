@@ -138,19 +138,6 @@ export const AuditLogPage: React.FC = () => {
     setPage(1);
   }, []);
 
-  // Re-fetch when filters are cleared
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled && !filterUserId && !filterAction && !filterDateFrom && !filterDateTo) {
-        await loadEntries(1);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [filterUserId, filterAction, filterDateFrom, filterDateTo, loadEntries]);
-
   const toggleExpand = useCallback((id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
