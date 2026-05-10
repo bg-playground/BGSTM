@@ -11,6 +11,7 @@ export function useEffectAsync(callback: () => Promise<void>, deps: React.Depend
     return () => {
       cancelled = true;
     };
+    // callback dependencies are intentionally provided by the caller through `deps`
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }
