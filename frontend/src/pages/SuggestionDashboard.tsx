@@ -16,6 +16,7 @@ import { SuggestionStats } from '../components/SuggestionStats';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { SuggestionPreviewModal } from '../components/SuggestionPreviewModal';
 import { VirtualizedSuggestionList } from '../components/VirtualizedSuggestionList';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 import { useRoleGate } from '../hooks/useRoleGate';
 
 const VIRTUALIZATION_THRESHOLD = 50;
@@ -167,16 +168,8 @@ export const SuggestionDashboard: React.FC = () => {
     }
   }, [filters, showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadData();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadData();
   }, [loadData]);
 
   // Reset focus when suggestion list changes

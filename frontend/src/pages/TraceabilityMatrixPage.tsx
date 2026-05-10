@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import traceabilityApi, { type TraceabilityMatrix } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useEffectAsync } from "../hooks/useEffectAsync";
 
 export default function TraceabilityMatrixPage() {
   const [matrix, setMatrix] = useState<TraceabilityMatrix | null>(null);
@@ -22,16 +23,8 @@ export default function TraceabilityMatrixPage() {
     }
   }, [showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadMatrix();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadMatrix();
   }, [loadMatrix]);
 
   const handleExport = async (format: "csv" | "json" | "pdf") => {

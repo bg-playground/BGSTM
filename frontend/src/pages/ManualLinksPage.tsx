@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { linksApi } from '../api/links';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
@@ -6,6 +6,7 @@ import { LinkSource, LinkType } from '../types/api';
 import type { Link, LinkCreate, Requirement, TestCase } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 
 export const ManualLinksPage: React.FC = () => {
   const [links, setLinks] = useState<Link[]>([]);
@@ -40,16 +41,8 @@ export const ManualLinksPage: React.FC = () => {
     }
   }, [showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadData();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadData();
   }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {

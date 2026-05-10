@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { auditLogApi } from '../api/auditLog';
 import type { AuditLogEntry } from '../api/auditLog';
 import { usersApi } from '../api/users';
@@ -6,6 +6,7 @@ import type { ManagedUser } from '../api/users';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 
 const PAGE_SIZES = [25, 50, 100];
 
@@ -101,28 +102,12 @@ export const AuditLogPage: React.FC = () => {
     [pageSize, filterUserId, filterAction, filterDateFrom, filterDateTo, showToast],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadUsers();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadUsers();
   }, [loadUsers]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadEntries(page);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadEntries(page);
   }, [page, loadEntries]);
 
   const handleApplyFilters = useCallback(() => {

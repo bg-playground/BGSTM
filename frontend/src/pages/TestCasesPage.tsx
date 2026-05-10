@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { testCasesApi } from '../api/testCases';
 import { TestCaseType, PriorityLevel, TestCaseStatus } from '../types/api';
 import type { TestCase, TestCaseCreate, TestCaseUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 import { useRoleGate } from '../hooks/useRoleGate';
 
 export const TestCasesPage: React.FC = () => {
@@ -42,16 +43,8 @@ export const TestCasesPage: React.FC = () => {
     }
   }, [page, showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadTestCases(page);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadTestCases(page);
   }, [page, loadTestCases]);
 
   const handleSubmit = async (e: React.FormEvent) => {

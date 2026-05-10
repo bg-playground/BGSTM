@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { usersApi } from '../api/users';
 import type { ManagedUser } from '../api/users';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 
 const PAGE_SIZE = 25;
 
@@ -53,16 +54,8 @@ export const UserManagementPage: React.FC = () => {
     [showToast],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadUsers();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadUsers();
   }, [loadUsers]);
 
   // Client-side search/filter
