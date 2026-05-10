@@ -43,7 +43,15 @@ export const TestCasesPage: React.FC = () => {
   }, [page, showToast]);
 
   useEffect(() => {
-    loadTestCases(page);
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadTestCases(page);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [page, loadTestCases]);
 
   const handleSubmit = async (e: React.FormEvent) => {

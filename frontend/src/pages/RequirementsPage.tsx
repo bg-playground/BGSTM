@@ -42,7 +42,15 @@ export const RequirementsPage: React.FC = () => {
   }, [page, showToast]);
 
   useEffect(() => {
-    loadRequirements(page);
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadRequirements(page);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [page, loadRequirements]);
 
   const handleSubmit = async (e: React.FormEvent) => {

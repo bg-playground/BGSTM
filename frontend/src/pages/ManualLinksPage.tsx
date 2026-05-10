@@ -41,7 +41,15 @@ export const ManualLinksPage: React.FC = () => {
   }, [showToast]);
 
   useEffect(() => {
-    loadData();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadData();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {

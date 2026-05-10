@@ -102,11 +102,27 @@ export const AuditLogPage: React.FC = () => {
   );
 
   useEffect(() => {
-    loadUsers();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadUsers();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadUsers]);
 
   useEffect(() => {
-    loadEntries(page);
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadEntries(page);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [page, loadEntries]);
 
   const handleApplyFilters = useCallback(() => {
@@ -124,9 +140,15 @@ export const AuditLogPage: React.FC = () => {
 
   // Re-fetch when filters are cleared
   useEffect(() => {
-    if (!filterUserId && !filterAction && !filterDateFrom && !filterDateTo) {
-      loadEntries(1);
-    }
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled && !filterUserId && !filterAction && !filterDateFrom && !filterDateTo) {
+        await loadEntries(1);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [filterUserId, filterAction, filterDateFrom, filterDateTo, loadEntries]);
 
   const toggleExpand = useCallback((id: string) => {

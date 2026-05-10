@@ -54,7 +54,15 @@ export const UserManagementPage: React.FC = () => {
   );
 
   useEffect(() => {
-    loadUsers();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadUsers();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadUsers]);
 
   // Client-side search/filter

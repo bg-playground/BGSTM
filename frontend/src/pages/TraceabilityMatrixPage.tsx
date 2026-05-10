@@ -23,7 +23,15 @@ export default function TraceabilityMatrixPage() {
   }, [showToast]);
 
   useEffect(() => {
-    loadMatrix();
+    let cancelled = false;
+    void (async () => {
+      if (!cancelled) {
+        await loadMatrix();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadMatrix]);
 
   const handleExport = async (format: "csv" | "json" | "pdf") => {
