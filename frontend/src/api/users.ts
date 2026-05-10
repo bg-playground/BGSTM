@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 export interface ManagedUser {
   id: string;
@@ -22,8 +23,8 @@ export interface UserUpdate {
 }
 
 export const usersApi = {
-  list: (skip = 0, limit = 100) =>
-    apiClient.get<UserListResponse>(`/users?skip=${skip}&limit=${limit}`),
+  list: (skip = 0, limit = 100, config?: AxiosRequestConfig) =>
+    apiClient.get<UserListResponse>(`/users?skip=${skip}&limit=${limit}`, config),
 
   update: (id: string, updates: UserUpdate) =>
     apiClient.patch<ManagedUser>(`/users/${id}`, updates),

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { linksApi } from '../api/links';
 import { requirementsApi } from '../api/requirements';
 import { testCasesApi } from '../api/testCases';
@@ -22,18 +23,19 @@ export const ManualLinksPage: React.FC = () => {
   });
   const { showToast } = useToast();
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const [linksData, reqData, tcData] = await Promise.all([
-        linksApi.list(),
-        requirementsApi.list(1, 200),
-        testCasesApi.list(1, 200),
+        linksApi.list(1, 50, { signal }),
+        requirementsApi.list(1, 200, { signal }),
+        testCasesApi.list(1, 200, { signal }),
       ]);
       setLinks(linksData.items);
       setRequirements(reqData.items);
       setTestCases(tcData.items);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Error loading data:', error);
       showToast('Failed to load data', 'error');
     } finally {
@@ -41,8 +43,8 @@ export const ManualLinksPage: React.FC = () => {
     }
   }, [showToast]);
 
-  useEffectAsync(async () => {
-    await loadData();
+  useEffectAsync(async (signal) => {
+    await loadData(signal);
   }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {

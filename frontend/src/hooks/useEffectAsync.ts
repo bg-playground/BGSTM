@@ -1,16 +1,13 @@
 import { useEffect } from 'react';
 
-export function useEffectAsync(callback: () => Promise<void>, deps: React.DependencyList): void {
+export function useEffectAsync(
+  callback: (signal: AbortSignal) => Promise<void>,
+  deps: React.DependencyList
+): void {
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await callback();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    const controller = new AbortController();
+    void callback(controller.signal);
+    return () => controller.abort();
     // callback dependencies are intentionally provided by the caller through `deps`
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

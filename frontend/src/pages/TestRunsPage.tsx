@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { externalResultsApi, type RunStatus, type TestSession } from '../api/externalResults';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -56,7 +57,7 @@ export const TestRunsPage: React.FC = () => {
 
   const pages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  const loadSessions = useCallback(async () => {
+  const loadSessions = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const skip = (page - 1) * PAGE_SIZE;
@@ -64,10 +65,11 @@ export const TestRunsPage: React.FC = () => {
         skip,
         limit: PAGE_SIZE,
         status: toStatusParam(statusFilter),
-      });
+      }, { signal });
       setSessions(res.data.sessions);
       setTotal(res.data.total);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Failed to load test runs:', error);
       showToast('Failed to load test runs', 'error');
     } finally {
@@ -75,8 +77,8 @@ export const TestRunsPage: React.FC = () => {
     }
   }, [page, showToast, statusFilter]);
 
-  useEffectAsync(async () => {
-    await loadSessions();
+  useEffectAsync(async (signal) => {
+    await loadSessions(signal);
   }, [loadSessions]);
 
   const handleStatusFilterChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {

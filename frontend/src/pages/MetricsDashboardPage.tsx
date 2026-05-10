@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { isRequestCanceled } from "../api/client";
 import traceabilityApi, { type Metrics } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -10,12 +11,13 @@ export default function MetricsDashboardPage() {
   const [exporting, setExporting] = useState(false);
   const { showToast } = useToast();
 
-  const loadMetrics = useCallback(async () => {
+  const loadMetrics = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await traceabilityApi.getMetrics();
+      const data = await traceabilityApi.getMetrics({ signal });
       setMetrics(data);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error("Failed to load metrics:", error);
       showToast("Failed to load metrics", "error");
     } finally {
@@ -23,8 +25,8 @@ export default function MetricsDashboardPage() {
     }
   }, [showToast]);
 
-  useEffectAsync(async () => {
-    await loadMetrics();
+  useEffectAsync(async (signal) => {
+    await loadMetrics(signal);
   }, [loadMetrics]);
 
   const handleExportCsv = useCallback(async () => {
@@ -86,7 +88,9 @@ export default function MetricsDashboardPage() {
             Export CSV
           </button>
           <button
-            onClick={loadMetrics}
+            onClick={() => {
+              void loadMetrics();
+            }}
             disabled={loading}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
           >

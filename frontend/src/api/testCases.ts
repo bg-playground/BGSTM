@@ -1,10 +1,16 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { TestCase, TestCaseCreate, TestCaseUpdate, PaginatedResponse } from '../types/api';
 
 export const testCasesApi = {
-  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<TestCase>> => {
+  list: async (
+    page = 1,
+    pageSize = 50,
+    config?: AxiosRequestConfig
+  ): Promise<PaginatedResponse<TestCase>> => {
     const response = await apiClient.get<PaginatedResponse<TestCase>>(
-      `/test-cases?page=${page}&page_size=${pageSize}`
+      `/test-cases?page=${page}&page_size=${pageSize}`,
+      config
     );
     return response.data;
   },

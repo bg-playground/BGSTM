@@ -1,10 +1,16 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { Requirement, RequirementCreate, RequirementUpdate, PaginatedResponse } from '../types/api';
 
 export const requirementsApi = {
-  list: async (page = 1, pageSize = 50): Promise<PaginatedResponse<Requirement>> => {
+  list: async (
+    page = 1,
+    pageSize = 50,
+    config?: AxiosRequestConfig
+  ): Promise<PaginatedResponse<Requirement>> => {
     const response = await apiClient.get<PaginatedResponse<Requirement>>(
-      `/requirements?page=${page}&page_size=${pageSize}`
+      `/requirements?page=${page}&page_size=${pageSize}`,
+      config
     );
     return response.data;
   },

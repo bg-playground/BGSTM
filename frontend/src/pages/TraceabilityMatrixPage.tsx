@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { isRequestCanceled } from "../api/client";
 import traceabilityApi, { type TraceabilityMatrix } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -10,12 +11,13 @@ export default function TraceabilityMatrixPage() {
   const [exporting, setExporting] = useState(false);
   const { showToast } = useToast();
 
-  const loadMatrix = useCallback(async () => {
+  const loadMatrix = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await traceabilityApi.getMatrix();
+      const data = await traceabilityApi.getMatrix({ signal });
       setMatrix(data);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error("Failed to load traceability matrix:", error);
       showToast("Failed to load traceability matrix", "error");
     } finally {
@@ -23,8 +25,8 @@ export default function TraceabilityMatrixPage() {
     }
   }, [showToast]);
 
-  useEffectAsync(async () => {
-    await loadMatrix();
+  useEffectAsync(async (signal) => {
+    await loadMatrix(signal);
   }, [loadMatrix]);
 
   const handleExport = async (format: "csv" | "json" | "pdf") => {
@@ -111,7 +113,9 @@ export default function TraceabilityMatrixPage() {
             Export PDF
           </button>
           <button
-            onClick={loadMatrix}
+            onClick={() => {
+              void loadMatrix();
+            }}
             disabled={loading}
             className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-400"
           >

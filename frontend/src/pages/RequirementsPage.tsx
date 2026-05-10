@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { requirementsApi } from '../api/requirements';
 import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
 import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
@@ -27,14 +28,15 @@ export const RequirementsPage: React.FC = () => {
   const { showToast } = useToast();
   const { isAdmin } = useRoleGate();
 
-  const loadRequirements = useCallback(async (targetPage = page) => {
+  const loadRequirements = useCallback(async (targetPage = page, signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await requirementsApi.list(targetPage, PAGE_SIZE);
+      const data = await requirementsApi.list(targetPage, PAGE_SIZE, { signal });
       setRequirements(data.items);
       setTotal(data.total);
       setPages(data.pages);
     } catch (error) {
+      if (isRequestCanceled(error)) return;
       console.error('Error loading requirements:', error);
       showToast('Failed to load requirements', 'error');
     } finally {
@@ -42,8 +44,8 @@ export const RequirementsPage: React.FC = () => {
     }
   }, [page, showToast]);
 
-  useEffectAsync(async () => {
-    await loadRequirements(page);
+  useEffectAsync(async (signal) => {
+    await loadRequirements(page, signal);
   }, [page, loadRequirements]);
 
   const handleSubmit = async (e: React.FormEvent) => {

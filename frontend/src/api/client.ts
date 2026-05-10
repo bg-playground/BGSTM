@@ -25,6 +25,9 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
     console.error('API Error:', error.response?.data || error.message);
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
@@ -33,3 +36,7 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export function isRequestCanceled(error: unknown): boolean {
+  return axios.isCancel(error) || (error instanceof DOMException && error.name === 'AbortError');
+}

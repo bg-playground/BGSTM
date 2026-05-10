@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 export interface AuditLogEntry {
   id: string;
@@ -26,7 +27,7 @@ export interface AuditLogFilters {
 }
 
 export const auditLogApi = {
-  list: (filters: AuditLogFilters = {}) => {
+  list: (filters: AuditLogFilters = {}, config?: AxiosRequestConfig) => {
     const params = new URLSearchParams();
     if (filters.user_id) params.set('user_id', filters.user_id);
     if (filters.action) params.set('action', filters.action);
@@ -35,6 +36,6 @@ export const auditLogApi = {
     if (filters.date_to) params.set('date_to', filters.date_to);
     params.set('skip', String(filters.skip ?? 0));
     params.set('limit', String(filters.limit ?? 25));
-    return apiClient.get<AuditLogListResponse>(`/audit-log?${params.toString()}`);
+    return apiClient.get<AuditLogListResponse>(`/audit-log?${params.toString()}`, config);
   },
 };
