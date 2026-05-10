@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { requirementsApi } from '../api/requirements';
 import { RequirementType, PriorityLevel, RequirementStatus } from '../types/api';
 import type { Requirement, RequirementCreate, RequirementUpdate } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Pagination } from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
+import { useEffectAsync } from '../hooks/useEffectAsync';
 import { useRoleGate } from '../hooks/useRoleGate';
 
 export const RequirementsPage: React.FC = () => {
@@ -41,16 +42,8 @@ export const RequirementsPage: React.FC = () => {
     }
   }, [page, showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadRequirements(page);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadRequirements(page);
   }, [page, loadRequirements]);
 
   const handleSubmit = async (e: React.FormEvent) => {

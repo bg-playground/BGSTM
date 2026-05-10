@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import traceabilityApi, { type Metrics } from "../api/traceability";
 import { useToast } from "../context/ToastContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useEffectAsync } from "../hooks/useEffectAsync";
 
 export default function MetricsDashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -22,16 +23,8 @@ export default function MetricsDashboardPage() {
     }
   }, [showToast]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      if (!cancelled) {
-        await loadMetrics();
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  useEffectAsync(async () => {
+    await loadMetrics();
   }, [loadMetrics]);
 
   const handleExportCsv = useCallback(async () => {
