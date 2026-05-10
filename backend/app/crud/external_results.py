@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.external_results import ExternalRunSession, RunStatus
@@ -137,3 +137,26 @@ async def get_session(
     """Return a single ExternalRunSession by primary key, or None."""
     result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
     return result.scalar_one_or_none()
+
+
+async def list_sessions(
+    db: AsyncSession,
+    *,
+    project_id: UUID | None = None,
+    status: RunStatus | None = None,
+    skip: int = 0,
+    limit: int = 25,
+) -> tuple[list[ExternalRunSession], int]:
+    """Return a paginated list of sessions and total count."""
+    stmt = select(ExternalRunSession).order_by(ExternalRunSession.started_at.desc())
+    count_stmt = select(func.count()).select_from(ExternalRunSession)
+    if project_id is not None:
+        stmt = stmt.where(ExternalRunSession.project_id == project_id)
+        count_stmt = count_stmt.where(ExternalRunSession.project_id == project_id)
+    if status is not None:
+        stmt = stmt.where(ExternalRunSession.status == status)
+        count_stmt = count_stmt.where(ExternalRunSession.status == status)
+    stmt = stmt.offset(skip).limit(limit)
+    total = (await db.execute(count_stmt)).scalar_one()
+    rows = (await db.execute(stmt)).scalars().all()
+    return list(rows), total

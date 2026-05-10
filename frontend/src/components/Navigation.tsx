@@ -11,6 +11,7 @@ export const Navigation: React.FC = () => {
     { path: '/', label: 'Suggestion Dashboard' },
     { path: '/requirements', label: 'Requirements' },
     { path: '/test-cases', label: 'Test Cases' },
+    { path: '/runs', label: 'Test Runs' },
     { path: '/links', label: 'Manual Links' },
     { path: '/traceability', label: 'Traceability Matrix' },
     { path: '/metrics', label: 'Metrics' },

@@ -10,6 +10,8 @@ import { SuggestionDashboard } from './pages/SuggestionDashboard';
 import { RequirementsPage } from './pages/RequirementsPage';
 import { TestCasesPage } from './pages/TestCasesPage';
 import { ManualLinksPage } from './pages/ManualLinksPage';
+import { TestRunsPage } from './pages/TestRunsPage';
+import TestRunDetailPage from './pages/TestRunDetailPage';
 import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
 import { AuditLogPage } from './pages/AuditLogPage';
@@ -38,6 +40,8 @@ function App() {
               <Route path="/" element={<SuggestionDashboard />} />
               <Route path="/requirements" element={<RequirementsPage />} />
               <Route path="/test-cases" element={<TestCasesPage />} />
+              <Route path="/runs" element={<TestRunsPage />} />
+              <Route path="/runs/:sessionId" element={<TestRunDetailPage />} />
               <Route path="/links" element={<ManualLinksPage />} />
               <Route path="/traceability" element={<TraceabilityMatrixPage />} />
               <Route path="/metrics" element={<MetricsDashboardPage />} />

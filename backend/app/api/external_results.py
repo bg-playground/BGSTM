@@ -18,7 +18,7 @@ import tempfile
 import uuid as _uuid_module
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from streaming_form_data import StreamingFormDataParser
 from streaming_form_data.targets import FileTarget, ValueTarget
@@ -30,18 +30,26 @@ from app.auth.dependencies import (
 from app.config import settings
 from app.crud.audit_log import write_audit
 from app.crud.external_case_artifacts import create_artifact
-from app.crud.external_case_results import create_case_result, get_case_result, update_case_result
-from app.crud.external_results import create_session, finish_session_db, get_session
+from app.crud.external_case_results import (
+    create_case_result,
+    get_case_result,
+    list_case_results_for_session,
+    update_case_result,
+)
+from app.crud.external_results import create_session, finish_session_db, get_session, list_sessions
 from app.db.session import get_db
 from app.models.external_case_artifact import ArtifactKind
 from app.models.runner_token import RunnerToken
 from app.schemas.external_results import (
     ArtifactResponse,
     CaseResultCreate,
+    CaseResultListResponse,
     CaseResultResponse,
     CaseResultUpdate,
+    RunStatus,
     SessionCreate,
     SessionFinish,
+    SessionListResponse,
     SessionResponse,
 )
 from app.storage import get_storage
@@ -103,8 +111,9 @@ def _session_to_response(session) -> SessionResponse:
         project_id=session.project_id,
         git_sha=session.git_sha,
         git_branch=session.git_branch,
-        ci_url=session.ci_url,
+        ci_url=str(session.ci_url) if session.ci_url else None,
         metadata=session.run_metadata or {},
+        summary=session.summary or {},
     )
 
 
@@ -246,6 +255,28 @@ async def get_external_session(
         )
 
     return _session_to_response(session)
+
+
+@router.get(
+    "/external-results/sessions",
+    response_model=SessionListResponse,
+)
+async def list_external_sessions(
+    project_id: UUID | None = Query(None),
+    status: RunStatus | None = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(25, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    _auth=Depends(get_runner_or_user_auth),
+) -> SessionListResponse:
+    """Return a paginated list of sessions, newest first."""
+    sessions, total = await list_sessions(db, project_id=project_id, status=status, skip=skip, limit=limit)
+    return SessionListResponse(
+        sessions=[_session_to_response(s) for s in sessions],
+        total=total,
+        skip=skip,
+        limit=limit,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -414,6 +445,33 @@ async def get_external_case_result(
             },
         )
     return _case_result_to_response(case_result)
+
+
+@router.get(
+    "/external-results/session/{session_id}/cases",
+    response_model=CaseResultListResponse,
+)
+async def list_external_session_cases(
+    session_id: UUID,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    db: AsyncSession = Depends(get_db),
+    _auth=Depends(get_runner_or_user_auth),
+) -> CaseResultListResponse:
+    """Return all case results for a given session."""
+    session = await get_session(db, session_id)
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "session.not_found", "message": f"Session {session_id} does not exist.", "details": None},
+        )
+    cases, total = await list_case_results_for_session(db, session_id=session_id, skip=skip, limit=limit)
+    return CaseResultListResponse(
+        cases=[_case_result_to_response(c) for c in cases],
+        total=total,
+        skip=skip,
+        limit=limit,
+    )
 
 
 # ---------------------------------------------------------------------------

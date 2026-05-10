@@ -538,3 +538,58 @@ class TestAuditAndAuth:
         assert get_with_user.status_code == 200
         assert get_with_runner.status_code == 200
         assert get_unknown.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_list_session_cases_returns_paginated_rows_and_404_for_unknown_session(
+        self, db_session, write_token, read_token
+    ):
+        _write_model, write_plaintext = write_token
+        _read_model, read_plaintext = read_token
+
+        with TestClient(app) as client:
+            session_id = _create_session(client, write_plaintext)
+            first = client.post(
+                "/api/v1/external-results/case",
+                json={
+                    "session_id": session_id,
+                    "external_id": f"case-a-{uuid.uuid4()}",
+                    "title": "case-a",
+                    "outcome": "passed",
+                    "duration_ms": 12,
+                    "requirement_ids": [],
+                },
+                headers=_auth_header(write_plaintext),
+            )
+            second = client.post(
+                "/api/v1/external-results/case",
+                json={
+                    "session_id": session_id,
+                    "external_id": f"case-b-{uuid.uuid4()}",
+                    "title": "case-b",
+                    "outcome": "failed",
+                    "duration_ms": 34,
+                    "error_message": "assertion failed",
+                    "requirement_ids": [],
+                },
+                headers=_auth_header(write_plaintext),
+            )
+            assert first.status_code == 201, first.text
+            assert second.status_code == 201, second.text
+
+            list_resp = client.get(
+                f"/api/v1/external-results/session/{session_id}/cases?skip=0&limit=200",
+                headers=_auth_header(read_plaintext),
+            )
+            assert list_resp.status_code == 200, list_resp.text
+            list_data = list_resp.json()
+            assert list_data["total"] == 2
+            assert list_data["skip"] == 0
+            assert list_data["limit"] == 200
+            assert [case["id"] for case in list_data["cases"]] == [first.json()["id"], second.json()["id"]]
+
+            missing_resp = client.get(
+                f"/api/v1/external-results/session/{uuid.uuid4()}/cases",
+                headers=_auth_header(read_plaintext),
+            )
+            assert missing_resp.status_code == 404
+            assert missing_resp.json()["detail"]["code"] == "session.not_found"
