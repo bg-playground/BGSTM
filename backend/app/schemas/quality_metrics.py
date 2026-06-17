@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -44,6 +45,24 @@ class ModuleQualityBucket(BaseModel):
 
 class DefectsByModuleResponse(BaseModel):
     modules: list[ModuleQualityBucket] = Field(default_factory=list)
+    is_synthetic: bool = False
+    reason: str | None = None
+
+
+class FlakyTestEntry(BaseModel):
+    test_case_id: UUID | None = None
+    external_id: str | None = None
+    display_name: str
+    runs: int
+    flaky_outcomes: int
+    transitions: int
+    flip_rate: float
+    last_outcome: str
+    last_seen_at: datetime
+
+
+class FlakyRankingResponse(BaseModel):
+    entries: list[FlakyTestEntry] = Field(default_factory=list)
     is_synthetic: bool = False
     reason: str | None = None
 

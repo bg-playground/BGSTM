@@ -29,6 +29,7 @@ import {
   type WindowDays,
 } from '../api/qualityMetrics';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { FlakyRankingPanel } from '../components/quality/FlakyRankingPanel';
 import { useToast } from '../context/ToastContext';
 import { useEffectAsync } from '../hooks/useEffectAsync';
 
@@ -452,6 +453,8 @@ export default function QualityDashboardPage() {
             </div>
           )}
         </div>
+
+        <FlakyRankingPanel window={selectedWindow} />
 
         <div data-testid="quality-dashboard-chart-automation-coverage" className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Automation Coverage</h2>
