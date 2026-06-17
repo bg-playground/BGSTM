@@ -10,6 +10,7 @@ Covers:
 - 409 when PATCH-ing a passed session to any terminal status
 - Idempotency: duplicate POST within 60 s returns the same session id
 - Migration reversibility: alembic downgrade -1 then upgrade head
+- Migration idempotency: alembic upgrade head twice
 """
 
 from __future__ import annotations
@@ -392,6 +393,35 @@ class TestSessionIdempotency:
 
 
 class TestMigrationReversibility:
+    def test_upgrade_head_twice(self):
+        """alembic upgrade head twice must succeed on PostgreSQL."""
+        import os
+
+        db_url = os.environ.get("DATABASE_URL", "")
+        if not db_url.startswith("postgresql"):
+            pytest.skip("Migration idempotency test requires PostgreSQL (set DATABASE_URL)")
+
+        backend_dir = str(__import__("pathlib").Path(__file__).parent.parent.parent)
+        env = {**os.environ, "DATABASE_URL": db_url}
+
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            cwd=backend_dir,
+            env=env,
+        )
+        assert result.returncode == 0, f"first upgrade head failed:\n{result.stderr}"
+
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            cwd=backend_dir,
+            env=env,
+        )
+        assert result.returncode == 0, f"second upgrade head failed:\n{result.stderr}"
+
     def test_downgrade_then_upgrade(self):
         """alembic downgrade -1 then upgrade head must succeed.
 

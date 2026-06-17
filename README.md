@@ -126,6 +126,7 @@ docker compose logs -f   # view logs   (or: docker-compose logs -f)
 3. **Use Templates**: Download and customize [templates](docs/templates/README.md) for your project
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
+6. **Release Readiness**: Use the [Release Readiness Dashboard](docs/features/release-readiness-dashboard.md) for Go/Caution/No-Go checks
 
 ## 🛠️ Manual Setup
 
@@ -257,6 +258,7 @@ docker compose -f docker-compose.test.yml down -v
 | `exports.spec.ts` | CSV and PDF export downloads |
 | `rbac.spec.ts` | Role-based access: viewer, reviewer, admin |
 | `notifications.spec.ts` | Notification bell, mark-as-read, lifecycle |
+| `release-readiness.spec.ts` | Release readiness status banner, sign-off, and markdown export |
 
 **Useful commands:**
 

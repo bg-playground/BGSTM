@@ -26,6 +26,7 @@ if database_url:
 # All models must be imported so their tables are registered on Base.metadata.
 import app.models.external_results  # noqa: E402, F401
 import app.models.link  # noqa: E402, F401
+import app.models.release_signoff  # noqa: E402, F401
 import app.models.requirement  # noqa: E402, F401
 import app.models.suggestion  # noqa: E402, F401
 import app.models.test_case  # noqa: E402, F401

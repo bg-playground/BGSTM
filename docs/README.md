@@ -30,3 +30,6 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 
 #### Integration Guide
 - [Multi-Platform App Integration](integration/multi-platform-guide.md)
+
+#### Features
+- [Release Readiness Dashboard (v1)](features/release-readiness-dashboard.md)

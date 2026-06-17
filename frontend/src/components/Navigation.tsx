@@ -15,6 +15,7 @@ export const Navigation: React.FC = () => {
     { path: '/links', label: 'Manual Links' },
     { path: '/traceability', label: 'Traceability Matrix' },
     { path: '/metrics', label: 'Metrics' },
+    { path: '/release-readiness', label: 'Release Readiness' },
   ];
 
   const adminNavItems = [
