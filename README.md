@@ -127,6 +127,7 @@ docker compose logs -f   # view logs   (or: docker-compose logs -f)
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
 6. **Release Readiness**: Use the [Release Readiness Dashboard](docs/features/release-readiness-dashboard.md) for Go/Caution/No-Go checks
+7. **Quality Trends**: Use the [Quality KPI Dashboard](docs/features/quality-kpi-dashboard.md) for defect, pass-rate, module, and automation trend visuals
 
 ## 🛠️ Manual Setup
 
@@ -259,6 +260,7 @@ docker compose -f docker-compose.test.yml down -v
 | `rbac.spec.ts` | Role-based access: viewer, reviewer, admin |
 | `notifications.spec.ts` | Notification bell, mark-as-read, lifecycle |
 | `release-readiness.spec.ts` | Release readiness status banner, sign-off, and markdown export |
+| `quality-dashboard.spec.ts` | Quality KPI charts, window toggle, and release-readiness cross-link |
 
 **Useful commands:**
 

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { isRequestCanceled } from '../api/client';
 import { releaseReadinessApi, type ReadinessCriterion, type ReadinessSnapshot, type RoleSignoff } from '../api/releaseReadiness';
@@ -157,14 +158,19 @@ export default function ReleaseReadinessPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Release Readiness Dashboard</h1>
-          <a
-            href="https://github.com/bg-playground/BGSTM/blob/main/docs/features/release-readiness-dashboard.md"
-            target="_blank"
-            rel="noreferrer"
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            What is this?
-          </a>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <Link to="/quality-dashboard" className="text-blue-600 hover:text-blue-800">
+              View KPI trends →
+            </Link>
+            <a
+              href="https://github.com/bg-playground/BGSTM/blob/main/docs/features/release-readiness-dashboard.md"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              What is this?
+            </a>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <details className="relative">

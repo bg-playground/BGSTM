@@ -10,9 +10,13 @@ Sample Data:
 """
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 from app.db.session import AsyncSessionLocal, init_db
+from app.models.external_case_result import CaseStatus, ExternalCaseResult
+from app.models.external_results import ExternalRunSession, RunStatus
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
+from app.models.project import Project
 from app.models.release_signoff import ReleaseSignoff, ReleaseSignoffRole
 from app.models.requirement import (
     PriorityLevel,
@@ -20,6 +24,7 @@ from app.models.requirement import (
     RequirementStatus,
     RequirementType,
 )
+from app.models.runner_token import RunnerToken
 from app.models.suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
 from app.models.test_case import (
     AutomationStatus,
@@ -28,6 +33,10 @@ from app.models.test_case import (
     TestCaseType,
 )
 from app.models.user import User, UserRole
+
+
+def _days_ago(days: int) -> datetime:
+    return (datetime.now(timezone.utc) - timedelta(days=days)).replace(tzinfo=None)
 
 
 async def load_sample_data():
@@ -241,7 +250,39 @@ async def load_sample_data():
             created_by="qa_engineer",
         )
 
-        session.add_all([tc1, tc2, tc3, tc4])
+        tc5 = TestCase(
+            external_id="TC-005",
+            title="Verify Manual Refund Approval",
+            description="Confirm refund requests can be reviewed and approved manually by support.",
+            type=TestCaseType.FUNCTIONAL,
+            priority=PriorityLevel.MEDIUM,
+            status=TestCaseStatus.READY,
+            steps={"1": "Open refund queue", "2": "Review request", "3": "Approve refund"},
+            module="Orders",
+            tags=["returns", "manual"],
+            automation_status=AutomationStatus.MANUAL,
+            execution_time_minutes=12,
+            source_system="TestRail",
+            created_by="qa_engineer",
+        )
+
+        tc6 = TestCase(
+            external_id="TC-006",
+            title="Verify Guest Checkout Error Recovery",
+            description="Validate guest checkout recovery when the payment gateway times out.",
+            type=TestCaseType.INTEGRATION,
+            priority=PriorityLevel.LOW,
+            status=TestCaseStatus.READY,
+            steps={"1": "Start guest checkout", "2": "Trigger timeout", "3": "Retry payment"},
+            module="Checkout",
+            tags=["checkout", "resilience"],
+            automation_status=AutomationStatus.AUTOMATABLE,
+            execution_time_minutes=9,
+            source_system="TestRail",
+            created_by="qa_engineer",
+        )
+
+        session.add_all([tc1, tc2, tc3, tc4, tc5, tc6])
         await session.flush()
 
         # Create Manual Links
@@ -317,6 +358,292 @@ async def load_sample_data():
         session.add_all([suggestion1, admin_user])
         await session.flush()
 
+        project = Project(
+            name="ShopFlow",
+            description="Seed project for sample quality metrics and external test executions",
+            created_at=_days_ago(90),
+            updated_at=_days_ago(1),
+        )
+        session.add(project)
+        await session.flush()
+
+        runner_token = RunnerToken(
+            hashed_token="sample-runner-token-hash",
+            salt="sample-runner-token-salt",
+            label="sample-shopflow-runner",
+            scopes=["external_results:write"],
+            created_by_user_id=admin_user.id,
+            created_at=_days_ago(90),
+        )
+        session.add(runner_token)
+        await session.flush()
+
+        session_one = ExternalRunSession(
+            project_id=project.id,
+            runner="@bgstm/playwright-core@0.1.0",
+            status=RunStatus.failed,
+            git_sha="shopflow30",
+            git_branch="main",
+            ci_url="https://ci.example.com/runs/shopflow-30",
+            run_metadata={"os": "ubuntu-22.04"},
+            summary={"total": 4, "failed": 2},
+            started_at=_days_ago(30),
+            finished_at=_days_ago(30) + timedelta(minutes=12),
+            created_by_runner_token_id=runner_token.id,
+        )
+        session_two = ExternalRunSession(
+            project_id=project.id,
+            runner="@bgstm/playwright-core@0.1.0",
+            status=RunStatus.failed,
+            git_sha="shopflow18",
+            git_branch="main",
+            ci_url="https://ci.example.com/runs/shopflow-18",
+            run_metadata={"os": "ubuntu-22.04"},
+            summary={"total": 5, "failed": 2},
+            started_at=_days_ago(18),
+            finished_at=_days_ago(18) + timedelta(minutes=15),
+            created_by_runner_token_id=runner_token.id,
+        )
+        session_three = ExternalRunSession(
+            project_id=project.id,
+            runner="@bgstm/playwright-core@0.1.0",
+            status=RunStatus.failed,
+            git_sha="shopflow8",
+            git_branch="main",
+            ci_url="https://ci.example.com/runs/shopflow-8",
+            run_metadata={"os": "ubuntu-22.04"},
+            summary={"total": 5, "failed": 2},
+            started_at=_days_ago(8),
+            finished_at=_days_ago(8) + timedelta(minutes=11),
+            created_by_runner_token_id=runner_token.id,
+        )
+        session_four = ExternalRunSession(
+            project_id=project.id,
+            runner="@bgstm/playwright-core@0.1.0",
+            status=RunStatus.passed,
+            git_sha="shopflow2",
+            git_branch="main",
+            ci_url="https://ci.example.com/runs/shopflow-2",
+            run_metadata={"os": "ubuntu-22.04"},
+            summary={"total": 6, "failed": 1},
+            started_at=_days_ago(2),
+            finished_at=_days_ago(2) + timedelta(minutes=10),
+            created_by_runner_token_id=runner_token.id,
+        )
+        session.add_all([session_one, session_two, session_three, session_four])
+        await session.flush()
+
+        case_results = [
+            ExternalCaseResult(
+                session_id=session_one.id,
+                test_case_id=tc1.id,
+                external_id="TC-001-30d",
+                title=tc1.title,
+                outcome=CaseStatus.failed,
+                duration_ms=210000,
+                error_message="2FA redirect missing",
+                created_at=_days_ago(30),
+                updated_at=_days_ago(30),
+            ),
+            ExternalCaseResult(
+                session_id=session_one.id,
+                test_case_id=tc2.id,
+                external_id="TC-002-30d",
+                title=tc2.title,
+                outcome=CaseStatus.passed,
+                duration_ms=180000,
+                created_at=_days_ago(30),
+                updated_at=_days_ago(30),
+            ),
+            ExternalCaseResult(
+                session_id=session_one.id,
+                test_case_id=tc3.id,
+                external_id="TC-003-30d",
+                title=tc3.title,
+                outcome=CaseStatus.passed,
+                duration_ms=140000,
+                created_at=_days_ago(30),
+                updated_at=_days_ago(30),
+            ),
+            ExternalCaseResult(
+                session_id=session_one.id,
+                test_case_id=tc5.id,
+                external_id="TC-005-30d",
+                title=tc5.title,
+                outcome=CaseStatus.failed,
+                duration_ms=240000,
+                error_message="Refund approval audit trail missing",
+                created_at=_days_ago(30),
+                updated_at=_days_ago(30),
+            ),
+            ExternalCaseResult(
+                session_id=session_two.id,
+                test_case_id=tc1.id,
+                external_id="TC-001-18d",
+                title=tc1.title,
+                outcome=CaseStatus.passed,
+                duration_ms=205000,
+                created_at=_days_ago(18),
+                updated_at=_days_ago(18),
+            ),
+            ExternalCaseResult(
+                session_id=session_two.id,
+                test_case_id=tc2.id,
+                external_id="TC-002-18d",
+                title=tc2.title,
+                outcome=CaseStatus.failed,
+                duration_ms=175000,
+                error_message="Search filters ignored brand facet",
+                created_at=_days_ago(18),
+                updated_at=_days_ago(18),
+            ),
+            ExternalCaseResult(
+                session_id=session_two.id,
+                test_case_id=tc3.id,
+                external_id="TC-003-18d",
+                title=tc3.title,
+                outcome=CaseStatus.failed,
+                duration_ms=150000,
+                error_message="Cart total not recalculated after discount",
+                created_at=_days_ago(18),
+                updated_at=_days_ago(18),
+            ),
+            ExternalCaseResult(
+                session_id=session_two.id,
+                test_case_id=tc4.id,
+                external_id="TC-004-18d",
+                title=tc4.title,
+                outcome=CaseStatus.passed,
+                duration_ms=255000,
+                created_at=_days_ago(18),
+                updated_at=_days_ago(18),
+            ),
+            ExternalCaseResult(
+                session_id=session_two.id,
+                test_case_id=tc6.id,
+                external_id="TC-006-18d",
+                title=tc6.title,
+                outcome=CaseStatus.passed,
+                duration_ms=190000,
+                created_at=_days_ago(18),
+                updated_at=_days_ago(18),
+            ),
+            ExternalCaseResult(
+                session_id=session_three.id,
+                test_case_id=tc1.id,
+                external_id="TC-001-8d",
+                title=tc1.title,
+                outcome=CaseStatus.failed,
+                duration_ms=215000,
+                error_message="Password reset fallback still broken",
+                created_at=_days_ago(8),
+                updated_at=_days_ago(8),
+            ),
+            ExternalCaseResult(
+                session_id=session_three.id,
+                test_case_id=tc2.id,
+                external_id="TC-002-8d",
+                title=tc2.title,
+                outcome=CaseStatus.passed,
+                duration_ms=176000,
+                created_at=_days_ago(8),
+                updated_at=_days_ago(8),
+            ),
+            ExternalCaseResult(
+                session_id=session_three.id,
+                test_case_id=tc3.id,
+                external_id="TC-003-8d",
+                title=tc3.title,
+                outcome=CaseStatus.passed,
+                duration_ms=146000,
+                created_at=_days_ago(8),
+                updated_at=_days_ago(8),
+            ),
+            ExternalCaseResult(
+                session_id=session_three.id,
+                test_case_id=tc4.id,
+                external_id="TC-004-8d",
+                title=tc4.title,
+                outcome=CaseStatus.failed,
+                duration_ms=260000,
+                error_message="Checkout confirmation email missing",
+                created_at=_days_ago(8),
+                updated_at=_days_ago(8),
+            ),
+            ExternalCaseResult(
+                session_id=session_three.id,
+                test_case_id=tc5.id,
+                external_id="TC-005-8d",
+                title=tc5.title,
+                outcome=CaseStatus.passed,
+                duration_ms=230000,
+                created_at=_days_ago(8),
+                updated_at=_days_ago(8),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc1.id,
+                external_id="TC-001-2d",
+                title=tc1.title,
+                outcome=CaseStatus.failed,
+                duration_ms=220000,
+                error_message="SSO callback loop detected",
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc2.id,
+                external_id="TC-002-2d",
+                title=tc2.title,
+                outcome=CaseStatus.passed,
+                duration_ms=170000,
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc3.id,
+                external_id="TC-003-2d",
+                title=tc3.title,
+                outcome=CaseStatus.passed,
+                duration_ms=142000,
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc4.id,
+                external_id="TC-004-2d",
+                title=tc4.title,
+                outcome=CaseStatus.passed,
+                duration_ms=248000,
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc5.id,
+                external_id="TC-005-2d",
+                title=tc5.title,
+                outcome=CaseStatus.passed,
+                duration_ms=228000,
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+            ExternalCaseResult(
+                session_id=session_four.id,
+                test_case_id=tc6.id,
+                external_id="TC-006-2d",
+                title=tc6.title,
+                outcome=CaseStatus.passed,
+                duration_ms=188000,
+                created_at=_days_ago(2),
+                updated_at=_days_ago(2),
+            ),
+        ]
+        session.add_all(case_results)
+
         release_signoff = ReleaseSignoff(
             role=ReleaseSignoffRole.product,
             signed_off_by_user_id=admin_user.id,
@@ -329,9 +656,11 @@ async def load_sample_data():
 
         print("✅ Sample data loaded successfully!")
         print(f"  - {5} Requirements created")
-        print(f"  - {4} Test Cases created")
+        print(f"  - {6} Test Cases created")
         print(f"  - {5} Manual Links created")
         print(f"  - {1} Pending suggestion created")
+        print(f"  - {4} External run sessions created")
+        print(f"  - {20} External case results created")
         print(f"  - {1} Release sign-off created")
 
 
