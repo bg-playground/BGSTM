@@ -26,15 +26,23 @@ def upgrade() -> None:
     if "release_signoffs" in insp.get_table_names():
         return
 
-    role_enum = sa.Enum("qa_lead", "product", "eng_lead", name="releasesignoffrole")
-    role_enum.create(bind, checkfirst=True)
+    role_enum = postgresql.ENUM("qa_lead", "product", "eng_lead", name="releasesignoffrole")
+    if bind.dialect.name == "postgresql":
+        enum_type_exists = bind.execute(
+            sa.text("SELECT 1 FROM pg_type WHERE typname = :type_name"),
+            {"type_name": "releasesignoffrole"},
+        ).scalar()
+        if enum_type_exists is None:
+            role_enum.create(bind, checkfirst=False)
+    else:
+        role_enum.create(bind, checkfirst=True)
 
     op.create_table(
         "release_signoffs",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column(
             "role",
-            sa.Enum("qa_lead", "product", "eng_lead", name="releasesignoffrole", create_type=False),
+            postgresql.ENUM("qa_lead", "product", "eng_lead", name="releasesignoffrole", create_type=False),
             nullable=False,
         ),
         sa.Column(

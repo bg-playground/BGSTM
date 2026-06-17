@@ -18,7 +18,10 @@ class ReleaseSignoff(Base, TimestampMixin):
     __tablename__ = "release_signoffs"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    role = Column(Enum(ReleaseSignoffRole, values_callable=_enum_values), nullable=False)
+    role = Column(
+        Enum(ReleaseSignoffRole, values_callable=_enum_values, name="releasesignoffrole", create_type=False),
+        nullable=False,
+    )
     signed_off_by_user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     signed_off_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     note = Column(Text, nullable=True)
