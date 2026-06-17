@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { AuthProvider } from './components/AuthProvider';
@@ -16,6 +17,8 @@ import TraceabilityMatrixPage from './pages/TraceabilityMatrixPage';
 import MetricsDashboardPage from './pages/MetricsDashboardPage';
 import { AuditLogPage } from './pages/AuditLogPage';
 import { UserManagementPage } from './pages/UserManagementPage';
+
+const ReleaseReadinessPage = lazy(() => import('./pages/ReleaseReadinessPage'));
 
 function ProtectedLayout() {
   return (
@@ -45,6 +48,14 @@ function App() {
               <Route path="/links" element={<ManualLinksPage />} />
               <Route path="/traceability" element={<TraceabilityMatrixPage />} />
               <Route path="/metrics" element={<MetricsDashboardPage />} />
+              <Route
+                path="/release-readiness"
+                element={
+                  <Suspense fallback={<div className="p-8">Loading...</div>}>
+                    <ReleaseReadinessPage />
+                  </Suspense>
+                }
+              />
               <Route
                 path="/admin/audit-log"
                 element={

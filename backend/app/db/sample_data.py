@@ -13,18 +13,21 @@ import asyncio
 
 from app.db.session import AsyncSessionLocal, init_db
 from app.models.link import LinkSource, LinkType, RequirementTestCaseLink
+from app.models.release_signoff import ReleaseSignoff, ReleaseSignoffRole
 from app.models.requirement import (
     PriorityLevel,
     Requirement,
     RequirementStatus,
     RequirementType,
 )
+from app.models.suggestion import LinkSuggestion, SuggestionMethod, SuggestionStatus
 from app.models.test_case import (
     AutomationStatus,
     TestCase,
     TestCaseStatus,
     TestCaseType,
 )
+from app.models.user import User, UserRole
 
 
 async def load_sample_data():
@@ -294,12 +297,42 @@ async def load_sample_data():
 
         session.add_all([link1, link2, link3, link4, link5])
 
+        suggestion1 = LinkSuggestion(
+            requirement_id=req5.id,
+            test_case_id=tc2.id,
+            similarity_score=0.82,
+            suggestion_method=SuggestionMethod.HYBRID,
+            status=SuggestionStatus.PENDING,
+            suggestion_reason="Potential coverage for order tracking search behavior",
+        )
+
+        admin_user = User(
+            email="admin@test.com",
+            hashed_password="$2b$12$demo.hash.for.sample.data.only",
+            full_name="Sample Admin",
+            role=UserRole.admin,
+            is_active=True,
+        )
+
+        session.add_all([suggestion1, admin_user])
+        await session.flush()
+
+        release_signoff = ReleaseSignoff(
+            role=ReleaseSignoffRole.product,
+            signed_off_by_user_id=admin_user.id,
+            note="Initial product review complete",
+        )
+
+        session.add(release_signoff)
+
         await session.commit()
 
         print("✅ Sample data loaded successfully!")
         print(f"  - {5} Requirements created")
         print(f"  - {4} Test Cases created")
         print(f"  - {5} Manual Links created")
+        print(f"  - {1} Pending suggestion created")
+        print(f"  - {1} Release sign-off created")
 
 
 if __name__ == "__main__":

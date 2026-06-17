@@ -13,6 +13,7 @@ from app.api import (
     links,
     notifications,
     projects,
+    release_readiness,
     requirements,
     suggestions,
     test_cases,
@@ -46,6 +47,7 @@ app.include_router(users.router, prefix=settings.API_V1_PREFIX, tags=["users"])
 app.include_router(notifications.router, prefix=settings.API_V1_PREFIX, tags=["notifications"])
 app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=["external_results"])
 app.include_router(projects.router, prefix=settings.API_V1_PREFIX, tags=["projects"])
+app.include_router(release_readiness.router, prefix=settings.API_V1_PREFIX, tags=["release_readiness"])
 
 # Dev-only static route: serve local artifact files when BGSTM_STORAGE_BACKEND=local.
 # This is intentionally NOT mounted in production (S3 or other remote backends).
