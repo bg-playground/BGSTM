@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Area,
   AreaChart,
@@ -33,6 +33,8 @@ import { useToast } from '../context/ToastContext';
 import { useEffectAsync } from '../hooks/useEffectAsync';
 
 const WINDOW_OPTIONS: WindowDays[] = [7, 30, 90];
+const STORAGE_KEY = 'bgstm-quality-dashboard-filters';
+const DEFAULT_FILTERS = { window: 30 } as const satisfies QualityDashboardFilters;
 
 const SEVERITY_COLORS = {
   critical: '#dc2626',
@@ -44,6 +46,10 @@ const SEVERITY_COLORS = {
 const AUTOMATION_COLORS = ['#2563eb', '#64748b', '#f59e0b'];
 
 type DeltaTone = 'up' | 'down' | 'flat';
+
+interface QualityDashboardFilters {
+  window: WindowDays;
+}
 
 interface DeltaIndicator {
   symbol: '▲' | '▼' | '●';
@@ -67,6 +73,54 @@ function getDeltaClass(tone: DeltaTone): string {
   if (tone === 'up') return 'text-emerald-600';
   if (tone === 'down') return 'text-rose-600';
   return 'text-slate-500';
+}
+
+function isWindowDays(value: unknown): value is WindowDays {
+  return typeof value === 'number' && WINDOW_OPTIONS.includes(value as WindowDays);
+}
+
+function parseWindowParam(value: string | null): WindowDays | null {
+  if (value === '7') return 7;
+  if (value === '30') return 30;
+  if (value === '90') return 90;
+  return null;
+}
+
+function readFromStorage(): Partial<QualityDashboardFilters> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Partial<QualityDashboardFilters>;
+  } catch {
+    return {};
+  }
+}
+
+function writeToStorage(filters: QualityDashboardFilters): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+  } catch {
+    // Ignore (e.g. private browsing)
+  }
+}
+
+function clearStorage(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore (e.g. private browsing)
+  }
+}
+
+function parseFiltersFromParams(
+  params: URLSearchParams,
+  stored: Partial<QualityDashboardFilters>
+): QualityDashboardFilters {
+  const parsedWindow = parseWindowParam(params.get('window'));
+
+  return {
+    window: isWindowDays(parsedWindow) ? parsedWindow : (isWindowDays(stored.window) ? stored.window : DEFAULT_FILTERS.window),
+  };
 }
 
 function calculateHalfWindowDelta(
@@ -137,9 +191,12 @@ function SummaryTile({
 }
 
 export default function QualityDashboardPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useToast();
   const [snapshot, setSnapshot] = useState<QualityDashboardSnapshot | null>(null);
-  const [selectedWindow, setSelectedWindow] = useState<WindowDays>(30);
+  const [filters, setFilters] = useState<QualityDashboardFilters>(() =>
+    parseFiltersFromParams(searchParams, readFromStorage())
+  );
   const [defectTrend, setDefectTrend] = useState<DefectTrendResponse | null>(null);
   const [passRateTrend, setPassRateTrend] = useState<PassRateTrendResponse | null>(null);
   const [defectsByModule, setDefectsByModule] = useState<DefectsByModuleResponse | null>(null);
@@ -149,6 +206,34 @@ export default function QualityDashboardPage() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const refreshControllerRef = useRef<AbortController | null>(null);
 
+  const syncFiltersToUrl = useCallback(
+    (nextFilters: QualityDashboardFilters) => {
+      const params = new URLSearchParams();
+      if (nextFilters.window !== DEFAULT_FILTERS.window) {
+        params.set('window', nextFilters.window.toString());
+      }
+      setSearchParams(params, { replace: true });
+    },
+    [setSearchParams]
+  );
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: QualityDashboardFilters) => {
+      setFilters(nextFilters);
+      clearStorage();
+      writeToStorage(nextFilters);
+      syncFiltersToUrl(nextFilters);
+    },
+    [syncFiltersToUrl]
+  );
+
+  const handleWindowChange = useCallback(
+    (window: WindowDays) => {
+      handleFiltersChange({ ...filters, window });
+    },
+    [filters, handleFiltersChange]
+  );
+
   const loadSnapshot = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoadingSnapshot(true);
@@ -156,7 +241,7 @@ export default function QualityDashboardPage() {
       setSnapshot(data);
       setAutomationCoverage(data.automation_coverage);
       setUpdatedAt(new Date().toISOString());
-      if (selectedWindow === 30) {
+      if (filters.window === 30) {
         setDefectTrend(data.defect_trend);
         setPassRateTrend(data.pass_rate_trend);
         setDefectsByModule(data.defects_by_module);
@@ -167,7 +252,7 @@ export default function QualityDashboardPage() {
     } finally {
       setLoadingSnapshot(false);
     }
-  }, [selectedWindow, showToast]);
+  }, [filters.window, showToast]);
 
   useEffectAsync(async (signal) => {
     await loadSnapshot(signal);
@@ -178,7 +263,7 @@ export default function QualityDashboardPage() {
       return;
     }
 
-    if (selectedWindow === 30) {
+    if (filters.window === 30) {
       setDefectTrend(snapshot.defect_trend);
       setPassRateTrend(snapshot.pass_rate_trend);
       setDefectsByModule(snapshot.defects_by_module);
@@ -188,9 +273,9 @@ export default function QualityDashboardPage() {
     try {
       setLoadingCharts(true);
       const [nextDefectTrend, nextPassRateTrend, nextDefectsByModule] = await Promise.all([
-        qualityMetricsApi.getDefectTrend(selectedWindow, { signal }),
-        qualityMetricsApi.getPassRateTrend(selectedWindow, { signal }),
-        qualityMetricsApi.getDefectsByModule(selectedWindow, 10, { signal }),
+        qualityMetricsApi.getDefectTrend(filters.window, { signal }),
+        qualityMetricsApi.getPassRateTrend(filters.window, { signal }),
+        qualityMetricsApi.getDefectsByModule(filters.window, 10, { signal }),
       ]);
       setDefectTrend(nextDefectTrend);
       setPassRateTrend(nextPassRateTrend);
@@ -202,7 +287,7 @@ export default function QualityDashboardPage() {
     } finally {
       setLoadingCharts(false);
     }
-  }, [selectedWindow, snapshot, showToast]);
+  }, [filters.window, snapshot, showToast]);
 
   const handleRefresh = useCallback(() => {
     refreshControllerRef.current?.abort();
@@ -309,9 +394,9 @@ export default function QualityDashboardPage() {
               <button
                 key={windowOption}
                 data-testid={`quality-dashboard-window-${windowOption}`}
-                onClick={() => setSelectedWindow(windowOption)}
+                onClick={() => handleWindowChange(windowOption)}
                 className={`rounded-md px-3 py-2 text-sm font-medium ${
-                  selectedWindow === windowOption
+                  filters.window === windowOption
                     ? 'bg-slate-900 text-white'
                     : 'text-slate-600 hover:bg-slate-100'
                 }`}
@@ -375,7 +460,7 @@ export default function QualityDashboardPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <div data-testid="quality-dashboard-chart-defect-trend" className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Defect Trend</h2>
-          {loadingCharts && selectedWindow !== 30 ? (
+          {loadingCharts && filters.window !== 30 ? (
             <div className="flex h-72 items-center justify-center">
               <LoadingSpinner />
             </div>
@@ -402,7 +487,7 @@ export default function QualityDashboardPage() {
 
         <div data-testid="quality-dashboard-chart-pass-rate" className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Pass Rate Over Time</h2>
-          {loadingCharts && selectedWindow !== 30 ? (
+          {loadingCharts && filters.window !== 30 ? (
             <div className="flex h-72 items-center justify-center">
               <LoadingSpinner />
             </div>
@@ -428,7 +513,7 @@ export default function QualityDashboardPage() {
 
         <div data-testid="quality-dashboard-chart-defects-by-module" className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">Defects by Module</h2>
-          {loadingCharts && selectedWindow !== 30 ? (
+          {loadingCharts && filters.window !== 30 ? (
             <div className="flex h-72 items-center justify-center">
               <LoadingSpinner />
             </div>
