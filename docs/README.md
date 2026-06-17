@@ -33,3 +33,4 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 
 #### Features
 - [Release Readiness Dashboard (v1)](features/release-readiness-dashboard.md)
+- [Quality KPI Dashboard (v1)](features/quality-kpi-dashboard.md)

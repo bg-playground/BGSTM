@@ -19,6 +19,7 @@ import { AuditLogPage } from './pages/AuditLogPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 
 const ReleaseReadinessPage = lazy(() => import('./pages/ReleaseReadinessPage'));
+const QualityDashboardPage = lazy(() => import('./pages/QualityDashboardPage'));
 
 function ProtectedLayout() {
   return (
@@ -53,6 +54,14 @@ function App() {
                 element={
                   <Suspense fallback={<div className="p-8">Loading...</div>}>
                     <ReleaseReadinessPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/quality-dashboard"
+                element={
+                  <Suspense fallback={<div className="p-8">Loading...</div>}>
+                    <QualityDashboardPage />
                   </Suspense>
                 }
               />

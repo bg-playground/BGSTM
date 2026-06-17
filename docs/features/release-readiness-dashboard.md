@@ -52,3 +52,7 @@ Sign-offs are persisted in `release_signoffs`.
 The dashboard supports export from the UI:
 - Markdown (`.md`)
 - PDF (`.pdf`)
+
+## See also
+
+- [Quality KPI Dashboard](quality-kpi-dashboard.md)

@@ -8,6 +8,18 @@ from .link import (
     SuggestionResponse,
     SuggestionReview,
 )
+from .quality_metrics import (
+    AutomationCoverageResponse,
+    DefectsByModuleResponse,
+    DefectTrendPoint,
+    DefectTrendResponse,
+    ModuleQualityBucket,
+    PassRateTrendPoint,
+    PassRateTrendResponse,
+    QualityDashboardSnapshot,
+    SeverityMix,
+    SummaryStatsResponse,
+)
 from .release_readiness import ReadinessCriterion, ReadinessSnapshot, ReadinessSummary, RoleSignoff, SignoffRequest
 from .requirement import RequirementCreate, RequirementResponse, RequirementUpdate
 from .test_case import TestCaseCreate, TestCaseResponse, TestCaseUpdate
@@ -25,6 +37,16 @@ __all__ = [
     "SuggestionResponse",
     "SuggestionReview",
     "BulkReviewRequest",
+    "SeverityMix",
+    "DefectTrendPoint",
+    "DefectTrendResponse",
+    "PassRateTrendPoint",
+    "PassRateTrendResponse",
+    "ModuleQualityBucket",
+    "DefectsByModuleResponse",
+    "AutomationCoverageResponse",
+    "SummaryStatsResponse",
+    "QualityDashboardSnapshot",
     "ReadinessCriterion",
     "RoleSignoff",
     "ReadinessSummary",
