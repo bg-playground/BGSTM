@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import AsyncGenerator
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -23,7 +24,7 @@ def _days_ago(days: int) -> datetime:
 
 
 @pytest_asyncio.fixture
-async def db_session() -> AsyncSession:
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -59,8 +60,10 @@ async def _seed_session(session: AsyncSession) -> tuple[uuid.UUID, uuid.UUID]:
     session.add(runner_token)
     await session.flush()
 
+    run_session_id = uuid.uuid4()
+    run_session_id_2 = uuid.uuid4()
     run_session = ExternalRunSession(
-        id=uuid.uuid4(),
+        id=run_session_id,
         project_id=project.id,
         runner="@bgstm/playwright-core@0.1.0",
         status=RunStatus.failed,
@@ -74,7 +77,7 @@ async def _seed_session(session: AsyncSession) -> tuple[uuid.UUID, uuid.UUID]:
         created_by_runner_token_id=runner_token.id,
     )
     run_session_2 = ExternalRunSession(
-        id=uuid.uuid4(),
+        id=run_session_id_2,
         project_id=project.id,
         runner="@bgstm/playwright-core@0.1.0",
         status=RunStatus.failed,
@@ -89,7 +92,7 @@ async def _seed_session(session: AsyncSession) -> tuple[uuid.UUID, uuid.UUID]:
     )
     session.add_all([run_session, run_session_2])
     await session.flush()
-    return run_session.id, run_session_2.id
+    return run_session_id, run_session_id_2
 
 
 async def _add_case_result(
