@@ -17,6 +17,8 @@ from app.schemas.quality_metrics import (
     DefectsByModuleResponse,
     DefectTrendPoint,
     DefectTrendResponse,
+    FlakyRankingResponse,
+    FlakyTestEntry,
     ModuleQualityBucket,
     PassRateTrendPoint,
     PassRateTrendResponse,
@@ -285,6 +287,87 @@ async def get_defects_by_module(
         ],
         is_synthetic=False,
     )
+
+
+_TRANSITION_OUTCOMES = {CaseStatus.passed, CaseStatus.failed, CaseStatus.flaky}
+
+
+async def get_flaky_ranking(
+    db: AsyncSession,
+    window_days: int,
+    top_n: int = 10,
+) -> FlakyRankingResponse:
+    if window_days not in _VALID_WINDOWS:
+        raise ValueError(f"Unsupported window: {window_days}")
+
+    rows = await _load_case_rows(db, start_at=_window_start(window_days))
+    if not rows:
+        return FlakyRankingResponse(
+            entries=[],
+            is_synthetic=True,
+            reason="requires external case-result outcomes; no execution results are available yet",
+        )
+
+    rows_by_identity: dict[str, list[tuple[ExternalCaseResult, TestCase | None]]] = defaultdict(list)
+    for case_result, test_case in rows:
+        identity = str(case_result.test_case_id or case_result.external_id or case_result.id)
+        rows_by_identity[identity].append((case_result, test_case))
+
+    ranking: list[FlakyTestEntry] = []
+    for identity_rows in rows_by_identity.values():
+        ordered_rows = sorted(identity_rows, key=lambda item: item[0].created_at)
+        runs = len(ordered_rows)
+        if runs < 2:
+            continue
+
+        considered_outcomes = [
+            case_result.outcome
+            for case_result, _test_case in ordered_rows
+            if case_result.outcome in _TRANSITION_OUTCOMES
+        ]
+        transitions = sum(
+            1
+            for previous, current in zip(considered_outcomes, considered_outcomes[1:], strict=False)
+            if previous != current
+        )
+        if transitions == 0:
+            continue
+        runs_considered = len(considered_outcomes)
+        flip_rate = transitions / max(runs_considered - 1, 1)
+        flaky_outcomes = sum(1 for case_result, _test_case in ordered_rows if case_result.outcome == CaseStatus.flaky)
+        latest_result, latest_test_case = ordered_rows[-1]
+        display_name = (
+            latest_test_case.title
+            if latest_test_case and latest_test_case.title
+            else (latest_result.external_id or str(latest_result.test_case_id))
+        )
+
+        ranking.append(
+            FlakyTestEntry(
+                test_case_id=latest_result.test_case_id,
+                external_id=latest_result.external_id,
+                display_name=display_name,
+                runs=runs,
+                flaky_outcomes=flaky_outcomes,
+                transitions=transitions,
+                flip_rate=round(flip_rate, 4),
+                last_outcome=latest_result.outcome.value,
+                last_seen_at=latest_result.created_at,
+            )
+        )
+
+    if not ranking:
+        return FlakyRankingResponse(
+            entries=[],
+            is_synthetic=False,
+            reason="No tests had enough runs in the selected window to compute a flip rate.",
+        )
+
+    sorted_ranking = sorted(
+        ranking,
+        key=lambda entry: (-entry.flip_rate, -entry.flaky_outcomes, -entry.runs, entry.display_name.lower()),
+    )[:top_n]
+    return FlakyRankingResponse(entries=sorted_ranking, is_synthetic=False)
 
 
 async def get_automation_coverage(db: AsyncSession) -> AutomationCoverageResponse:

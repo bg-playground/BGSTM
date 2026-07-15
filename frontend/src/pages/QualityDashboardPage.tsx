@@ -29,6 +29,7 @@ import {
   type WindowDays,
 } from '../api/qualityMetrics';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { FlakyRankingPanel } from '../components/quality/FlakyRankingPanel';
 import { useToast } from '../context/ToastContext';
 import { useEffectAsync } from '../hooks/useEffectAsync';
 
@@ -570,6 +571,8 @@ export default function QualityDashboardPage() {
           )}
         </div>
       </div>
+
+      <FlakyRankingPanel window={filters.window} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ from app.schemas.quality_metrics import (
     AutomationCoverageResponse,
     DefectsByModuleResponse,
     DefectTrendResponse,
+    FlakyRankingResponse,
     PassRateTrendResponse,
     QualityDashboardSnapshot,
     SummaryStatsResponse,
@@ -68,6 +69,17 @@ async def get_automation_coverage(
 ) -> AutomationCoverageResponse:
     _ = current_user
     return await crud.get_automation_coverage(db)
+
+
+@router.get("/flaky-ranking", response_model=FlakyRankingResponse)
+async def get_flaky_ranking(
+    window: WindowParam = Query(30),
+    top_n: int = Query(10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> FlakyRankingResponse:
+    _ = current_user
+    return await crud.get_flaky_ranking(db, window, top_n)
 
 
 @router.get("/summary-stats", response_model=SummaryStatsResponse)

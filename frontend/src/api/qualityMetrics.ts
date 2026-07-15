@@ -47,6 +47,24 @@ export interface DefectsByModuleResponse {
   reason: string | null;
 }
 
+export interface FlakyTestEntry {
+  test_case_id: string | null;
+  external_id: string | null;
+  display_name: string;
+  runs: number;
+  flaky_outcomes: number;
+  transitions: number;
+  flip_rate: number;
+  last_outcome: string;
+  last_seen_at: string;
+}
+
+export interface FlakyRankingResponse {
+  entries: FlakyTestEntry[];
+  is_synthetic: boolean;
+  reason: string | null;
+}
+
 export interface AutomationCoverageResponse {
   total: number;
   automated: number;
@@ -103,6 +121,18 @@ export const qualityMetricsApi = {
   ): Promise<DefectsByModuleResponse> {
     const response = await apiClient.get<DefectsByModuleResponse>(
       `/quality-metrics/defects-by-module?window=${window}&top_n=${topN}`,
+      config
+    );
+    return response.data;
+  },
+
+  async getFlakyRanking(
+    window: WindowDays,
+    topN = 10,
+    config?: AxiosRequestConfig
+  ): Promise<FlakyRankingResponse> {
+    const response = await apiClient.get<FlakyRankingResponse>(
+      `/quality-metrics/flaky-ranking?window=${window}&top_n=${topN}`,
       config
     );
     return response.data;
