@@ -366,7 +366,9 @@ The following templates support Test Results Reporting activities:
 [Test Results Analysis](05-test-results-analysis.md)
 
 ## Next Phase
-This is the final phase. Return to [Phase 1: Test Planning](01-test-planning.md) for the next project cycle.
+For ETL and data-pipeline initiatives that require NATAegisFlow evidence, proceed to
+[ETL Semantic Validation](07-etl-semantic-validation.md). Otherwise, return to
+[Phase 1: Test Planning](01-test-planning.md) for the next project cycle.
 
 ## Continuous Improvement
 Use insights from reporting to improve:
@@ -379,4 +381,4 @@ Use insights from reporting to improve:
 
 ---
 
-**This completes the six phases of the BGSTM framework. Each phase builds upon the previous one to ensure comprehensive, professional testing that adapts to various methodologies and delivers high-quality software.**
+**This completes the core six phases of the BGSTM framework. ETL and data-pipeline initiatives can extend the workflow with Phase 7: ETL Semantic Validation to verify semantic correctness with NATAegisFlow evidence.**

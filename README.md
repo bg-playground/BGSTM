@@ -9,13 +9,13 @@
 
 ## 🎯 Overview
 
-This framework provides a structured approach to software testing through six core phases, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+This framework provides a structured approach to software testing through six core phases plus an ETL semantic validation phase, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
 
 ## 📚 Documentation
 
 ### [Complete Documentation →](docs/README.md)
 
-## 🔄 Six Phases of Software Testing
+## 🔄 BGSTM Testing Phases
 
 1. **[Test Planning](docs/phases/01-test-planning.md)** - Define scope, strategy, resources, and timelines
 2. **[Test Case Development](docs/phases/02-test-case-development.md)** - Design and document test scenarios and cases
@@ -23,6 +23,7 @@ This framework provides a structured approach to software testing through six co
 4. **[Test Execution](docs/phases/04-test-execution.md)** - Execute tests and manage defects
 5. **[Test Results Analysis](docs/phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](docs/phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
+7. **[ETL Semantic Validation](docs/phases/07-etl-semantic-validation.md)** - Validate ETL semantics using NATAegisFlow outputs
 
 ## 🔧 Methodology Guides
 

@@ -45,7 +45,7 @@ Actionable checklists for each methodology to ensure comprehensive testing cover
 
 ## Adapting BGSTM
 
-All six phases of BGSTM can be adapted to your chosen methodology:
+All BGSTM phases can be adapted to your chosen methodology:
 
 | Phase | Agile/Scrum | Waterfall |
 |-------|-------------|-----------|
@@ -55,5 +55,6 @@ All six phases of BGSTM can be adapted to your chosen methodology:
 | Test Execution | Throughout Sprint | Dedicated Testing Phase |
 | Results Analysis | Sprint Review/Retro | Phase Gate Review |
 | Results Reporting | Sprint Reports | Comprehensive Phase Reports |
+| ETL Semantic Validation | Backlog items, sprint reviews, and release readiness | Requirements, design, test, and deployment gates |
 
 [:octicons-arrow-right-24: Explore Testing Phases](../phases/index.md)

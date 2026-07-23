@@ -5,7 +5,7 @@
 
 ## 🎯 Overview
 
-BGSTM provides a structured approach to software testing through **six core phases**, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+BGSTM provides a structured approach to software testing through **six core phases** plus an ETL semantic validation phase, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
 
 ---
 
@@ -25,7 +25,7 @@ BGSTM provides a structured approach to software testing through **six core phas
 
     ---
 
-    Learn about the six phases of software testing
+    Learn about the BGSTM testing phases
 
     [:octicons-arrow-right-24: Testing Phases](phases/index.md)
 
@@ -49,7 +49,7 @@ BGSTM provides a structured approach to software testing through **six core phas
 
 ---
 
-## 🔄 Six Phases of Software Testing
+## 🔄 BGSTM Testing Phases
 
 1. **[Test Planning](phases/01-test-planning.md)** - Define scope, strategy, resources, and timelines
 2. **[Test Case Development](phases/02-test-case-development.md)** - Design and document test scenarios and cases
@@ -57,6 +57,7 @@ BGSTM provides a structured approach to software testing through **six core phas
 4. **[Test Execution](phases/04-test-execution.md)** - Execute tests and manage defects
 5. **[Test Results Analysis](phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
+7. **[ETL Semantic Validation](phases/07-etl-semantic-validation.md)** - Validate ETL semantics using NATAegisFlow outputs
 
 ---
 
