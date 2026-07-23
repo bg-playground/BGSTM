@@ -26,7 +26,9 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 - [Methodology Comparison](methodologies/comparison.md)
 
 #### Templates & Examples
-- [Templates](templates/README.md)
+- [Templates](test-templates/README.md)
+- [NATAegisFlow Artifact Workflow Checklist](test-templates/nataegisflow-artifact-workflow-template.md)
+- [NATAegisFlow Artifact Workflow Example](examples/nataegisflow-artifact-workflow-example.md)
 - [Examples](examples/README.md)
 
 #### Integration Guide

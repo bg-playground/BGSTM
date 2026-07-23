@@ -11,6 +11,7 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [ ] Ensure acceptance criteria are testable and measurable
 - [ ] Identify stories with unclear requirements for clarification
 - [ ] Check that stories follow Given-When-Then or similar format
+- [ ] For NATAegisFlow artifact stories, include semantic validation acceptance criteria, required evidence, and policy gate expectations
 
 ### Test Planning
 - [ ] Identify all testable items for the sprint
@@ -71,6 +72,8 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [ ] Execute test cases based on acceptance criteria
 - [ ] Perform exploratory testing on new features
 - [ ] Validate business logic and workflows
+- [ ] Validate NATAegisFlow semantic findings are reviewed, dispositioned, and linked to affected artifacts
+- [ ] Confirm "evidence attached" and "patch validation complete" checks are satisfied before story acceptance
 - [ ] Test edge cases and error conditions
 - [ ] Verify integration with existing functionality
 - [ ] Confirm responsive design on different devices/browsers
@@ -166,6 +169,7 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [ ] Run full regression test suite
 - [ ] Verify all critical and high priority defects resolved
 - [ ] Confirm all Definition of Done criteria met
+- [ ] Confirm NATAegisFlow policy gate approval or documented exception is complete
 - [ ] Validate integration with existing features
 - [ ] Check that no new regressions introduced
 
