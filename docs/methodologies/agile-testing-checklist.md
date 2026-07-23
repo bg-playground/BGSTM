@@ -10,6 +10,8 @@
 ### Planning Activities
 - [ ] Review iteration scope and user stories
 - [ ] Identify testable requirements and acceptance criteria
+- [ ] Add NATAegisFlow semantic validation checkpoints for artifact workflow stories
+- [ ] Define policy gate approvers, required evidence, and patch validation expectations
 - [ ] Estimate testing effort for planned work
 - [ ] Assess testing risks and dependencies
 - [ ] Plan test automation opportunities
@@ -33,6 +35,8 @@
 - [ ] Perform exploratory testing daily
 - [ ] Execute automated regression tests
 - [ ] Validate against acceptance criteria
+- [ ] Review and disposition NATAegisFlow semantic validation findings
+- [ ] Confirm evidence is attached and patch validation is complete for affected artifacts
 - [ ] Test integrations between components
 - [ ] Conduct usability testing where applicable
 
@@ -76,6 +80,7 @@
 - [ ] Discuss quality concerns
 - [ ] Gather stakeholder feedback
 - [ ] Validate acceptance criteria met
+- [ ] Confirm NATAegisFlow policy gate and approval workflow status
 - [ ] Identify improvement areas
 
 ---

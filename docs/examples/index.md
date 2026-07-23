@@ -161,6 +161,17 @@ The ShopFlow Checkout Enhancement project aims to modernize and streamline the e
 
 ---
 
+### Phase 7: ETL Semantic Validation
+📄 **[NATAegisFlow Artifact Workflow Example](nataegisflow-artifact-workflow-example.md)**
+- Worked example for an ETL artifact patch using NATAegisFlow validation evidence
+- Semantic validation checkpoints for business meaning, lineage, transformation intent, findings, and residual risk
+- Policy gate and approval workflow decisions
+- "Evidence attached" and "patch validation complete" checks
+
+**When to use:** When adapting BGSTM templates for NATAegisFlow artifact workflows, governance gates, and audit evidence.
+
+---
+
 ## How to Use These Examples
 
 ### 1. **As Learning Materials**

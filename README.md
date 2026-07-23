@@ -34,7 +34,7 @@ This framework provides a structured approach to software testing through six co
 
 ## 📋 Templates & Resources
 
-- **[Templates](docs/templates/README.md)** - Ready-to-use templates for test plans, test cases, and reports
+- **[Templates](docs/test-templates/README.md)** - Ready-to-use templates for test plans, test cases, reports, and NATAegisFlow artifact workflows
 - **[Examples](docs/examples/README.md)** - Practical examples and sample artifacts
 - **[Multi-Platform App Guide](docs/integration/multi-platform-guide.md)** - Build testing management applications
 
@@ -124,7 +124,7 @@ docker compose logs -f   # view logs   (or: docker-compose logs -f)
 ### Quick Reference:
 1. **Choose Your Methodology**: Review [methodology guides](docs/methodologies/comparison.md) to select the best approach
 2. **Understand the Phases**: Read through the [six testing phases](docs/phases/01-test-planning.md)
-3. **Use Templates**: Download and customize [templates](docs/templates/README.md) for your project
+3. **Use Templates**: Download and customize [templates](docs/test-templates/README.md) for your project
 4. **Implement**: Apply the framework to your testing processes
 5. **Build (Optional)**: Use as foundation for custom testing tools
 6. **Release Readiness**: Use the [Release Readiness Dashboard](docs/features/release-readiness-dashboard.md) for Go/Caution/No-Go checks

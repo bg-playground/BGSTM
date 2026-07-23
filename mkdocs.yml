@@ -149,6 +149,7 @@ nav:
     - Defect Report Template: test-templates/defect-report-template.md
     - Test Execution Report Template: test-templates/test-execution-report-template.md
     - Test Summary Report Template: test-templates/test-summary-report-template.md
+    - NATAegisFlow Artifact Workflow Checklist: test-templates/nataegisflow-artifact-workflow-template.md
 
   - Examples:
     - examples/index.md
@@ -159,6 +160,7 @@ nav:
     - Environment Setup Example: examples/environment-setup-example.md
     - Testing Schedule Example: examples/testing-schedule-example.md
     - Traceability Matrix Example: examples/traceability-matrix-example.md
+    - NATAegisFlow Artifact Workflow Example: examples/nataegisflow-artifact-workflow-example.md
 
   - Integration:
     - integration/multi-platform-guide.md

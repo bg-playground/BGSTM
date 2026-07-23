@@ -33,7 +33,7 @@ BGSTM provides a structured approach to software testing through **six core phas
 
     ---
 
-    Download production-ready testing templates
+    Download production-ready testing templates, including NATAegisFlow artifact workflow checks
 
     [:octicons-arrow-right-24: Templates](test-templates/index.md)
 
@@ -58,6 +58,13 @@ BGSTM provides a structured approach to software testing through **six core phas
 5. **[Test Results Analysis](phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
 7. **[ETL Semantic Validation](phases/07-etl-semantic-validation.md)** - Validate ETL semantics using NATAegisFlow outputs
+
+---
+
+## 🧭 NATAegisFlow Artifact Workflow
+
+- **[NATAegisFlow Artifact Workflow Checklist Template](test-templates/nataegisflow-artifact-workflow-template.md)** - Story and artifact acceptance checklist with semantic validation, policy gate, approval, evidence, and patch validation checkpoints
+- **[NATAegisFlow Artifact Workflow Example](examples/nataegisflow-artifact-workflow-example.md)** - Worked example showing a completed ETL artifact patch validation
 
 ---
 

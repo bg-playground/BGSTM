@@ -95,6 +95,16 @@ All templates in this collection follow a consistent structure:
 
 ---
 
+### Phase 7: ETL Semantic Validation
+
+#### [NATAegisFlow Artifact Workflow Checklist Template](nataegisflow-artifact-workflow-template.md)
+**Purpose:** Story and artifact checklist for NATAegisFlow semantic validation, policy gates, approvals, evidence, and patch validation.  
+**When to Use:** For ETL or data-pipeline stories and controlled artifact changes that require NATAegisFlow evidence.  
+**Key Sections:** Semantic validation checkpoints, policy gate workflow, evidence package, patch validation checks  
+**Best For:** QA reviewers, data engineers, product owners, and approvers validating NATAegisFlow artifact workflows
+
+---
+
 ## Quick Reference Guide
 
 ### When to Use Each Template
@@ -108,6 +118,7 @@ All templates in this collection follow a consistent structure:
 | Reporting daily/weekly test progress | Test Execution Report Template | Test Leads, Test Managers |
 | Logging defects found during testing | Defect Report Template | Testers, QA Engineers |
 | Final quality assessment and sign-off | Test Summary Report Template | Test Managers, QA Directors |
+| Validating NATAegisFlow artifacts | NATAegisFlow Artifact Workflow Checklist Template | QA Reviewers, Data Engineers, Approvers |
 
 ### Template Dependencies
 
