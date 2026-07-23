@@ -17,6 +17,7 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 4. [Test Execution](phases/04-test-execution.md)
 5. [Test Results Analysis](phases/05-test-results-analysis.md)
 6. [Test Results Reporting](phases/06-test-results-reporting.md)
+7. [ETL Semantic Validation](phases/07-etl-semantic-validation.md)
 
 #### Methodology Guides
 - [Agile Testing](methodologies/agile.md)
