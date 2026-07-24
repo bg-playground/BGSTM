@@ -214,6 +214,7 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [Test Case Template](../templates/test-case-template.md) - For detailed test scenarios
 - [Defect Report Template](../templates/defect-report-template.md) - For logging defects
 - [Test Execution Report Template](../templates/test-execution-report-template.md) - For sprint review
+- [NATAegisFlow Artifact Workflow Checklist](../test-templates/nataegisflow-artifact-workflow-template.md) - For ETL semantic validation evidence
 
 ### Phase Guidance
 - [Test Planning Phase](../phases/01-test-planning.md) - Detailed planning guidance
@@ -222,6 +223,7 @@ This checklist provides a comprehensive guide for testing activities throughout 
 - [Test Execution Phase](../phases/04-test-execution.md) - Execution best practices
 - [Test Results Analysis](../phases/05-test-results-analysis.md) - Analyzing results
 - [Test Results Reporting](../phases/06-test-results-reporting.md) - Sprint reporting
+- [Phase 7: ETL Semantic Validation](../phases/07-etl-semantic-validation.md) - Finalized NATAegisFlow process guidance
 
 ### Examples
 - [Examples Directory](../examples/README.md) - Practical examples (coming soon)

@@ -1,10 +1,15 @@
 # Phase 7: ETL Semantic Validation
 
 ## Overview
-ETL Semantic Validation is a BGSTM process phase for verifying that extract, transform, and load outputs preserve
-business meaning, data lineage, and rule intent. This draft phase uses NATAegisFlow outputs as validation evidence so
+ETL Semantic Validation is a finalized BGSTM process phase for verifying that extract, transform, and load outputs
+preserve business meaning, data lineage, and rule intent. The phase uses NATAegisFlow outputs as validation evidence so
 teams can confirm that transformed data is semantically correct before downstream reporting, release approval, or
 operational handoff.
+
+**Status:** Finalized for broader adoption as BGSTM Phase 7, process version 1.2.  
+**Process owner:** QA Semantic Review Lead.  
+**Owner sign-off:** Approved for production use and ongoing governance on 2026-07-24 after AegisFlow pilot actions were
+incorporated into the checklist, examples, methodology cross-links, and release notes.
 
 ## Objectives
 - Validate that ETL outputs align with source-system semantics and approved business rules
@@ -48,7 +53,7 @@ operational handoff.
 - Present the validation report and open findings to reviewers and approvers
 - Confirm remediation, accepted exceptions, and release constraints are documented
 - Hand off approved semantic validation results to reporting, deployment, or operational support teams
-- For pilots, record friction points, process changes, and rollout readiness before closing the evidence package
+- Record adoption feedback, process changes, and rollout readiness before closing the evidence package
 
 ## Required Artifacts
 1. **ETL Semantic Validation Report**: Summary of scope, NATAegisFlow runs, validation outcomes, key risks, and release
@@ -90,17 +95,17 @@ operational handoff.
 - Medium and low findings have owners, target dates, and documented disposition
 - Approval record confirms release, conditional release, operational handoff, or required rework
 - Audit evidence is traceable to NATAegisFlow output versions, ETL versions, reviewers, and approval timestamps
-- Pilot retrospective actions and rollout readiness decisions are recorded when Phase 7 is piloted
+- Adoption feedback, process improvement actions, and rollout readiness decisions are recorded for governance review
 
-## Pilot-Proven Practices
+## Finalized Process Practices
 
-The AegisFlow pilot showed that Phase 7 runs more predictably when teams:
+The AegisFlow pilot evidence showed that Phase 7 runs more predictably when teams:
 
 1. Complete an evidence inventory before NATAegisFlow findings triage starts.
 2. Require owner, disposition, target date, and gate impact for every medium-or-higher open finding.
 3. Use standardized gate decision terms so approval, conditional approval, rejection, completion, and blocked handoff are
    recorded consistently.
-4. Capture retrospective actions before closing a pilot evidence package so process improvements are not lost.
+4. Capture adoption feedback and retrospective actions before closing an evidence package so process improvements are not lost.
 
 ## Methodology Touchpoints
 
@@ -139,6 +144,14 @@ findings as false positives.
 ### Challenge: Evidence Is Difficult to Reconstruct Later
 **Solution**: Store NATAegisFlow output versions, ETL build identifiers, reviewer notes, and approval records together as
 part of the audit evidence package.
+
+## Related NATAegisFlow Documentation
+
+- [NATAegisFlow Artifact Workflow Checklist Template](../test-templates/nataegisflow-artifact-workflow-template.md)
+- [NATAegisFlow Artifact Workflow Example](../examples/nataegisflow-artifact-workflow-example.md)
+- [AegisFlow BGSTM Adoption Retrospective and Sign-off](../examples/nataegisflow-bgstm-pilot-retrospective.md)
+- [Agile Testing Checklist](../methodologies/agile-testing-checklist.md)
+- [Scrum Sprint Testing Checklist](../methodologies/scrum-sprint-testing-checklist.md)
 
 ## Previous Phase
 This phase extends the BGSTM workflow after [Test Results Reporting](06-test-results-reporting.md) for ETL and

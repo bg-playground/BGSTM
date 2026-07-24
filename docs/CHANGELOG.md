@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Finalized BGSTM Phase 7 ETL Semantic Validation as process version 1.2 with updated NATAegisFlow checklist artifacts, methodology cross-links, rollout readiness guidance, and process owner sign-off (#387).
+
 ## [2.0.1] - 2026-03-05
 
 ### Added
