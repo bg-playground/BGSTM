@@ -1,7 +1,7 @@
 # NATAegisFlow Artifact Workflow Checklist Template
 
-**Version:** 1.0  
-**Purpose:** This checklist helps teams validate NATAegisFlow-related artifacts before acceptance, release, or governance review.  
+**Version:** 1.1  
+**Purpose:** This checklist helps teams validate NATAegisFlow-related artifacts before acceptance, release, pilot review, or governance review.  
 **When to Use:** Use for user stories, patches, or controlled artifact changes that rely on NATAegisFlow semantic validation evidence.
 
 ---
@@ -18,6 +18,7 @@
 | Reviewer | [Semantic reviewer] |
 | Approver | [Policy gate approver] |
 | Target Release / Sprint | [Release, sprint, or gate] |
+| Run Mode | [Pilot/Production/Retrospective follow-up] |
 
 ## Acceptance Criteria
 
@@ -27,6 +28,14 @@
 - [ ] Critical and high semantic findings are resolved or have documented risk acceptance
 - [ ] Patch validation is complete for all changed mappings, rules, evidence files, and downstream references
 - [ ] Required evidence is attached and accessible from the story or artifact record
+- [ ] Pilot or rollout readiness decision is recorded when this checklist is used for a pilot
+
+## Pre-Flight Evidence Inventory
+
+- [ ] NATAegisFlow run configuration, rule set version, and input artifact versions are recorded
+- [ ] Lineage export, mapping specification, data contract, and sample replay evidence are available before triage
+- [ ] Evidence location, access permissions, and retention expectations are confirmed
+- [ ] Reviewer, owner, and approver availability is confirmed for the policy gate window
 
 ## Semantic Validation Checkpoints
 
@@ -45,12 +54,21 @@
 - [ ] Required approver has approved release, conditional release, or rework
 - [ ] Exceptions include approver, rationale, compensating controls, and follow-up date
 - [ ] Approval record links to NATAegisFlow run ID, artifact version, and evidence location
+- [ ] Medium-or-higher open findings have owner, disposition, target date, and gate impact recorded
 
 | Gate | Required Role | Decision | Date | Evidence / Approval Link |
 |------|---------------|----------|------|--------------------------|
 | Semantic Review | [Reviewer] | [Approved/Changes Required] | [Date] | [Link] |
 | Policy Gate | [Approver] | [Approved/Conditional/Rejected] | [Date] | [Link] |
 | Release / Handoff | [Owner] | [Complete/Blocked] | [Date] | [Link] |
+
+## Pilot Retrospective and Rollout Decision
+
+- [ ] Friction points and improvement ideas are captured when this checklist is used for a pilot
+- [ ] At least three concrete process changes are identified or explicitly marked as not found
+- [ ] Template or process documentation updates are linked to the pilot evidence package
+- [ ] Readiness decision is recorded: [Ready for wider rollout / Run another controlled pilot / Not ready]
+- [ ] Follow-up owner and review date are assigned for each accepted process change
 
 ## Evidence Package
 
@@ -60,6 +78,7 @@
 - [ ] Reviewer notes and finding dispositions attached
 - [ ] Approval record attached
 - [ ] Evidence location meets access control and retention expectations
+- [ ] Pilot retrospective or lessons-learned record attached when applicable
 
 ## Patch Validation
 
@@ -75,6 +94,7 @@
 - [Test Case Template](test-case-template.md)
 - [Traceability Matrix Template](traceability-matrix-template.md)
 - [NATAegisFlow Artifact Workflow Example](../examples/nataegisflow-artifact-workflow-example.md)
+- [AegisFlow BGSTM Pilot Retrospective](../examples/nataegisflow-bgstm-pilot-retrospective.md)
 
 ---
 

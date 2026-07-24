@@ -161,6 +161,7 @@ nav:
     - Testing Schedule Example: examples/testing-schedule-example.md
     - Traceability Matrix Example: examples/traceability-matrix-example.md
     - NATAegisFlow Artifact Workflow Example: examples/nataegisflow-artifact-workflow-example.md
+    - AegisFlow BGSTM Pilot Retrospective: examples/nataegisflow-bgstm-pilot-retrospective.md
 
   - Integration:
     - integration/multi-platform-guide.md

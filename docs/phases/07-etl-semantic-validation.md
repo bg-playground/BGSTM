@@ -26,6 +26,7 @@ operational handoff.
 - Identify ETL jobs, data domains, tables, files, APIs, and downstream consumers in scope
 - Confirm the semantic rules, business glossary terms, and data contracts to validate
 - Define severity thresholds for semantic drift, rule conflicts, missing lineage, and unresolved anomalies
+- Confirm the pre-flight evidence inventory is complete before semantic triage begins
 
 ### 2. NATAegisFlow Output Review
 - Review generated findings for rule violations, semantic mismatches, lineage gaps, and suspicious transformations
@@ -36,6 +37,7 @@ operational handoff.
 - Assign each finding an owner, severity, business impact, target resolution date, and disposition
 - Link findings to ETL requirements, data contracts, source mappings, and affected downstream reports
 - Escalate findings that could change business decisions, compliance posture, or customer-facing metrics
+- Treat medium-or-higher findings without owner, disposition, target date, or gate impact as policy gate blockers
 
 ### 4. Evidence and Audit Assembly
 - Capture NATAegisFlow run identifiers, input versions, configuration, rule sets, timestamps, and reviewers
@@ -46,6 +48,7 @@ operational handoff.
 - Present the validation report and open findings to reviewers and approvers
 - Confirm remediation, accepted exceptions, and release constraints are documented
 - Hand off approved semantic validation results to reporting, deployment, or operational support teams
+- For pilots, record friction points, process changes, and rollout readiness before closing the evidence package
 
 ## Required Artifacts
 1. **ETL Semantic Validation Report**: Summary of scope, NATAegisFlow runs, validation outcomes, key risks, and release
@@ -87,6 +90,17 @@ operational handoff.
 - Medium and low findings have owners, target dates, and documented disposition
 - Approval record confirms release, conditional release, operational handoff, or required rework
 - Audit evidence is traceable to NATAegisFlow output versions, ETL versions, reviewers, and approval timestamps
+- Pilot retrospective actions and rollout readiness decisions are recorded when Phase 7 is piloted
+
+## Pilot-Proven Practices
+
+The AegisFlow pilot showed that Phase 7 runs more predictably when teams:
+
+1. Complete an evidence inventory before NATAegisFlow findings triage starts.
+2. Require owner, disposition, target date, and gate impact for every medium-or-higher open finding.
+3. Use standardized gate decision terms so approval, conditional approval, rejection, completion, and blocked handoff are
+   recorded consistently.
+4. Capture retrospective actions before closing a pilot evidence package so process improvements are not lost.
 
 ## Methodology Touchpoints
 

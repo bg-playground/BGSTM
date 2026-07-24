@@ -168,6 +168,11 @@ The ShopFlow Checkout Enhancement project aims to modernize and streamline the e
 - Policy gate and approval workflow decisions
 - "Evidence attached" and "patch validation complete" checks
 
+📄 **[AegisFlow BGSTM Pilot Retrospective](nataegisflow-bgstm-pilot-retrospective.md)**
+- End-to-end pilot record for a simulated customer-risk ETL patch
+- Friction points, improvements, concrete process changes, and rollout readiness decision
+- Links pilot lessons back to the updated NATAegisFlow checklist and Phase 7 guidance
+
 **When to use:** When adapting BGSTM templates for NATAegisFlow artifact workflows, governance gates, and audit evidence.
 
 ---
