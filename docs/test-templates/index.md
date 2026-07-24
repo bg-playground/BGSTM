@@ -100,7 +100,7 @@ All templates in this collection follow a consistent structure:
 #### [NATAegisFlow Artifact Workflow Checklist Template](nataegisflow-artifact-workflow-template.md)
 **Purpose:** Story and artifact checklist for NATAegisFlow semantic validation, policy gates, approvals, evidence, and patch validation.  
 **When to Use:** For ETL or data-pipeline stories and controlled artifact changes that require NATAegisFlow evidence.  
-**Key Sections:** Pre-flight evidence inventory, semantic validation checkpoints, policy gate workflow, pilot retrospective, evidence package, patch validation checks  
+**Key Sections:** Pre-flight evidence inventory, semantic validation checkpoints, policy gate workflow, adoption retrospective, process owner sign-off, evidence package, patch validation checks  
 **Best For:** QA reviewers, data engineers, product owners, and approvers validating NATAegisFlow artifact workflows
 
 ---
@@ -118,7 +118,7 @@ All templates in this collection follow a consistent structure:
 | Reporting daily/weekly test progress | Test Execution Report Template | Test Leads, Test Managers |
 | Logging defects found during testing | Defect Report Template | Testers, QA Engineers |
 | Final quality assessment and sign-off | Test Summary Report Template | Test Managers, QA Directors |
-| Validating NATAegisFlow artifacts or pilots | NATAegisFlow Artifact Workflow Checklist Template | QA Reviewers, Data Engineers, Approvers |
+| Validating NATAegisFlow artifacts or adoption reviews | NATAegisFlow Artifact Workflow Checklist Template | QA Reviewers, Data Engineers, Approvers |
 
 ### Template Dependencies
 
@@ -312,6 +312,8 @@ When creating new templates:
 
 ### Additional Resources
 
+- **Phase 7 ETL Semantic Validation:** See [../phases/07-etl-semantic-validation.md](../phases/07-etl-semantic-validation.md) for finalized NATAegisFlow process guidance
+- **NATAegisFlow Checklist:** See [nataegisflow-artifact-workflow-template.md](nataegisflow-artifact-workflow-template.md) for the finalized artifact workflow
 - **Phase Documentation:** See [../phases/](../phases/) for detailed testing phase guidance
 - **Methodology Guides:** See [../methodologies/](../methodologies/) for Agile, Waterfall, and other approaches
 - **Examples:** Check with QA team for example filled templates from past projects

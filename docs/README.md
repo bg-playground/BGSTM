@@ -29,7 +29,7 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 - [Templates](test-templates/README.md)
 - [NATAegisFlow Artifact Workflow Checklist](test-templates/nataegisflow-artifact-workflow-template.md)
 - [NATAegisFlow Artifact Workflow Example](examples/nataegisflow-artifact-workflow-example.md)
-- [AegisFlow BGSTM Pilot Retrospective](examples/nataegisflow-bgstm-pilot-retrospective.md)
+- [AegisFlow BGSTM Adoption Retrospective and Sign-off](examples/nataegisflow-bgstm-pilot-retrospective.md)
 - [Examples](examples/README.md)
 
 #### Integration Guide
