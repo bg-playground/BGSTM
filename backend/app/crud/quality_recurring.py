@@ -45,9 +45,7 @@ async def get_recurring_defects_pareto(
         )
 
     failed_rows = [
-        (case_result, test_case)
-        for case_result, test_case in rows
-        if case_result.outcome == CaseStatus.failed
+        (case_result, test_case) for case_result, test_case in rows if case_result.outcome == CaseStatus.failed
     ]
     if not failed_rows:
         return RecurringDefectsParetoResponse(
@@ -101,11 +99,7 @@ async def get_recurring_defects_pareto(
 
         test_case_id = latest_result.test_case_id if isinstance(latest_result.test_case_id, UUID) else None
         linked_requirements = requirements_by_test_case_id.get(test_case_id, []) if test_case_id else []
-        display_name = (
-            latest_test_case.title
-            if latest_test_case and latest_test_case.title
-            else latest_result.title
-        )
+        display_name = latest_test_case.title if latest_test_case and latest_test_case.title else latest_result.title
 
         entries.append(
             RecurringDefectEntry(

@@ -16,9 +16,9 @@ from app.models.base import Base
 from app.models.external_case_result import CaseStatus, ExternalCaseResult
 from app.models.external_results import ExternalRunSession, RunStatus
 from app.models.project import Project
+from app.models.requirement import PriorityLevel
 from app.models.runner_token import RunnerToken
 from app.models.test_case import AutomationStatus, TestCase, TestCaseStatus, TestCaseType
-from app.models.requirement import PriorityLevel
 from app.models.user import User, UserRole
 
 
