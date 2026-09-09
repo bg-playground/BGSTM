@@ -158,6 +158,7 @@ export const SuggestionDashboard: React.FC = () => {
         testCasesApi.list(1, 200, { signal }),
       ]);
 
+      if (signal?.aborted) return;
       setSuggestions(suggestionData.items);
       setRequirements(new Map(reqData.items.map((r) => [r.id, r])));
       setTestCases(new Map(tcData.items.map((tc) => [tc.id, tc])));
