@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.external_case_result import CaseStatus, ExternalCaseResult
@@ -48,6 +49,27 @@ def _dedupe_requirement_external_ids(requirement_external_ids: list[str]) -> lis
     return deduped_external_ids
 
 
+def _integrity_error_matches(exc: IntegrityError, *needles: str) -> bool:
+    message = str(exc.orig or exc).lower()
+    return any(needle.lower() in message for needle in needles)
+
+
+def _is_test_case_external_id_collision(exc: IntegrityError) -> bool:
+    return _integrity_error_matches(
+        exc,
+        "ix_test_cases_external_id",
+        "test_cases.external_id",
+    )
+
+
+def _is_case_result_idempotency_collision(exc: IntegrityError) -> bool:
+    return _integrity_error_matches(
+        exc,
+        "uq_external_case_results_session_external_id",
+        "external_case_results.session_id, external_case_results.external_id",
+    )
+
+
 async def _get_requirement_ids_for_test_case(
     db: AsyncSession,
     *,
@@ -62,6 +84,41 @@ async def _get_requirement_ids_for_test_case(
         .order_by(RequirementTestCaseLink.created_at.asc())
     )
     return list(result.scalars().all())
+
+
+async def _hydrate_idempotent_result(
+    db: AsyncSession,
+    *,
+    existing: ExternalCaseResult,
+    payload: CaseResultCreate,
+) -> ExternalCaseResult:
+    existing.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=existing.test_case_id)
+    _resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
+        db,
+        requirement_ids=payload.requirement_ids,
+    )
+    _resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
+        db,
+        requirement_external_ids=payload.requirement_external_ids,
+        auto_register_requirements=False,
+    )
+    existing.unresolved_requirement_ids = unresolved_ids
+    existing.unresolved_requirement_external_ids = unresolved_external_ids
+    return existing
+
+
+async def _find_case_result_by_idempotency_key(
+    db: AsyncSession,
+    *,
+    session_id: UUID,
+    external_id: str,
+) -> ExternalCaseResult | None:
+    result = await db.execute(
+        select(ExternalCaseResult)
+        .where(ExternalCaseResult.session_id == session_id)
+        .where(ExternalCaseResult.external_id == external_id)
+    )
+    return result.scalar_one_or_none()
 
 
 async def _resolve_or_create_test_case(
@@ -104,7 +161,17 @@ async def _resolve_or_create_test_case(
         created_by=f"runner_token:{runner_token_id}",
     )
     db.add(test_case)
-    await db.flush()
+    try:
+        await db.flush()
+    except IntegrityError as exc:
+        if not _is_test_case_external_id_collision(exc):
+            raise
+        await db.rollback()
+        raced_result = await db.execute(select(TestCase).where(TestCase.external_id == payload.external_id))
+        raced_test_case = raced_result.scalar_one_or_none()
+        if raced_test_case is None:
+            raise
+        return raced_test_case, False
     return test_case, True
 
 
@@ -214,26 +281,13 @@ async def create_case_result(
     runner_token_id: UUID,
 ) -> tuple[ExternalCaseResult, bool]:
     if payload.external_id is not None:
-        existing_result = await db.execute(
-            select(ExternalCaseResult)
-            .where(ExternalCaseResult.session_id == session_id)
-            .where(ExternalCaseResult.external_id == payload.external_id)
+        existing = await _find_case_result_by_idempotency_key(
+            db,
+            session_id=session_id,
+            external_id=payload.external_id,
         )
-        existing = existing_result.scalar_one_or_none()
         if existing is not None:
-            existing.requirement_ids = await _get_requirement_ids_for_test_case(db, test_case_id=existing.test_case_id)
-            _resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
-                db,
-                requirement_ids=payload.requirement_ids,
-            )
-            _resolved_external_ids, unresolved_external_ids = await _resolve_requirement_external_ids(
-                db,
-                requirement_external_ids=payload.requirement_external_ids,
-                auto_register_requirements=False,
-            )
-            existing.unresolved_requirement_ids = unresolved_ids
-            existing.unresolved_requirement_external_ids = unresolved_external_ids
-            return existing, False
+            return await _hydrate_idempotent_result(db, existing=existing, payload=payload), False
 
     session_result = await db.execute(select(ExternalRunSession).where(ExternalRunSession.id == session_id))
     session = session_result.scalar_one_or_none()
@@ -263,7 +317,21 @@ async def create_case_result(
         auto_registered=was_auto_registered,
     )
     db.add(case_result)
-    await db.flush()
+    try:
+        await db.flush()
+    except IntegrityError as exc:
+        if payload.external_id is None or not _is_case_result_idempotency_collision(exc):
+            raise
+        await db.rollback()
+        existing = await _find_case_result_by_idempotency_key(
+            db,
+            session_id=session_id,
+            external_id=payload.external_id,
+        )
+        if existing is None:
+            raise
+        return await _hydrate_idempotent_result(db, existing=existing, payload=payload), False
+
     resolvable_ids, unresolved_ids = await _resolve_requirement_ids(
         db,
         requirement_ids=payload.requirement_ids,
