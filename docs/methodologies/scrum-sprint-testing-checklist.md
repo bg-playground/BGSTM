@@ -1,275 +1,110 @@
 # Scrum Sprint Testing Checklist
 
 ## Overview
-This checklist provides a comprehensive guide for testing activities throughout a Scrum sprint. Use this to ensure all critical testing tasks are completed and nothing is overlooked during your sprint cycle.
 
-## Pre-Sprint Planning
+This checklist adapts the **six BGSTM phases** to a Scrum sprint. The phases are iterative rather than sequential: planning, test design, environment preparation, execution, analysis, and reporting can all recur during a sprint.
 
-### User Story Review
-- [ ] Review all user stories planned for the sprint
-- [ ] Verify each story has clear acceptance criteria
-- [ ] Ensure acceptance criteria are testable and measurable
-- [ ] Identify stories with unclear requirements for clarification
-- [ ] Check that stories follow Given-When-Then or similar format
-- [ ] For NATAegisFlow artifact stories, include semantic validation acceptance criteria, required evidence, and policy gate expectations
+For ETL or data-pipeline stories, NATAegisFlow semantic-validation activities can be incorporated into the same six phases using the specialized applied example and checklist linked below.
 
-### Test Planning
-- [ ] Identify all testable items for the sprint
-- [ ] List dependencies between user stories and tests
-- [ ] Determine which stories need automated tests
-- [ ] Plan exploratory testing sessions
-- [ ] Identify non-functional testing needs (performance, security)
+## Pre-Sprint / Sprint Planning
 
-### Estimation
-- [ ] Estimate testing effort for each user story
-- [ ] Account for automation development time
-- [ ] Include time for regression testing
-- [ ] Reserve time for defect retesting
-- [ ] Factor in test environment setup time
-- [ ] Consider time for exploratory testing sessions
+### Phase 1 — Test Planning
+- [ ] Review planned user stories and acceptance criteria
+- [ ] Identify testing scope, dependencies, risks, and non-functional needs
+- [ ] Estimate testing and automation effort
+- [ ] Confirm Definition of Done includes appropriate quality criteria
+- [ ] For NATAegisFlow artifact stories, define semantic-validation acceptance criteria, required evidence, and policy-gate expectations
 
-### Test Environment
-- [ ] Verify test environment availability for sprint
-- [ ] Confirm environment matches production configuration
-- [ ] Check test data availability and quality
-- [ ] Validate access credentials are current
-- [ ] Ensure necessary test tools are accessible
-- [ ] Test CI/CD pipeline is functioning
+### Phase 2 — Test Case Development
+- [ ] Define test scenarios for each story
+- [ ] Cover positive, negative, edge, integration, and regression scenarios
+- [ ] Identify automation candidates
+- [ ] Establish or update requirements-to-test traceability
 
-### Definition of Done Review
-- [ ] Review and confirm Definition of Done with team
-- [ ] Ensure all team members understand testing criteria
-- [ ] Verify Definition of Done includes testing requirements
-- [ ] Confirm acceptance criteria alignment with DoD
+### Phase 3 — Test Environment Preparation
+- [ ] Confirm test environments are available and production-representative where practical
+- [ ] Prepare test data and access
+- [ ] Validate required tools, services, integrations, and CI/CD pipelines
+- [ ] Confirm NATAegisFlow run inputs and evidence locations when applicable
 
-**Common Pitfalls to Avoid:**
-- ⚠️ Not clarifying vague acceptance criteria early
-- ⚠️ Underestimating testing effort
-- ⚠️ Assuming test environment will "just work"
+## During the Sprint
 
-## During Sprint
+### Phase 4 — Test Execution
+- [ ] Test completed stories as soon as they are ready
+- [ ] Execute acceptance, exploratory, integration, regression, and non-functional tests as appropriate
+- [ ] Log defects with clear reproduction steps and evidence
+- [ ] Retest resolved defects and check for regressions
+- [ ] Maintain automated tests for new and changed functionality
+- [ ] Review and disposition NATAegisFlow semantic findings for applicable stories
+- [ ] Confirm required evidence is attached and patch validation is complete before acceptance
 
-### Daily Testing Activities
+### Daily Quality Coordination
+- [ ] Communicate testing progress and blockers during stand-up
+- [ ] Monitor CI/CD and automated-test health
+- [ ] Raise critical defects, environment issues, and requirement ambiguities promptly
+- [ ] Coordinate with developers and Product Owner on quality decisions
 
-#### Daily Stand-up Participation
-- [ ] Share yesterday's testing accomplishments
-- [ ] Communicate today's testing plan
-- [ ] Raise any blockers or impediments
-- [ ] Flag test environment issues
-- [ ] Report critical defects found
-- [ ] Request clarifications from team members
+## Sprint Review and Closeout
 
-#### Continuous Integration Testing
-*Monitor and maintain CI/CD pipeline health continuously throughout the sprint:*
-- [ ] Monitor CI/CD pipeline for build failures
-- [ ] Investigate and report failed automated tests
-- [ ] Verify automated smoke tests pass on each commit
-- [ ] Review test coverage metrics from CI reports
-- [ ] Ensure regression tests run successfully
+### Phase 5 — Test Results Analysis
+- [ ] Review pass/fail status, coverage, defect trends, and open risks
+- [ ] Identify gaps in planned versus completed testing
+- [ ] Evaluate regression and automation effectiveness
+- [ ] Assess residual risk and release readiness
+- [ ] For applicable ETL work, confirm semantic findings have owners, dispositions, target dates, and gate impacts
 
-#### Story Acceptance Testing
-- [ ] Test completed stories as soon as they're ready
-- [ ] Execute test cases based on acceptance criteria
-- [ ] Perform exploratory testing on new features
-- [ ] Validate business logic and workflows
-- [ ] Validate NATAegisFlow semantic findings are reviewed, dispositioned, and linked to affected artifacts
-- [ ] Confirm "evidence attached" and "patch validation complete" checks are satisfied before story acceptance
-- [ ] Test edge cases and error conditions
-- [ ] Verify integration with existing functionality
-- [ ] Confirm responsive design on different devices/browsers
+### Phase 6 — Test Results Reporting
+- [ ] Prepare a concise sprint test summary
+- [ ] Report coverage, defects, risks, known limitations, and release recommendation
+- [ ] Confirm Definition of Done and acceptance criteria status
+- [ ] Record policy-gate approval or documented exceptions when applicable
+- [ ] Archive relevant execution and approval evidence
 
-#### Defect Management
-- [ ] Log defects with clear reproduction steps
-- [ ] Attach screenshots or videos to defect reports
-- [ ] Tag defects with appropriate severity and priority
-- [ ] Link defects to affected user stories
-- [ ] Participate in daily defect triage
-- [ ] Retest fixed defects promptly
-- [ ] Verify defect fixes don't introduce regressions
+## Sprint Retrospective
 
-#### Test Automation Activities
-- [ ] Write automated tests for new functionality
-- [ ] Update existing tests affected by changes
-- [ ] Refactor flaky or unreliable tests
-- [ ] Add tests to regression suite
-- [ ] Review and optimize test execution time
-- [ ] Document automation progress
+- [ ] Review what worked well and what slowed testing
+- [ ] Identify recurring defect patterns or quality risks
+- [ ] Assess test automation and environment reliability
+- [ ] Capture actionable process improvements with owners
+- [ ] Feed improvements into the next sprint's Phase 1 planning
 
-#### Collaboration
-- [ ] Pair test with developers when needed
-- [ ] Clarify requirements with Product Owner
-- [ ] Share testing insights in team discussions
-- [ ] Help team members with testing questions
-- [ ] Review code from testing perspective
+## Key Metrics
 
-**Common Pitfalls to Avoid:**
-- ⚠️ Waiting until sprint end to start testing
-- ⚠️ Not retesting defect fixes promptly
-- ⚠️ Ignoring flaky automated tests
-
-## Sprint Review / Retrospective
-
-### Sprint Review Preparation
-- [ ] Complete all planned test execution
-- [ ] Verify all acceptance criteria met
-- [ ] Document known issues and limitations
-- [ ] Prepare demo environment
-- [ ] Create test summary report
-- [ ] Gather quality metrics
-
-### Demo and Presentation
-- [ ] Demonstrate tested features to stakeholders
-- [ ] Present test results and coverage metrics
-- [ ] Show passing automated test suites
-- [ ] Explain any known issues or workarounds
-- [ ] Gather feedback from stakeholders
-- [ ] Document questions and concerns raised
-
-### Test Coverage Review
-- [ ] Calculate percentage of stories fully tested
-- [ ] Review test automation coverage
-- [ ] Identify gaps in test coverage
-- [ ] Document areas needing additional testing
-- [ ] Assess regression test suite effectiveness
-
-### Sprint Retrospective
-
-#### What Went Well
-- [ ] Identify successful testing practices
-- [ ] Note effective collaboration moments
-- [ ] Recognize helpful tools or techniques
-- [ ] Document time-saving automation wins
-
-#### What Needs Improvement
-- [ ] List testing challenges encountered
-- [ ] Identify bottlenecks in testing process
-- [ ] Note environment or tool issues
-- [ ] Document communication gaps
-
-#### Lessons Learned
-- [ ] Record key insights about testing approach
-- [ ] Document new techniques or tools tried
-- [ ] Note effective defect prevention strategies
-- [ ] Capture knowledge for future sprints
-
-#### Action Items
-- [ ] Create specific, actionable improvements
-- [ ] Assign owners to action items
-- [ ] Set deadlines for improvements
-- [ ] Plan to review action items next sprint
-
-**Common Pitfalls to Avoid:**
-- ⚠️ Rushing through retrospective discussion
-- ⚠️ Not following up on action items from previous sprints
-- ⚠️ Focusing only on problems, not celebrating successes
-
-## Sprint Closeout
-
-### Final Verification
-- [ ] Run full regression test suite
-- [ ] Verify all critical and high priority defects resolved
-- [ ] Confirm all Definition of Done criteria met
-- [ ] Confirm NATAegisFlow policy gate approval or documented exception is complete
-- [ ] Validate integration with existing features
-- [ ] Check that no new regressions introduced
-
-### Documentation Updates
-- [ ] Update test case repository
-- [ ] Document new test scenarios
-- [ ] Update automated test documentation
-- [ ] Record sprint metrics and trends
-- [ ] Archive test execution results
-
-### Preparation for Next Sprint
-- [ ] Identify carry-over testing tasks
-- [ ] Update test environment for next sprint
-- [ ] Plan automation improvements
-- [ ] Review and groom test backlog
-- [ ] Prepare for upcoming sprint planning
-
-## Key Metrics to Track
-
-### Test Execution Metrics
-- [ ] Number of test cases executed
-- [ ] Pass/fail rate
-- [ ] Test automation coverage percentage
-- [ ] Regression test suite execution time
-
-### Defect Metrics
-- [ ] Total defects found
-- [ ] Defects by severity
-- [ ] Defect fix rate
-- [ ] Escaped defects (if any)
-
-### Sprint Velocity and Quality
-- [ ] Story points completed vs. planned
-- [ ] Stories meeting Definition of Done
-- [ ] Test coverage per story point
-- [ ] Technical debt created or resolved
+- Test cases or scenarios executed versus planned
+- Pass/fail/blocked rate
+- Requirement or story coverage
+- Defects by severity and status
+- Escaped defects
+- Automation coverage and stability
+- Regression execution time
+- Residual-risk status
 
 ## Related Resources
 
 ### Templates
-- [Test Plan Template](../templates/test-plan-template.md) - For sprint test planning
-- [Test Case Template](../templates/test-case-template.md) - For detailed test scenarios
-- [Defect Report Template](../templates/defect-report-template.md) - For logging defects
-- [Test Execution Report Template](../templates/test-execution-report-template.md) - For sprint review
-- [NATAegisFlow Artifact Workflow Checklist](../test-templates/nataegisflow-artifact-workflow-template.md) - For ETL semantic validation evidence
+- [Test Plan Template](../test-templates/test-plan-template.md)
+- [Test Case Template](../test-templates/test-case-template.md)
+- [Defect Report Template](../test-templates/defect-report-template.md)
+- [Test Execution Report Template](../test-templates/test-execution-report-template.md)
+- [NATAegisFlow Artifact Workflow Checklist](../test-templates/nataegisflow-artifact-workflow-template.md)
 
-### Phase Guidance
-- [Test Planning Phase](../phases/01-test-planning.md) - Detailed planning guidance
-- [Test Case Development](../phases/02-test-case-development.md) - Creating test cases
-- [Test Environment Preparation](../phases/03-test-environment-preparation.md) - Environment setup
-- [Test Execution Phase](../phases/04-test-execution.md) - Execution best practices
-- [Test Results Analysis](../phases/05-test-results-analysis.md) - Analyzing results
-- [Test Results Reporting](../phases/06-test-results-reporting.md) - Sprint reporting
-- [Phase 7: ETL Semantic Validation](../phases/07-etl-semantic-validation.md) - Finalized NATAegisFlow process guidance
+### BGSTM Phase Guidance
+- [Phase 1: Test Planning](../phases/01-test-planning.md)
+- [Phase 2: Test Case Development](../phases/02-test-case-development.md)
+- [Phase 3: Test Environment Preparation](../phases/03-test-environment-preparation.md)
+- [Phase 4: Test Execution](../phases/04-test-execution.md)
+- [Phase 5: Test Results Analysis](../phases/05-test-results-analysis.md)
+- [Phase 6: Test Results Reporting](../phases/06-test-results-reporting.md)
 
-### Examples
-- [Examples Directory](../examples/README.md) - Practical examples (coming soon)
+### Applied Examples
+- [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md)
+- [NATAegisFlow Artifact Workflow Example](../examples/nataegisflow-artifact-workflow-example.md)
 
-### Related Methodology Docs
-- [Scrum Testing Methodology](scrum.md) - Comprehensive Scrum testing guide
-- [Agile Testing Methodology](agile.md) - General Agile testing practices
-- [Methodology Comparison](comparison.md) - Compare different approaches
-
-## Tips for Success
-
-### For New Scrum Teams
-1. Start with a simple Definition of Done and evolve it
-2. Focus on automation from sprint one
-3. Don't over-commit on testing in early sprints
-4. Build time for learning and improvement
-
-### For Experienced Teams
-1. Continuously refactor and improve test automation
-2. Experiment with new testing techniques
-3. Mentor team members on testing practices
-4. Challenge yourselves to increase velocity without compromising quality
-
-### General Best Practices
-- Test early and test often throughout the sprint
-- Collaborate closely with developers
-- Automate repetitive tests
-- Keep test documentation lightweight but sufficient
-- Celebrate quality wins, learn from defects
-- Maintain sustainable testing pace
-
-## Checklist Usage Guidelines
-
-**How to Use This Checklist:**
-1. Review at sprint planning to prepare for the sprint
-2. Reference daily during sprint execution
-3. Use during sprint review to ensure completeness
-4. Customize based on your team's specific needs
-5. Print or pin for easy team access
-
-**Customization Tips:**
-- Add team-specific items relevant to your context
-- Remove items that don't apply to your project
-- Adjust frequency of activities based on sprint length
-- Modify to align with your Definition of Done
+### Methodology Guides
+- [Scrum Testing](scrum.md)
+- [Agile Testing](agile.md)
+- [Methodology Comparison](comparison.md)
 
 ---
 
-*This checklist is part of the BGSTM (BG Software Testing Methodology) framework. For more information, see the [main documentation](../README.md).*
+*This checklist is part of BGSTM. BGSTM has exactly six core methodology phases.*
