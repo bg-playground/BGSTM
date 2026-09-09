@@ -25,6 +25,7 @@ from app.schemas.quality_recovery import RecoveryTrendResponse
 from app.schemas.quality_recurring import RecurringDefectsParetoResponse
 
 router = APIRouter(prefix="/quality-metrics")
+_RECOVERY_SEMANTIC_NOTE = "Execution recovery (time-to-green), not defect lifecycle repair time."
 
 
 class WindowParam(IntEnum):
@@ -33,13 +34,26 @@ class WindowParam(IntEnum):
     DAYS_90 = 90
 
 
+async def _apply_recovery_summary(db: AsyncSession, summary: SummaryStatsResponse) -> SummaryStatsResponse:
+    recovery = await get_recovery_trend_data(db, 30, "overall")
+    summary.mean_time_to_repair_hours = recovery.mean_recovery_hours
+    summary.mean_time_to_repair_hours_reason = (
+        _RECOVERY_SEMANTIC_NOTE
+        if recovery.mean_recovery_hours is not None
+        else f"{_RECOVERY_SEMANTIC_NOTE} {recovery.reason or 'No resolved recovery episodes are available.'}"
+    )
+    return summary
+
+
 @router.get("/", response_model=QualityDashboardSnapshot)
 async def get_quality_dashboard(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> QualityDashboardSnapshot:
     _ = current_user
-    return await crud.get_quality_dashboard_snapshot(db, 30)
+    snapshot = await crud.get_quality_dashboard_snapshot(db, 30)
+    snapshot.summary_stats = await _apply_recovery_summary(db, snapshot.summary_stats)
+    return snapshot
 
 
 @router.get("/defect-trend", response_model=DefectTrendResponse)
@@ -131,4 +145,4 @@ async def get_summary_stats(
     current_user: User = Depends(get_current_user),
 ) -> SummaryStatsResponse:
     _ = current_user
-    return await crud.get_summary_stats(db)
+    return await _apply_recovery_summary(db, await crud.get_summary_stats(db))
