@@ -263,8 +263,8 @@ def test_coverage_vs_defects_endpoint_and_window_validation(db_session):
 
     app.dependency_overrides[get_current_user] = override_current_user
     with TestClient(app) as client:
-        response = client.get("/api/quality-metrics/coverage-vs-defects?window=7")
-        invalid = client.get("/api/quality-metrics/coverage-vs-defects?window=14")
+        response = client.get("/api/v1/quality-metrics/coverage-vs-defects?window=7")
+        invalid = client.get("/api/v1/quality-metrics/coverage-vs-defects?window=14")
 
     assert response.status_code == 200
     assert response.json()["points"] == []
