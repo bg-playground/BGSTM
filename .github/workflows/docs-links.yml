@@ -1,4 +1,4 @@
-name: Documentation Links
+name: Documentation Quality
 
 on:
   pull_request:
@@ -6,15 +6,23 @@ on:
       - main
     paths:
       - '**/*.md'
+      - 'mkdocs.yml'
+      - 'docs/assets/**'
+      - 'docs/stylesheets/**'
       - 'scripts/check_markdown_links.py'
       - '.github/workflows/docs-links.yml'
+      - '.github/workflows/deploy-docs.yml'
   push:
     branches:
       - main
     paths:
       - '**/*.md'
+      - 'mkdocs.yml'
+      - 'docs/assets/**'
+      - 'docs/stylesheets/**'
       - 'scripts/check_markdown_links.py'
       - '.github/workflows/docs-links.yml'
+      - '.github/workflows/deploy-docs.yml'
 
 permissions:
   contents: read
@@ -34,3 +42,23 @@ jobs:
 
       - name: Check internal Markdown links
         run: python scripts/check_markdown_links.py
+
+  mkdocs-build:
+    name: MkDocs Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install documentation dependencies
+        run: |
+          pip install mkdocs-material
+          pip install mkdocs-minify-plugin
+
+      - name: Build documentation strictly
+        run: mkdocs build --strict

@@ -10,7 +10,21 @@ edit_uri: edit/main/docs/
 copyright: Copyright &copy; 2024-2026 BGSTM Project. Licensed under the MIT License.
 
 draft_docs: '!*'  # Do not exclude any files as drafts
-not_in_nav: warn
+exclude_docs: |
+  README.md
+  examples/README.md
+  methodologies/README.md
+  test-templates/README.md
+  templates/**
+
+# Repository-relative links can intentionally point to source files outside
+# docs/. The dedicated Markdown-link checker validates those paths across the
+# full repository; MkDocs should report them without failing the site build.
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    not_found: info
 
 theme:
   name: material
@@ -175,6 +189,8 @@ nav:
 
   - Features:
     - Enhanced Suggestion Review: features/enhanced-suggestion-review.md
+    - Quality KPI Dashboard: features/quality-kpi-dashboard.md
+    - Release Readiness Dashboard: features/release-readiness-dashboard.md
 
   - Architecture:
     - architecture/index.md
