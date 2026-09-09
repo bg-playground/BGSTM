@@ -164,6 +164,7 @@ nav:
 
   - Examples:
     - examples/index.md
+    - Start Here - Six-Phase Worked Example: examples/six-phase-checkout-worked-example.md
     - Test Plan Example: examples/test-plan-example.md
     - Test Case Suite Example: examples/test-case-suite-example.md
     - Defect Report Example: examples/defect-report-example.md
