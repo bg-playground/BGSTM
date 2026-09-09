@@ -92,7 +92,7 @@ There are many ways to contribute to BGSTM:
 
 3. **Make Your Changes**
    - Edit documentation files (`.md` files)
-   - Add new templates in the `docs/templates/` directory
+   - Add new templates in the `docs/test-templates/` directory
    - Add examples in the `docs/examples/` directory
 
 4. **Test Your Changes**
@@ -189,7 +189,8 @@ Maintain the existing structure:
 docs/
 ├── phases/           # Testing phase documentation
 ├── methodologies/    # Methodology guides
-├── templates/        # Testing templates
+├── test-templates/   # Canonical testing templates
+├── templates/        # Legacy compatibility links only
 ├── examples/         # Practical examples
 └── integration/      # Integration guides
 ```
@@ -278,7 +279,7 @@ We use the following labels:
 
 If you need help with your contribution:
 
-1. Check the [documentation](docs/README.md)
+1. Check the [documentation](README.md)
 2. Review existing issues and PRs
 3. Open a new issue with the `question` label
 4. Be specific about what you need help with
@@ -298,19 +299,19 @@ All contributors will be recognized for their contributions. We value every cont
 
 Maintainers with push access can publish a new GitHub Release by following these steps:
 
-1. **Update the changelog** — Add an entry for the new version in `docs/CHANGELOG.md` under a heading like:
+1. **Update the changelog** — Add an entry for the new version in `CHANGELOG.md` under a heading like:
    ```markdown
    ## [X.Y.Z] - YYYY-MM-DD
    ```
 
-2. **Add the footer link** — At the bottom of `docs/CHANGELOG.md`, add:
+2. **Add the footer link** — At the bottom of `CHANGELOG.md`, add:
    ```markdown
    [X.Y.Z]: https://github.com/bg-playground/BGSTM/releases/tag/vX.Y.Z
    ```
 
 3. **Commit and push to main**
    ```bash
-   git add docs/CHANGELOG.md
+   git add CHANGELOG.md
    git commit -m "chore: release vX.Y.Z"
    git push origin main
    ```
@@ -327,10 +328,10 @@ Maintainers with push access can publish a new GitHub Release by following these
 
 ## 📚 Additional Resources
 
-- [README](README.md) - Project overview
-- [Getting Started Guide](docs/GETTING-STARTED.md) - Introduction to BGSTM
-- [Documentation](docs/README.md) - Complete documentation
-- [MIT License](LICENSE) - License information
+- [README](README.md) - Documentation overview
+- [Getting Started Guide](GETTING-STARTED.md) - Introduction to BGSTM
+- [Main Project Documentation](../README.md) - Repository overview
+- [MIT License](../LICENSE) - License information
 
 ---
 
