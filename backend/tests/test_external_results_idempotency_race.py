@@ -85,9 +85,7 @@ async def test_same_external_id_is_allowed_in_different_sessions(db_session: Asy
     assert second.session_id == session_b.id
 
     count_result = await db_session.execute(
-        select(func.count())
-        .select_from(ExternalCaseResult)
-        .where(ExternalCaseResult.external_id == external_id)
+        select(func.count()).select_from(ExternalCaseResult).where(ExternalCaseResult.external_id == external_id)
     )
     assert count_result.scalar_one() == 2
 
@@ -155,10 +153,7 @@ async def test_expected_case_result_uniqueness_race_recovers_existing_row(monkey
         side_effect=IntegrityError(
             "INSERT",
             {},
-            Exception(
-                "UNIQUE constraint failed: external_case_results.session_id, "
-                "external_case_results.external_id"
-            ),
+            Exception("UNIQUE constraint failed: external_case_results.session_id, external_case_results.external_id"),
         )
     )
     db.rollback = AsyncMock()
