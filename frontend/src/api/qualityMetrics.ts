@@ -47,6 +47,24 @@ export interface DefectsByModuleResponse {
   reason: string | null;
 }
 
+export interface RecurringDefectEntry {
+  test_case_id: string | null;
+  external_id: string | null;
+  display_name: string;
+  module: string;
+  failure_count: number;
+  cumulative_pct: number;
+  latest_failure_session_id: string;
+  latest_failure_at: string;
+}
+
+export interface RecurringDefectsParetoResponse {
+  entries: RecurringDefectEntry[];
+  total_recurring_failures: number;
+  is_synthetic: boolean;
+  reason: string | null;
+}
+
 export interface FlakyTestEntry {
   test_case_id: string | null;
   external_id: string | null;
@@ -121,6 +139,18 @@ export const qualityMetricsApi = {
   ): Promise<DefectsByModuleResponse> {
     const response = await apiClient.get<DefectsByModuleResponse>(
       `/quality-metrics/defects-by-module?window=${window}&top_n=${topN}`,
+      config
+    );
+    return response.data;
+  },
+
+  async getRecurringDefectsPareto(
+    window: WindowDays,
+    topN = 10,
+    config?: AxiosRequestConfig
+  ): Promise<RecurringDefectsParetoResponse> {
+    const response = await apiClient.get<RecurringDefectsParetoResponse>(
+      `/quality-metrics/recurring-defects?window=${window}&top_n=${topN}`,
       config
     );
     return response.data;

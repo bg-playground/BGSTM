@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { qualityMetricsApi, type FlakyRankingResponse } from '../../api/qualityMetrics';
+import {
+  qualityMetricsApi,
+  type FlakyRankingResponse,
+  type RecurringDefectsParetoResponse,
+} from '../../api/qualityMetrics';
 import { FlakyRankingPanel } from './FlakyRankingPanel';
 
 vi.mock('../../api/qualityMetrics', async () => {
@@ -11,6 +15,7 @@ vi.mock('../../api/qualityMetrics', async () => {
     qualityMetricsApi: {
       ...actual.qualityMetricsApi,
       getFlakyRanking: vi.fn(),
+      getRecurringDefectsPareto: vi.fn(),
     },
   };
 });
@@ -44,9 +49,45 @@ const responseWithRows: FlakyRankingResponse = {
   reason: null,
 };
 
+const paretoWithRows: RecurringDefectsParetoResponse = {
+  entries: [
+    {
+      test_case_id: '11111111-1111-1111-1111-111111111111',
+      external_id: 'TC-1',
+      display_name: 'Checkout flow',
+      module: 'Checkout',
+      failure_count: 4,
+      cumulative_pct: 66.67,
+      latest_failure_session_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      latest_failure_at: '2026-06-17T10:00:00.000Z',
+    },
+    {
+      test_case_id: '33333333-3333-3333-3333-333333333333',
+      external_id: 'TC-3',
+      display_name: 'Refund review',
+      module: 'Orders',
+      failure_count: 2,
+      cumulative_pct: 100,
+      latest_failure_session_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      latest_failure_at: '2026-06-17T09:30:00.000Z',
+    },
+  ],
+  total_recurring_failures: 6,
+  is_synthetic: false,
+  reason: null,
+};
+
+const emptyPareto: RecurringDefectsParetoResponse = {
+  entries: [],
+  total_recurring_failures: 0,
+  is_synthetic: false,
+  reason: 'No test failed more than once in the selected window.',
+};
+
 describe('FlakyRankingPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(qualityMetricsApi.getRecurringDefectsPareto).mockResolvedValue(emptyPareto);
   });
 
   it('renders ranking rows from API response', async () => {
@@ -63,7 +104,26 @@ describe('FlakyRankingPanel', () => {
     expect(screen.getByText('100.0%')).toBeInTheDocument();
   });
 
-  it('shows synthetic empty reason when no entries are returned', async () => {
+  it('renders recurring failures and evidence links', async () => {
+    vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue(responseWithRows);
+    vi.mocked(qualityMetricsApi.getRecurringDefectsPareto).mockResolvedValue(paretoWithRows);
+
+    render(
+      <MemoryRouter>
+        <FlakyRankingPanel window={30} />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByTestId('quality-dashboard-chart-recurring-defects')).toBeInTheDocument();
+    expect(screen.getByText('Refund review · Orders')).toBeInTheDocument();
+    const links = screen.getAllByRole('link', { name: 'View latest failure' });
+    expect(links[0]).toHaveAttribute(
+      'href',
+      '/runs/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa?case=11111111-1111-1111-1111-111111111111'
+    );
+  });
+
+  it('shows synthetic empty reason when no flaky entries are returned', async () => {
     vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue({
       entries: [],
       is_synthetic: true,
@@ -80,7 +140,7 @@ describe('FlakyRankingPanel', () => {
     expect(screen.getByText('requires external case-result outcomes; no execution results are available yet')).toBeInTheDocument();
   });
 
-  it('re-fetches when the selected window changes', async () => {
+  it('re-fetches both analyses when the selected window changes', async () => {
     vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue(responseWithRows);
 
     const { rerender } = render(
@@ -90,6 +150,7 @@ describe('FlakyRankingPanel', () => {
     );
 
     await waitFor(() => expect(qualityMetricsApi.getFlakyRanking).toHaveBeenCalledWith(30, 10, expect.any(Object)));
+    await waitFor(() => expect(qualityMetricsApi.getRecurringDefectsPareto).toHaveBeenCalledWith(30, 10, expect.any(Object)));
 
     rerender(
       <MemoryRouter>
@@ -98,6 +159,7 @@ describe('FlakyRankingPanel', () => {
     );
 
     await waitFor(() => expect(qualityMetricsApi.getFlakyRanking).toHaveBeenCalledWith(7, 10, expect.any(Object)));
+    await waitFor(() => expect(qualityMetricsApi.getRecurringDefectsPareto).toHaveBeenCalledWith(7, 10, expect.any(Object)));
   });
 
   it('sorts rows when a sortable column header is clicked', async () => {
@@ -110,11 +172,13 @@ describe('FlakyRankingPanel', () => {
     );
 
     await screen.findByText('Checkout flow');
-    const bodyRows = () => within(screen.getAllByRole('rowgroup')[1]).getAllByRole('row');
+    const flakyPanel = screen.getByTestId('quality-dashboard-chart-flaky-ranking');
+    const rowGroups = within(flakyPanel).getAllByRole('rowgroup');
+    const bodyRows = () => within(rowGroups[1]).getAllByRole('row');
 
     expect(within(bodyRows()[0]).getByText('Checkout flow')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Runs' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Runs' }));
+    fireEvent.click(within(flakyPanel).getByRole('button', { name: 'Runs' }));
+    fireEvent.click(within(flakyPanel).getByRole('button', { name: 'Runs' }));
     expect(within(bodyRows()[0]).getByText('Search filters')).toBeInTheDocument();
   });
 });

@@ -354,6 +354,23 @@ async def test_quality_dashboard_snapshot_endpoint_returns_all_sections(db_sessi
 
 
 @pytest.mark.asyncio
+async def test_quality_metric_valid_window_query_is_parsed(db_session):
+    _session, admin_user = db_session
+
+    async def override_user():
+        return admin_user
+
+    app.dependency_overrides[get_current_user] = override_user
+    try:
+        with TestClient(app) as client:
+            response = client.get("/api/v1/quality-metrics/defect-trend?window=7")
+        assert response.status_code == 200
+        assert len(response.json()["points"]) == 7
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
 async def test_quality_metric_window_validation_returns_422(db_session):
     _session, admin_user = db_session
 
