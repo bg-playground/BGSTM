@@ -173,7 +173,8 @@ describe('FlakyRankingPanel', () => {
 
     await screen.findByText('Checkout flow');
     const flakyPanel = screen.getByTestId('quality-dashboard-chart-flaky-ranking');
-    const bodyRows = () => within(flakyPanel).getAllByRole('rowgroup')[1] && within(within(flakyPanel).getAllByRole('rowgroup')[1]).getAllByRole('row');
+    const rowGroups = within(flakyPanel).getAllByRole('rowgroup');
+    const bodyRows = () => within(rowGroups[1]).getAllByRole('row');
 
     expect(within(bodyRows()[0]).getByText('Checkout flow')).toBeInTheDocument();
     fireEvent.click(within(flakyPanel).getByRole('button', { name: 'Runs' }));
