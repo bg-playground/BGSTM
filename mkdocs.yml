@@ -54,7 +54,6 @@ theme:
     edit: material/pencil
     view: material/eye
 
-  # Custom logo and favicon
   favicon: assets/favicon.png
   logo: assets/logo.png
 
@@ -63,8 +62,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/bg-playground/BGSTM
       name: BGSTM on GitHub
-  
-  generator: false  # Remove "Made with Material for MkDocs" footer
+  generator: false
 
 extra_css:
   - stylesheets/extra.css
@@ -124,7 +122,6 @@ nav:
     - Phase 4 - Test Execution: phases/04-test-execution.md
     - Phase 5 - Test Results Analysis: phases/05-test-results-analysis.md
     - Phase 6 - Test Results Reporting: phases/06-test-results-reporting.md
-    - Phase 7 - ETL Semantic Validation: phases/07-etl-semantic-validation.md
 
   - Methodologies:
     - methodologies/index.md
@@ -160,6 +157,7 @@ nav:
     - Environment Setup Example: examples/environment-setup-example.md
     - Testing Schedule Example: examples/testing-schedule-example.md
     - Traceability Matrix Example: examples/traceability-matrix-example.md
+    - ETL Semantic Validation Applied Example: examples/etl-semantic-validation-example.md
     - NATAegisFlow Artifact Workflow Example: examples/nataegisflow-artifact-workflow-example.md
     - AegisFlow BGSTM Pilot Retrospective: examples/nataegisflow-bgstm-pilot-retrospective.md
 
