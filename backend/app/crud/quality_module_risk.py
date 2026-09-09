@@ -96,7 +96,8 @@ async def get_module_coverage_failure_density(
         median_failure_density_pct=round(float(median(point.failure_density_pct for point in points)), 2),
         is_synthetic=False,
         reason=(
-            "No execution results were recorded in the selected window; failure density is 0% until execution evidence exists."
+            "No execution results were recorded in the selected window; "
+            "failure density is 0% until execution evidence exists."
             if not rows
             else None
         ),
