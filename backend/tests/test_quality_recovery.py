@@ -35,15 +35,24 @@ async def db_session():
 
 async def _seed_context(session: AsyncSession):
     user = User(
-        id=uuid.uuid4(), email="admin@example.com", hashed_password="hashed", full_name="Admin",
-        role=UserRole.admin, is_active=True,
+        id=uuid.uuid4(),
+        email="admin@example.com",
+        hashed_password="hashed",
+        full_name="Admin",
+        role=UserRole.admin,
+        is_active=True,
     )
     project = Project(id=uuid.uuid4(), name="Recovery", description="seed")
     session.add_all([user, project])
     await session.flush()
     token = RunnerToken(
-        id=uuid.uuid4(), hashed_token="hash", salt="salt", label="runner",
-        scopes=["external_results:write"], created_by_user_id=user.id, created_at=_days_ago(40),
+        id=uuid.uuid4(),
+        hashed_token="hash",
+        salt="salt",
+        label="runner",
+        scopes=["external_results:write"],
+        created_by_user_id=user.id,
+        created_at=_days_ago(40),
     )
     session.add(token)
     await session.flush()
@@ -52,9 +61,15 @@ async def _seed_context(session: AsyncSession):
 
 async def _case(session: AsyncSession, external_id: str, module: str, priority: PriorityLevel) -> TestCase:
     case = TestCase(
-        id=uuid.uuid4(), external_id=external_id, title=external_id, description="desc",
-        type=TestCaseType.FUNCTIONAL, priority=priority, status=TestCaseStatus.READY,
-        module=module, automation_status=AutomationStatus.AUTOMATED,
+        id=uuid.uuid4(),
+        external_id=external_id,
+        title=external_id,
+        description="desc",
+        type=TestCaseType.FUNCTIONAL,
+        priority=priority,
+        status=TestCaseStatus.READY,
+        module=module,
+        automation_status=AutomationStatus.AUTOMATED,
     )
     session.add(case)
     await session.flush()
@@ -72,16 +87,33 @@ async def _result(
 ) -> None:
     at = _days_ago(days_ago)
     run = ExternalRunSession(
-        id=uuid.uuid4(), project_id=project.id, runner="pytest", status=RunStatus.failed,
-        git_sha=str(uuid.uuid4()), git_branch="main", run_metadata={}, summary={},
-        started_at=at, finished_at=at + timedelta(minutes=1), created_by_runner_token_id=token.id,
+        id=uuid.uuid4(),
+        project_id=project.id,
+        runner="pytest",
+        status=RunStatus.failed,
+        git_sha=str(uuid.uuid4()),
+        git_branch="main",
+        run_metadata={},
+        summary={},
+        started_at=at,
+        finished_at=at + timedelta(minutes=1),
+        created_by_runner_token_id=token.id,
     )
     session.add(run)
     await session.flush()
-    session.add(ExternalCaseResult(
-        id=uuid.uuid4(), session_id=run.id, test_case_id=case.id, external_id=case.external_id,
-        title=case.title, outcome=outcome, duration_ms=100, created_at=at, updated_at=at,
-    ))
+    session.add(
+        ExternalCaseResult(
+            id=uuid.uuid4(),
+            session_id=run.id,
+            test_case_id=case.id,
+            external_id=case.external_id,
+            title=case.title,
+            outcome=outcome,
+            duration_ms=100,
+            created_at=at,
+            updated_at=at,
+        )
+    )
     await session.flush()
 
 
