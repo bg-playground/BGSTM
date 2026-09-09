@@ -46,9 +46,7 @@ async def get_module_coverage_failure_density(
 
     links_result = await db.execute(select(RequirementTestCaseLink.requirement_id, RequirementTestCaseLink.link_source))
     covered_requirement_ids = {
-        requirement_id
-        for requirement_id, link_source in links_result.all()
-        if link_source in _ACCEPTED_LINK_SOURCES
+        requirement_id for requirement_id, link_source in links_result.all() if link_source in _ACCEPTED_LINK_SOURCES
     }
 
     requirement_buckets: dict[str, dict[str, int]] = defaultdict(lambda: {"total": 0, "covered": 0})

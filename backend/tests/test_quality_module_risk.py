@@ -58,69 +58,130 @@ async def db_session():
 
 async def _seed(session: AsyncSession, user: User) -> None:
     auth_covered = Requirement(
-        id=uuid.uuid4(), external_id="REQ-A1", title="Auth login", description="desc",
-        type=RequirementType.FUNCTIONAL, priority=PriorityLevel.HIGH,
-        status=RequirementStatus.APPROVED, module="Authentication",
+        id=uuid.uuid4(),
+        external_id="REQ-A1",
+        title="Auth login",
+        description="desc",
+        type=RequirementType.FUNCTIONAL,
+        priority=PriorityLevel.HIGH,
+        status=RequirementStatus.APPROVED,
+        module="Authentication",
     )
     auth_uncovered = Requirement(
-        id=uuid.uuid4(), external_id="REQ-A2", title="Auth lockout", description="desc",
-        type=RequirementType.FUNCTIONAL, priority=PriorityLevel.HIGH,
-        status=RequirementStatus.APPROVED, module="Authentication",
+        id=uuid.uuid4(),
+        external_id="REQ-A2",
+        title="Auth lockout",
+        description="desc",
+        type=RequirementType.FUNCTIONAL,
+        priority=PriorityLevel.HIGH,
+        status=RequirementStatus.APPROVED,
+        module="Authentication",
     )
     orders_covered = Requirement(
-        id=uuid.uuid4(), external_id="REQ-O1", title="Order submit", description="desc",
-        type=RequirementType.FUNCTIONAL, priority=PriorityLevel.CRITICAL,
-        status=RequirementStatus.APPROVED, module="Orders",
+        id=uuid.uuid4(),
+        external_id="REQ-O1",
+        title="Order submit",
+        description="desc",
+        type=RequirementType.FUNCTIONAL,
+        priority=PriorityLevel.CRITICAL,
+        status=RequirementStatus.APPROVED,
+        module="Orders",
     )
     billing_uncovered = Requirement(
-        id=uuid.uuid4(), external_id="REQ-B1", title="Billing history", description="desc",
-        type=RequirementType.FUNCTIONAL, priority=PriorityLevel.MEDIUM,
-        status=RequirementStatus.APPROVED, module="Billing",
+        id=uuid.uuid4(),
+        external_id="REQ-B1",
+        title="Billing history",
+        description="desc",
+        type=RequirementType.FUNCTIONAL,
+        priority=PriorityLevel.MEDIUM,
+        status=RequirementStatus.APPROVED,
+        module="Billing",
     )
     auth_case = TestCase(
-        id=uuid.uuid4(), external_id="TC-A1", title="Login", description="desc",
-        type=TestCaseType.FUNCTIONAL, priority=PriorityLevel.HIGH, status=TestCaseStatus.READY,
-        module="Authentication", automation_status=AutomationStatus.AUTOMATED,
+        id=uuid.uuid4(),
+        external_id="TC-A1",
+        title="Login",
+        description="desc",
+        type=TestCaseType.FUNCTIONAL,
+        priority=PriorityLevel.HIGH,
+        status=TestCaseStatus.READY,
+        module="Authentication",
+        automation_status=AutomationStatus.AUTOMATED,
     )
     orders_case = TestCase(
-        id=uuid.uuid4(), external_id="TC-O1", title="Submit order", description="desc",
-        type=TestCaseType.FUNCTIONAL, priority=PriorityLevel.CRITICAL, status=TestCaseStatus.READY,
-        module="Orders", automation_status=AutomationStatus.AUTOMATED,
+        id=uuid.uuid4(),
+        external_id="TC-O1",
+        title="Submit order",
+        description="desc",
+        type=TestCaseType.FUNCTIONAL,
+        priority=PriorityLevel.CRITICAL,
+        status=TestCaseStatus.READY,
+        module="Orders",
+        automation_status=AutomationStatus.AUTOMATED,
     )
     session.add_all([auth_covered, auth_uncovered, orders_covered, billing_uncovered, auth_case, orders_case])
     await session.flush()
 
-    session.add_all([
-        RequirementTestCaseLink(
-            id=uuid.uuid4(), requirement_id=auth_covered.id, test_case_id=auth_case.id,
-            link_type=LinkType.COVERS, link_source=LinkSource.MANUAL, created_by="seed",
-        ),
-        RequirementTestCaseLink(
-            id=uuid.uuid4(), requirement_id=orders_covered.id, test_case_id=orders_case.id,
-            link_type=LinkType.COVERS, link_source=LinkSource.AI_CONFIRMED, created_by="seed",
-        ),
-    ])
+    session.add_all(
+        [
+            RequirementTestCaseLink(
+                id=uuid.uuid4(),
+                requirement_id=auth_covered.id,
+                test_case_id=auth_case.id,
+                link_type=LinkType.COVERS,
+                link_source=LinkSource.MANUAL,
+                created_by="seed",
+            ),
+            RequirementTestCaseLink(
+                id=uuid.uuid4(),
+                requirement_id=orders_covered.id,
+                test_case_id=orders_case.id,
+                link_type=LinkType.COVERS,
+                link_source=LinkSource.AI_CONFIRMED,
+                created_by="seed",
+            ),
+        ]
+    )
 
     project = Project(id=uuid.uuid4(), name="ShopFlow", description="seed")
     session.add(project)
     await session.flush()
     token = RunnerToken(
-        id=uuid.uuid4(), hashed_token="hash", salt="salt", label="seed",
-        scopes=["external_results:write"], created_by_user_id=user.id, created_at=_days_ago(40),
+        id=uuid.uuid4(),
+        hashed_token="hash",
+        salt="salt",
+        label="seed",
+        scopes=["external_results:write"],
+        created_by_user_id=user.id,
+        created_at=_days_ago(40),
     )
     session.add(token)
     await session.flush()
 
     recent_run = ExternalRunSession(
-        id=uuid.uuid4(), project_id=project.id, runner="pytest", status=RunStatus.failed,
-        git_sha="recent", git_branch="main", run_metadata={}, summary={"total": 4, "failed": 3},
-        started_at=_days_ago(3), finished_at=_days_ago(3) + timedelta(minutes=1),
+        id=uuid.uuid4(),
+        project_id=project.id,
+        runner="pytest",
+        status=RunStatus.failed,
+        git_sha="recent",
+        git_branch="main",
+        run_metadata={},
+        summary={"total": 4, "failed": 3},
+        started_at=_days_ago(3),
+        finished_at=_days_ago(3) + timedelta(minutes=1),
         created_by_runner_token_id=token.id,
     )
     old_run = ExternalRunSession(
-        id=uuid.uuid4(), project_id=project.id, runner="pytest", status=RunStatus.failed,
-        git_sha="old", git_branch="main", run_metadata={}, summary={"total": 1, "failed": 1},
-        started_at=_days_ago(20), finished_at=_days_ago(20) + timedelta(minutes=1),
+        id=uuid.uuid4(),
+        project_id=project.id,
+        runner="pytest",
+        status=RunStatus.failed,
+        git_sha="old",
+        git_branch="main",
+        run_metadata={},
+        summary={"total": 1, "failed": 1},
+        started_at=_days_ago(20),
+        finished_at=_days_ago(20) + timedelta(minutes=1),
         created_by_runner_token_id=token.id,
     )
     session.add_all([recent_run, old_run])
@@ -134,11 +195,19 @@ async def _seed(session: AsyncSession, user: User) -> None:
         (old_run.id, auth_case, CaseStatus.failed, 20),
     ]
     for index, (run_id, test_case, outcome, age) in enumerate(outcomes):
-        session.add(ExternalCaseResult(
-            id=uuid.uuid4(), session_id=run_id, test_case_id=test_case.id,
-            external_id=f"{test_case.external_id}-{index}", title=test_case.title,
-            outcome=outcome, duration_ms=100, created_at=_days_ago(age), updated_at=_days_ago(age),
-        ))
+        session.add(
+            ExternalCaseResult(
+                id=uuid.uuid4(),
+                session_id=run_id,
+                test_case_id=test_case.id,
+                external_id=f"{test_case.external_id}-{index}",
+                title=test_case.title,
+                outcome=outcome,
+                duration_ms=100,
+                created_at=_days_ago(age),
+                updated_at=_days_ago(age),
+            )
+        )
     await session.commit()
 
 
