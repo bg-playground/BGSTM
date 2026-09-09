@@ -24,6 +24,7 @@ import {
 } from '../../api/qualityMetrics';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { useEffectAsync } from '../../hooks/useEffectAsync';
+import { CoverageFailureDensityPanel } from './CoverageFailureDensityPanel';
 
 const outcomeBadgeClass: Record<string, string> = {
   passed: 'bg-green-100 text-green-800',
@@ -142,129 +143,133 @@ export function FlakyRankingPanel({ window }: { window: WindowDays }) {
   );
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      <div data-testid="quality-dashboard-chart-recurring-defects" className="rounded-lg bg-white p-6 shadow">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-slate-900">Recurring Defects Pareto</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Tests with two or more failures in the selected window. Bars are recurring failure counts; the line is cumulative share.
-          </p>
-        </div>
-        {loading && !paretoData ? (
-          <div className="flex h-72 items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        ) : !paretoData || paretoData.entries.length === 0 ? (
-          <EmptyPanel title="Recurring Defects Pareto" reason={paretoData?.reason} />
-        ) : (
-          <>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={paretoChartData} margin={{ top: 8, right: 16, left: 0, bottom: 48 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="label" interval={0} angle={-25} textAnchor="end" height={70} />
-                  <YAxis yAxisId="count" allowDecimals={false} />
-                  <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                  <Tooltip formatter={(value, name) => [name === 'cumulative_pct' ? `${value}%` : value, name === 'cumulative_pct' ? 'Cumulative %' : 'Recurring failures']} />
-                  <Legend />
-                  <Bar yAxisId="count" dataKey="failure_count" name="Recurring failures" fill={PARETO_BAR_COLOR}>
-                    {paretoChartData.map((entry) => (
-                      <Cell
-                        key={`${entry.latest_failure_session_id}:${entry.label}`}
-                        fill={PARETO_BAR_COLOR}
-                        cursor="pointer"
-                        onClick={() => navigate(paretoEvidenceLink(entry))}
-                      />
-                    ))}
-                  </Bar>
-                  <Line
-                    yAxisId="pct"
-                    type="monotone"
-                    dataKey="cumulative_pct"
-                    name="Cumulative %"
-                    stroke={PARETO_LINE_COLOR}
-                    strokeWidth={3}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-3 space-y-1 text-sm">
-              {paretoData.entries.map((entry) => (
-                <div key={`${entry.latest_failure_session_id}:${entry.test_case_id ?? entry.external_id ?? entry.display_name}`} className="flex items-center justify-between gap-3">
-                  <span className="truncate text-slate-600">{entry.display_name} · {entry.module}</span>
-                  <Link className="shrink-0 text-blue-600 hover:text-blue-800" to={paretoEvidenceLink(entry)}>
-                    View latest failure
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+    <div className="space-y-6">
+      <CoverageFailureDensityPanel window={window} />
 
-      <div data-testid="quality-dashboard-chart-flaky-ranking" className="rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-semibold text-slate-900">Flaky Test Ranking</h2>
-        {loading && !flakyData ? (
-          <div className="flex h-72 items-center justify-center">
-            <LoadingSpinner />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div data-testid="quality-dashboard-chart-recurring-defects" className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-slate-900">Recurring Defects Pareto</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Tests with two or more failures in the selected window. Bars are recurring failure counts; the line is cumulative share.
+            </p>
           </div>
-        ) : !flakyData || flakyData.entries.length === 0 ? (
-          <EmptyPanel title="Flaky Test Ranking" reason={flakyData?.reason} />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-700">
-                    <button onClick={() => onSort('display_name')}>Test</button>
-                  </th>
-                  <th className="px-3 py-2 text-right font-semibold text-slate-700">
-                    <button onClick={() => onSort('runs')}>Runs</button>
-                  </th>
-                  <th className="px-3 py-2 text-right font-semibold text-slate-700">
-                    <button onClick={() => onSort('transitions')}>Flips</button>
-                  </th>
-                  <th className="px-3 py-2 text-right font-semibold text-slate-700">
-                    <button onClick={() => onSort('flip_rate')}>Flip rate</button>
-                  </th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-700">
-                    <button onClick={() => onSort('last_outcome')}>Last outcome</button>
-                  </th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-700">
-                    <button onClick={() => onSort('last_seen_at')}>Last seen</button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {sortedEntries.map((entry) => {
-                  const searchValue = entry.test_case_id ?? entry.external_id ?? entry.display_name;
-                  return (
-                    <tr key={`${entry.test_case_id ?? 'ext'}:${entry.external_id ?? entry.display_name}`}>
-                      <td className="px-3 py-2 text-slate-800">
-                        <Link className="text-blue-600 hover:text-blue-800" to={`/test-cases?search=${encodeURIComponent(searchValue)}`}>
-                          {entry.display_name}
-                        </Link>
-                      </td>
-                      <td className="px-3 py-2 text-right text-slate-700">{entry.runs}</td>
-                      <td className="px-3 py-2 text-right text-slate-700">{entry.transitions}</td>
-                      <td className="px-3 py-2 text-right text-slate-700">{formatFlipRate(entry.flip_rate)}</td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                            outcomeBadgeClass[entry.last_outcome] ?? 'bg-slate-100 text-slate-700'
-                          }`}
-                        >
-                          {entry.last_outcome}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-slate-700">{new Date(entry.last_seen_at).toLocaleString()}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+          {loading && !paretoData ? (
+            <div className="flex h-72 items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : !paretoData || paretoData.entries.length === 0 ? (
+            <EmptyPanel title="Recurring Defects Pareto" reason={paretoData?.reason} />
+          ) : (
+            <>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={paretoChartData} margin={{ top: 8, right: 16, left: 0, bottom: 48 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="label" interval={0} angle={-25} textAnchor="end" height={70} />
+                    <YAxis yAxisId="count" allowDecimals={false} />
+                    <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                    <Tooltip formatter={(value, name) => [name === 'cumulative_pct' ? `${value}%` : value, name === 'cumulative_pct' ? 'Cumulative %' : 'Recurring failures']} />
+                    <Legend />
+                    <Bar yAxisId="count" dataKey="failure_count" name="Recurring failures" fill={PARETO_BAR_COLOR}>
+                      {paretoChartData.map((entry) => (
+                        <Cell
+                          key={`${entry.latest_failure_session_id}:${entry.label}`}
+                          fill={PARETO_BAR_COLOR}
+                          cursor="pointer"
+                          onClick={() => navigate(paretoEvidenceLink(entry))}
+                        />
+                      ))}
+                    </Bar>
+                    <Line
+                      yAxisId="pct"
+                      type="monotone"
+                      dataKey="cumulative_pct"
+                      name="Cumulative %"
+                      stroke={PARETO_LINE_COLOR}
+                      strokeWidth={3}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-3 space-y-1 text-sm">
+                {paretoData.entries.map((entry) => (
+                  <div key={`${entry.latest_failure_session_id}:${entry.test_case_id ?? entry.external_id ?? entry.display_name}`} className="flex items-center justify-between gap-3">
+                    <span className="truncate text-slate-600">{entry.display_name} · {entry.module}</span>
+                    <Link className="shrink-0 text-blue-600 hover:text-blue-800" to={paretoEvidenceLink(entry)}>
+                      View latest failure
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div data-testid="quality-dashboard-chart-flaky-ranking" className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold text-slate-900">Flaky Test Ranking</h2>
+          {loading && !flakyData ? (
+            <div className="flex h-72 items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : !flakyData || flakyData.entries.length === 0 ? (
+            <EmptyPanel title="Flaky Test Ranking" reason={flakyData?.reason} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">
+                      <button onClick={() => onSort('display_name')}>Test</button>
+                    </th>
+                    <th className="px-3 py-2 text-right font-semibold text-slate-700">
+                      <button onClick={() => onSort('runs')}>Runs</button>
+                    </th>
+                    <th className="px-3 py-2 text-right font-semibold text-slate-700">
+                      <button onClick={() => onSort('transitions')}>Flips</button>
+                    </th>
+                    <th className="px-3 py-2 text-right font-semibold text-slate-700">
+                      <button onClick={() => onSort('flip_rate')}>Flip rate</button>
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">
+                      <button onClick={() => onSort('last_outcome')}>Last outcome</button>
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">
+                      <button onClick={() => onSort('last_seen_at')}>Last seen</button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {sortedEntries.map((entry) => {
+                    const searchValue = entry.test_case_id ?? entry.external_id ?? entry.display_name;
+                    return (
+                      <tr key={`${entry.test_case_id ?? 'ext'}:${entry.external_id ?? entry.display_name}`}>
+                        <td className="px-3 py-2 text-slate-800">
+                          <Link className="text-blue-600 hover:text-blue-800" to={`/test-cases?search=${encodeURIComponent(searchValue)}`}>
+                            {entry.display_name}
+                          </Link>
+                        </td>
+                        <td className="px-3 py-2 text-right text-slate-700">{entry.runs}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{entry.transitions}</td>
+                        <td className="px-3 py-2 text-right text-slate-700">{formatFlipRate(entry.flip_rate)}</td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                              outcomeBadgeClass[entry.last_outcome] ?? 'bg-slate-100 text-slate-700'
+                            }`}
+                          >
+                            {entry.last_outcome}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-slate-700">{new Date(entry.last_seen_at).toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
