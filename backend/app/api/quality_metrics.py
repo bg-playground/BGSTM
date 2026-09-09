@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
 from app.crud import quality_metrics as crud
 from app.crud.quality_module_risk import get_module_coverage_failure_density
+from app.crud.quality_recovery import get_recovery_trend as get_recovery_trend_data
 from app.crud.quality_recurring import get_recurring_defects_pareto as get_recurring_defects_pareto_data
 from app.db.session import get_db
 from app.models.user import User
@@ -19,6 +21,7 @@ from app.schemas.quality_metrics import (
     SummaryStatsResponse,
 )
 from app.schemas.quality_module_risk import ModuleCoverageFailureResponse
+from app.schemas.quality_recovery import RecoveryTrendResponse
 from app.schemas.quality_recurring import RecurringDefectsParetoResponse
 
 router = APIRouter(prefix="/quality-metrics")
@@ -78,6 +81,17 @@ async def get_coverage_vs_defects(
 ) -> ModuleCoverageFailureResponse:
     _ = current_user
     return await get_module_coverage_failure_density(db, window)
+
+
+@router.get("/recovery-trend", response_model=RecoveryTrendResponse)
+async def get_recovery_trend(
+    window: WindowParam = Query(WindowParam.DAYS_30),
+    group_by: Literal["overall", "module", "severity"] = Query("overall"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> RecoveryTrendResponse:
+    _ = current_user
+    return await get_recovery_trend_data(db, window, group_by)
 
 
 @router.get("/recurring-defects", response_model=RecurringDefectsParetoResponse)
