@@ -9,7 +9,7 @@
 
 ## 🎯 Overview
 
-This framework provides a structured approach to software testing through six core phases plus an ETL semantic validation phase, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+This framework provides a structured approach to software testing through six core phases, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
 
 ## 📚 Documentation
 
@@ -23,7 +23,6 @@ This framework provides a structured approach to software testing through six co
 4. **[Test Execution](docs/phases/04-test-execution.md)** - Execute tests and manage defects
 5. **[Test Results Analysis](docs/phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](docs/phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
-7. **[ETL Semantic Validation](docs/phases/07-etl-semantic-validation.md)** - Validate ETL semantics using NATAegisFlow outputs
 
 ## 🔧 Methodology Guides
 
@@ -36,6 +35,7 @@ This framework provides a structured approach to software testing through six co
 
 - **[Templates](docs/test-templates/README.md)** - Ready-to-use templates for test plans, test cases, reports, and NATAegisFlow artifact workflows
 - **[Examples](docs/examples/README.md)** - Practical examples and sample artifacts
+- **[ETL Semantic Validation Applied Example](docs/examples/etl-semantic-validation-example.md)** - Example of applying the six BGSTM phases to ETL semantic validation using NATAegisFlow evidence
 - **[Multi-Platform App Guide](docs/integration/multi-platform-guide.md)** - Build testing management applications
 
 ## 🚀 Key Features
