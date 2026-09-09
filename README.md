@@ -1,377 +1,180 @@
-# BGSTM - Professional Software Testing Framework
+# BGSTM — Better Global Software Testing Methodology
 
 [![Backend CI](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml)
 [![Frontend CI](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml)
 [![Docker Build](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/docker.yml)
 [![E2E Tests](https://github.com/bg-playground/BGSTM/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/e2e-tests.yml)
 
-**BGSTM** (Better Global Software Testing Methodology) is a comprehensive, professional software testing framework adaptable to various software development methodologies including Agile, Scrum, and Waterfall.
+**BGSTM** is a practical, methodology-agnostic software testing framework for organizing quality work from planning through results reporting. It is designed to work across Agile, Scrum, Waterfall, and hybrid delivery models without forcing teams into a single development process.
 
-## 🎯 Overview
+> **Canonical methodology:** BGSTM has exactly **six core testing phases**. Specialized domains such as ETL semantic validation apply those six phases; they do not add new phases.
 
-This framework provides a structured approach to software testing through six core phases, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+## Start here
 
-## 📚 Documentation
+If you are evaluating BGSTM for the first time:
 
-### [Complete Documentation →](docs/README.md)
+1. Read the **[Getting Started Guide](docs/GETTING-STARTED.md)** for a practical introduction.
+2. Review the **[six testing phases](docs/phases/index.md)** to understand the lifecycle.
+3. Choose a **[methodology guide](docs/methodologies/comparison.md)** for Agile, Scrum, Waterfall, or hybrid delivery.
+4. Adapt the **[canonical test templates](docs/test-templates/README.md)** to your project.
+5. Use the **[worked examples](docs/examples/README.md)** to see the framework applied in practice.
 
-## 🔄 BGSTM Testing Phases
+## The six BGSTM phases
 
-1. **[Test Planning](docs/phases/01-test-planning.md)** - Define scope, strategy, resources, and timelines
-2. **[Test Case Development](docs/phases/02-test-case-development.md)** - Design and document test scenarios and cases
-3. **[Test Environment Preparation](docs/phases/03-test-environment-preparation.md)** - Set up infrastructure and tools
-4. **[Test Execution](docs/phases/04-test-execution.md)** - Execute tests and manage defects
-5. **[Test Results Analysis](docs/phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
-6. **[Test Results Reporting](docs/phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
+```mermaid
+flowchart LR
+    P1[1. Test Planning] --> P2[2. Test Case Development]
+    P2 --> P3[3. Test Environment Preparation]
+    P3 --> P4[4. Test Execution]
+    P4 --> P5[5. Test Results Analysis]
+    P5 --> P6[6. Test Results Reporting]
+    P6 -. feedback / next cycle .-> P1
+```
 
-## 🔧 Methodology Guides
+| Phase | Purpose |
+|---|---|
+| **1. [Test Planning](docs/phases/01-test-planning.md)** | Define scope, strategy, risks, resources, and timelines. |
+| **2. [Test Case Development](docs/phases/02-test-case-development.md)** | Design traceable test scenarios and cases. |
+| **3. [Test Environment Preparation](docs/phases/03-test-environment-preparation.md)** | Prepare infrastructure, tools, access, and test data. |
+| **4. [Test Execution](docs/phases/04-test-execution.md)** | Execute tests, collect evidence, and manage defects. |
+| **5. [Test Results Analysis](docs/phases/05-test-results-analysis.md)** | Interpret outcomes, trends, risks, and quality signals. |
+| **6. [Test Results Reporting](docs/phases/06-test-results-reporting.md)** | Communicate findings and support release decisions. |
 
-- **[Agile Testing](docs/methodologies/agile.md)** - Continuous testing with rapid feedback
-- **[Scrum Testing](docs/methodologies/scrum.md)** - Sprint-based testing approach
-- **[Waterfall Testing](docs/methodologies/waterfall.md)** - Sequential phase-based testing
-- **[Methodology Comparison](docs/methodologies/comparison.md)** - Detailed comparison and selection guide
+## What is in this repository?
 
-## 📋 Templates & Resources
+BGSTM is first and foremost a **testing methodology and knowledge base**. This repository also includes an open-source reference application that demonstrates how parts of the methodology can be represented in software.
 
-- **[Templates](docs/test-templates/README.md)** - Ready-to-use templates for test plans, test cases, reports, and NATAegisFlow artifact workflows
-- **[Examples](docs/examples/README.md)** - Practical examples and sample artifacts
-- **[ETL Semantic Validation Applied Example](docs/examples/etl-semantic-validation-example.md)** - Example of applying the six BGSTM phases to ETL semantic validation using NATAegisFlow evidence
-- **[Multi-Platform App Guide](docs/integration/multi-platform-guide.md)** - Build testing management applications
+| Area | Purpose | Start here |
+|---|---|---|
+| **Methodology** | The six-phase BGSTM lifecycle and testing guidance | [Testing phases](docs/phases/index.md) |
+| **Methodology adaptations** | Agile, Scrum, Waterfall, and comparison guidance | [Methodology guides](docs/methodologies/comparison.md) |
+| **Templates** | Reusable test plans, cases, reports, risk and traceability artifacts | [Test templates](docs/test-templates/README.md) |
+| **Worked examples** | Practical applications of BGSTM, including ETL semantic validation | [Examples](docs/examples/README.md) |
+| **Reference application** | FastAPI + React implementation for traceability, dashboards, reporting, and related workflows | [Application setup](#reference-application-quick-start) |
+| **Automation integration** | Playwright and external-result integration patterns | [External Results v1](docs/specs/external_results_v1.md) |
 
-## 🚀 Key Features
+### Applied example: ETL semantic validation
 
-- ✅ **Methodology Agnostic** - Adaptable to Agile, Scrum, Waterfall, and hybrid approaches
-- ✅ **Comprehensive Coverage** - End-to-end testing process from planning to reporting
-- ✅ **Professional Standards** - Industry best practices and quality standards
-- ✅ **Practical Templates** - Ready-to-use templates for immediate implementation
-- ✅ **Scalable** - Suitable for projects of all sizes
-- ✅ **App-Ready** - Foundation for building testing management tools
+**[ETL Semantic Validation](docs/examples/etl-semantic-validation-example.md)** is a specialized example showing how all six BGSTM phases can be applied to ETL/data-pipeline semantic validation using NATAegisFlow evidence. It is **not** an additional methodology phase.
 
-## 💡 Use Cases
+## Core principles
 
-### For Testing Teams
-- Implement structured testing processes
-- Improve test coverage and quality
-- Standardize testing practices
-- Reduce defects and improve software quality
+- **Methodology agnostic** — adapt BGSTM to Agile, Scrum, Waterfall, or hybrid delivery.
+- **End-to-end quality lifecycle** — connect planning, design, environment readiness, execution, analysis, and reporting.
+- **Traceability** — maintain meaningful links between requirements, tests, results, defects, evidence, and decisions.
+- **Risk-aware testing** — scale rigor and effort according to business and technical risk.
+- **Evidence-based reporting** — use test outcomes and quality signals to support stakeholder decisions.
+- **Practical adoption** — start with the methodology and templates; use software tooling where it adds value.
 
-### For Project Managers
-- Plan testing activities and resources
-- Track testing progress and metrics
-- Manage testing risks
-- Ensure quality standards
+## Documentation map
 
-### For Organizations
-- Establish testing standards
-- Train testing teams
-- Improve testing maturity
-- Build custom testing tools
+- **[Complete documentation](docs/README.md)**
+- **[Getting Started](docs/GETTING-STARTED.md)**
+- **[Testing phases](docs/phases/index.md)**
+- **[Methodology comparison](docs/methodologies/comparison.md)**
+- **[Test templates](docs/test-templates/README.md)**
+- **[Examples](docs/examples/README.md)**
+- **[Multi-platform application guide](docs/integration/multi-platform-guide.md)**
+- **[Release Readiness Dashboard](docs/features/release-readiness-dashboard.md)**
+- **[Quality KPI Dashboard](docs/features/quality-kpi-dashboard.md)**
 
-### For Developers
-- Build multi-platform testing management applications
-- Integrate testing into development workflows
-- Automate testing processes
-- Create testing dashboards and reports
+## Reference application quick start
 
-## 🛠️ Building a Multi-Platform App
-
-This framework can serve as the foundation for building comprehensive testing management applications. See our [Multi-Platform App Integration Guide](docs/integration/multi-platform-guide.md) for:
-
-- Recommended technology stacks
-- Application architecture
-- Core features and modules
-- API design
-- Development roadmap
-- Implementation considerations
-
-## 🚀 Quick Start
-
-Get a fully working demo environment running with a single command:
+The repository includes a reference application with a React frontend, FastAPI backend, PostgreSQL database, traceability features, quality dashboards, and automated test coverage.
 
 ```bash
 git clone https://github.com/bg-playground/BGSTM.git
 cd BGSTM
 ./setup.sh        # macOS/Linux
-setup.bat          # Windows
+setup.bat         # Windows
 ```
 
-The setup script will:
-- Check for Docker / Docker Compose
-- Create `.env` from `.env.example` automatically
-- Build and start all services (backend, frontend, Postgres)
-- Wait for every service to be healthy
-- Optionally load sample data
-- Open the browser to `http://localhost`
+The setup script checks Docker/Docker Compose, creates `.env` from `.env.example`, starts the services, waits for health checks, and can load sample data.
 
-| Service     | URL                          |
-|-------------|------------------------------|
-| Frontend    | http://localhost              |
-| Backend API | http://localhost:8000         |
-| API Docs    | http://localhost:8000/docs    |
-
-```bash
-docker compose down      # stop services (or: docker-compose down)
-docker compose logs -f   # view logs   (or: docker-compose logs -f)
-```
-
----
-
-## 📖 Framework Quick Reference
-
-### New to BGSTM? 
-👉 **[Start Here: Getting Started Guide](docs/GETTING-STARTED.md)** - Complete walkthrough for beginners
-
-### Quick Reference:
-1. **Choose Your Methodology**: Review [methodology guides](docs/methodologies/comparison.md) to select the best approach
-2. **Understand the Phases**: Read through the [six testing phases](docs/phases/01-test-planning.md)
-3. **Use Templates**: Download and customize [templates](docs/test-templates/README.md) for your project
-4. **Implement**: Apply the framework to your testing processes
-5. **Build (Optional)**: Use as foundation for custom testing tools
-6. **Release Readiness**: Use the [Release Readiness Dashboard](docs/features/release-readiness-dashboard.md) for Go/Caution/No-Go checks
-7. **Quality Trends**: Use the [Quality KPI Dashboard](docs/features/quality-kpi-dashboard.md) for defect, pass-rate, module, and automation trend visuals
-
-## 🛠️ Manual Setup
-
-### Frontend + Backend (Docker Compose)
-
-```bash
-# Clone the repository
-git clone https://github.com/bg-playground/BGSTM.git
-cd BGSTM
-
-# Copy environment file
-cp .env.example .env
-
-# Start all services (database, backend, frontend)
-docker-compose up -d
-
-# Access the application
-# Frontend: http://localhost
-# Backend API: http://localhost:8000
-# API Documentation: http://localhost:8000/docs
-```
-
-### Frontend Development
-
-To run the frontend locally for development:
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Access at http://localhost:3000
-```
-
-### Backend Development
-
-To run the backend locally:
-
-```bash
-cd backend
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up database (PostgreSQL)
-# Update DATABASE_URL in .env file
-
-# Run migrations
-alembic upgrade head
-
-# Start server
-uvicorn app.main:app --reload --port 8000
-```
-
-## 🧪 Testing
-
-### Backend Unit Tests
-
-```bash
-cd backend
-pytest                     # Run all backend tests
-pytest -v                  # Verbose output
-pytest --cov=app           # With coverage report
-```
-
-Or inside Docker:
-
-```bash
-docker-compose exec backend pytest
-```
-
-### Frontend Lint & Type Check
-
-```bash
-cd frontend
-npm run lint               # ESLint
-npm run type-check         # TypeScript type checking
-```
-
-### End-to-End Tests (Playwright)
-
-The E2E test suite uses [Playwright](https://playwright.dev/) to test critical flows against a fully dockerized stack (PostgreSQL + FastAPI backend + React frontend).
-
-**Quick start with Docker Compose:**
-
-```bash
-# 1. Start the test environment (builds & seeds the database)
-docker compose -f docker-compose.test.yml up -d
-
-# 2. Wait for services to be healthy (~60-90s)
-curl -sf http://localhost:8001/health   # backend
-curl -sf http://localhost:3001          # frontend
-
-# 3. Install Playwright (first time only)
-cd frontend
-npm ci
-npx playwright install --with-deps chromium
-
-# 4. Run the tests
-PLAYWRIGHT_BASE_URL=http://localhost:3001 \
-E2E_ADMIN_EMAIL=admin@test.com \
-E2E_ADMIN_PASSWORD=password123 \
-npx playwright test
-
-# 5. View the HTML report
-npx playwright show-report
-
-# 6. Tear down
-cd ..
-docker compose -f docker-compose.test.yml down -v
-```
-
-**Test suites:**
-
-| Spec File | Coverage |
+| Service | URL |
 |---|---|
-| `auth.spec.ts` | Registration, login, logout, protected routes |
-| `suggestions.spec.ts` | Suggestion dashboard, filters, accept/reject |
-| `crud.spec.ts` | Requirements & test case CRUD (create, edit, delete) |
-| `traceability.spec.ts` | Traceability matrix data, filtering, export buttons |
-| `exports.spec.ts` | CSV and PDF export downloads |
-| `rbac.spec.ts` | Role-based access: viewer, reviewer, admin |
-| `notifications.spec.ts` | Notification bell, mark-as-read, lifecycle |
-| `release-readiness.spec.ts` | Release readiness status banner, sign-off, and markdown export |
-| `quality-dashboard.spec.ts` | Quality KPI charts, window toggle, and release-readiness cross-link |
-
-**Useful commands:**
+| Frontend | http://localhost |
+| Backend API | http://localhost:8000 |
+| API Docs | http://localhost:8000/docs |
 
 ```bash
-npx playwright test --headed           # Watch in browser
-npx playwright test --ui               # Interactive UI mode
-npx playwright test auth.spec.ts       # Run a single spec
-npx playwright test --project=chromium # Chromium only (default in CI)
+docker compose down
+docker compose logs -f
 ```
 
-**Environment variables:**
+For development details, see the [backend README](backend/README.md), the frontend source under [`frontend/`](frontend/), and the [E2E test guide](frontend/tests/e2e/README.md).
 
-| Variable | Default | Description |
-|---|---|---|
-| `PLAYWRIGHT_BASE_URL` | `http://localhost:3000` | Frontend URL |
-| `E2E_ADMIN_EMAIL` | `admin@test.com` | Seeded admin email |
-| `E2E_ADMIN_PASSWORD` | `password123` | Seeded admin password |
+## Testing and CI
 
-> **Note:** In CI, the E2E tests run automatically via the [E2E Tests workflow](.github/workflows/e2e-tests.yml) on every push/PR to `main` that touches `frontend/`, `backend/`, or `docker-compose.test.yml`.
+The repository uses automated checks for backend, frontend, Docker, end-to-end behavior, security, and documentation link integrity. Common local checks include:
 
-For full details, see the [E2E Test README](frontend/tests/e2e/README.md).
+```bash
+# Backend
+cd backend
+pytest
+ruff check .
+ruff format --check .
+mypy .
+```
 
-## 📐 API Contracts & Specs
+```bash
+# Frontend
+cd frontend
+npm install
+npm run lint
+npm run type-check
+```
+
+The Playwright suite covers authentication, CRUD, suggestions, traceability, exports, RBAC, notifications, release readiness, and quality dashboards. See the **[E2E Test README](frontend/tests/e2e/README.md)** for setup and execution details.
+
+Documentation changes are checked for broken internal Markdown links by the **Documentation Links** workflow.
+
+## API contracts and automation integration
 
 | Spec | Status | Tracking |
 |---|---|---|
 | [External Results v1](docs/specs/external_results_v1.md) | Draft | [BGSTM#299](https://github.com/bg-playground/BGSTM/issues/299) |
 
----
+### Related Playwright project
 
-## Related projects
+**[bg-playground/bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks)** provides opinionated Playwright automation scaffolding with BGSTM-native traceability.
 
-### 🎭 [bg-playground/bgstm-playwright-frameworks](https://github.com/bg-playground/bgstm-playwright-frameworks)
+The intended relationship is:
 
-A monorepo of **opinionated, domain-specific Playwright automation frameworks** with native BGSTM traceability. Apache-2.0. Public.
-
-Unlike generic Playwright starters, each domain pack ships with:
-
-- **Pre-built page objects** for the common entities of that domain (e.g. CRM: Lead, Opportunity, Account)
-- **Realistic test data factories** for fast, repeatable test setup
-- **Multi-step workflow helpers** that model real business flows
-- **BGSTM-native reporting** — every test result, step, and artifact is automatically linked back to a BGSTM requirement and test case via the Reporter API
-
-#### Packages
-
-| Package | Description | Status |
-|---|---|---|
-| [`@bgstm/playwright-core`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/core) | Shared fixtures, base POM, BGSTM reporter | 🚧 Stub |
-| [`@bgstm/domain-crm`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/domain-crm) | CRM domain pack (Leads, Opportunities, Accounts) | 🚧 Stub |
-| [`@bgstm/domain-accounting`](https://github.com/bg-playground/bgstm-playwright-frameworks/tree/main/packages/domain-accounting) | Accounting domain pack (Ledgers, Journals, Reconciliations) | 🚧 Stub |
-
-#### Linking tests to BGSTM requirements
-
-The BGSTM reporter reads `bgstm:requirement` annotations from each test and forwards results to BGSTM:
-
-```ts
-import { test } from '@playwright/test';
-
-test(
-  'login redirects to dashboard',
-  { annotation: { type: 'bgstm:requirement', description: 'REQ-LOGIN-001' } },
-  async ({ page }) => {
-    await page.goto('/login');
-  },
-);
-```
-
-#### Architecture
-
-```
-BGSTM            ← methodology + traceability platform (this repo, open-source)
+```text
+BGSTM                         methodology + traceability/reference platform
    ▲
-   │ reports via the BGSTM Reporter API
+   │ reports test results
    │
-bgstm-playwright-frameworks  ← Playwright execution scaffolding (open-source, Apache-2.0)
+bgstm-playwright-frameworks  Playwright execution scaffolding
    ▲
-   │ runs at scale on
+   │ may run at scale on
    │
-NAT              ← managed execution + AI-adaptive testing (commercial, https://nat-testing.io)
+NAT                           managed execution + AI-adaptive testing
 ```
 
-> 💼 **Looking for regulated-industry packs** (Healthcare/HIPAA, Financial/SOX, GxP)? Those are available as part of [NAT](https://nat-testing.io).
+This separation keeps BGSTM's methodology independent from any single automation framework or commercial execution platform.
 
-- Tracking issue for the v0.1 `@bgstm/playwright-core` MVP: [`bgstm-playwright-frameworks#3`](https://github.com/bg-playground/bgstm-playwright-frameworks/issues/3) — *blocked by [BGSTM#291](https://github.com/bg-playground/BGSTM/issues/291) (Reporter API contract)*.
+## Contributing
 
-## 🤝 Contributing
+Contributions are welcome for documentation, examples, templates, methodology improvements, application code, and integrations. Please review **[CONTRIBUTING.md](CONTRIBUTING.md)** before opening a pull request.
 
-Contributions are welcome! Whether you want to:
-- Improve documentation
-- Add examples
-- Share templates
-- Report issues
-- Suggest features
+Two documentation rules are especially important:
 
-Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+- BGSTM's canonical methodology contains **six phases**.
+- `docs/test-templates/` is the canonical template directory; `docs/templates/` exists only for legacy-link compatibility.
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See **[LICENSE](LICENSE)**.
 
-## 🔗 Related Resources
+## Related resources
 
-- [ISTQB (International Software Testing Qualifications Board)](https://www.istqb.org/)
-- [Agile Testing by Lisa Crispin and Janet Gregory](https://agiletester.ca/)
-- [Test Automation Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
+- [ISTQB — International Software Testing Qualifications Board](https://www.istqb.org/)
+- [Agile Testing](https://agiletester.ca/)
+- [Martin Fowler — The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
+- [Playwright](https://playwright.dev/)
 
-## 📞 Support
+## Support
 
-For questions, suggestions, or discussions, please open an issue in this repository.
-
----
-
-**Made with ❤️ for the software testing community**
+For questions, suggestions, defects, or documentation improvements, please open an issue in this repository.
