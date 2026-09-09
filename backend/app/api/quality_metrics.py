@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
 from app.crud import quality_metrics as crud
+from app.crud.quality_recurring import get_recurring_defects_pareto as get_recurring_defects_pareto_data
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.quality_metrics import (
@@ -16,6 +17,7 @@ from app.schemas.quality_metrics import (
     QualityDashboardSnapshot,
     SummaryStatsResponse,
 )
+from app.schemas.quality_recurring import RecurringDefectsParetoResponse
 
 router = APIRouter(prefix="/quality-metrics")
 
@@ -60,6 +62,17 @@ async def get_defects_by_module(
 ) -> DefectsByModuleResponse:
     _ = current_user
     return await crud.get_defects_by_module(db, window, top_n)
+
+
+@router.get("/recurring-defects", response_model=RecurringDefectsParetoResponse)
+async def get_recurring_defects_pareto(
+    window: WindowParam = Query(30),
+    top_n: int = Query(10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> RecurringDefectsParetoResponse:
+    _ = current_user
+    return await get_recurring_defects_pareto_data(db, window, top_n)
 
 
 @router.get("/automation-coverage", response_model=AutomationCoverageResponse)
