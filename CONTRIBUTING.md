@@ -1,358 +1,163 @@
 # Contributing to BGSTM
 
-Thank you for your interest in contributing to BGSTM (Better Global Software Testing Methodology)! We welcome contributions from the community to help make this framework even better.
+Thank you for contributing to **BGSTM (Better Global Software Testing Methodology)**. Contributions are welcome across methodology documentation, templates, worked examples, integrations, and the reference application.
 
-## 📋 Table of Contents
+## Methodology invariants
 
-- [Code of Conduct](#code-of-conduct)
-- [How Can I Contribute?](#how-can-i-contribute)
-- [Getting Started](#getting-started)
-- [Pull Request Process](#pull-request-process)
-- [Style Guidelines](#style-guidelines)
-- [Issue Reporting Guidelines](#issue-reporting-guidelines)
-- [Contact](#contact)
+Before changing documentation or application behavior that represents BGSTM concepts, preserve these project-level rules:
 
-## 🤝 Code of Conduct
+1. **BGSTM has exactly six core phases:** Test Planning, Test Case Development, Test Environment Preparation, Test Execution, Test Results Analysis, and Test Results Reporting.
+2. Specialized domains such as ETL semantic validation **apply the six phases**; they do not create additional phases.
+3. `docs/test-templates/` is the **canonical template directory**. `docs/templates/` exists only as a compatibility layer for historical links and should not receive new templates or new documentation links.
+4. Prefer **one canonical document per subject**. README/index pages should primarily navigate to substantive documents instead of duplicating them.
 
-### Our Pledge
+## Ways to contribute
 
-We are committed to providing a welcoming and inspiring community for everyone. We expect all contributors to:
+You can help by:
 
-- Be respectful and inclusive
-- Exercise empathy and kindness
-- Accept constructive criticism gracefully
-- Focus on what is best for the community
-- Show courtesy and respect towards others
+- improving methodology guidance, clarity, and consistency;
+- contributing or refining practical templates and examples;
+- reporting defects, inconsistencies, or broken documentation;
+- improving the FastAPI/React reference application;
+- extending automation, traceability, dashboards, or integration support;
+- improving tests, CI, security, accessibility, and developer experience.
 
-### Unacceptable Behavior
-
-- Harassment, discrimination, or offensive comments
-- Trolling, insulting, or derogatory remarks
-- Publishing others' private information
-- Any conduct that could be considered inappropriate in a professional setting
-
-## 🎯 How Can I Contribute?
-
-There are many ways to contribute to BGSTM:
-
-### 1. Documentation Improvements
-- Fix typos, grammar, or formatting issues
-- Improve clarity and readability
-- Add missing information or examples
-- Translate documentation to other languages
-
-### 2. Templates and Examples
-- Share your testing templates
-- Contribute real-world examples
-- Create new template variations
-- Improve existing templates
-
-### 3. Methodology Enhancements
-- Suggest improvements to testing phases
-- Share best practices from your experience
-- Add new methodology guides
-- Enhance existing methodology documentation
-
-### 4. Issue Reporting
-- Report bugs or inconsistencies
-- Suggest new features or improvements
-- Share feedback on existing content
-- Identify areas that need clarification
-
-### 5. Community Support
-- Answer questions in issues
-- Help others understand the framework
-- Share your implementation experiences
-- Participate in discussions
-
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 
-- A GitHub account
-- Basic knowledge of Git and Markdown
-- Familiarity with software testing concepts (helpful but not required)
-- Python 3.11+ (for backend development)
+For documentation-only work, a GitHub account and basic Git/Markdown familiarity are sufficient. Application development may also require Python 3.11+, Node.js/npm, Docker, and Docker Compose depending on the area being changed.
 
-### Setting Up Your Development Environment
+### Set up your branch
 
-1. **Fork the Repository**
-   ```bash
-   # Fork via GitHub UI, then clone your fork
-   git clone https://github.com/YOUR-USERNAME/BGSTM.git
-   cd BGSTM
-   ```
-
-2. **Create a Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/your-fix-name
-   ```
-
-3. **Set Up Backend Development Environment** (if working on backend code)
-   ```bash
-   cd backend
-   
-   # Create and activate virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   ```
-
-4. **Make Your Changes**
-   - Edit documentation files (`.md` files)
-   - Add new templates in the `docs/templates/` directory
-   - Add examples in the `docs/examples/` directory
-   - Edit backend code in the `backend/` directory
-
-5. **Test Your Changes**
-   
-   **For Documentation:**
-   - Preview Markdown files to ensure proper formatting
-   - Check that all links work correctly
-   - Verify that images display properly
-   - Ensure consistency with existing documentation style
-   
-   **For Backend Code:**
-   - Run tests: `cd backend && pytest`
-   - Run linting: `cd backend && ruff check .`
-   - Check formatting: `cd backend && ruff format --check .`
-   - Run type checking: `cd backend && mypy .`
-
-## 📝 Pull Request Process
-
-### Before Submitting
-
-1. **Check Existing Issues/PRs**: Make sure your contribution isn't already being addressed
-2. **Review Guidelines**: Ensure your changes follow our style guidelines
-3. **Test Thoroughly**: Verify all changes work as expected
-4. **Update Documentation**: If applicable, update related documentation
-
-### Submitting Your PR
-
-1. **Commit Your Changes**
-   ```bash
-   git add .
-   git commit -m "Brief description of your changes"
-   ```
-   
-   Use clear, descriptive commit messages:
-   - `Add: [description]` for new features/content
-   - `Fix: [description]` for bug fixes
-   - `Update: [description]` for improvements
-   - `Docs: [description]` for documentation changes
-
-2. **Push to Your Fork**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-3. **Create Pull Request**
-   - Go to the original BGSTM repository
-   - Click "New Pull Request"
-   - Select your fork and branch
-   - Fill out the PR template with:
-     - **Title**: Clear, concise description
-     - **Description**: What changes you made and why
-     - **Related Issues**: Link any related issues
-     - **Testing**: How you tested your changes
-
-4. **PR Review Process**
-   - Maintainers will review your PR
-   - Automated CI checks will run on your PR
-   - Address any requested changes or CI failures
-   - Once approved and all checks pass, your PR will be merged
-   - Your contribution will be credited
-
-### Understanding CI Checks
-
-All pull requests automatically run continuous integration (CI) checks to ensure code quality:
-
-**Test Job**: Runs all unit and integration tests
-- Ensures your changes don't break existing functionality
-- If tests fail, review the error logs and fix the failing tests
-
-**Lint Job**: Checks code style and formatting
-- Ensures consistent code formatting across the project
-- If linting fails, run `ruff check .` locally to see issues
-- Fix issues manually or run `ruff check . --fix` to auto-fix
-
-**Type Check Job**: Validates type hints and type safety
-- Ensures proper type annotations in Python code
-- If type checking fails, run `mypy .` locally to see issues
-- Add proper type hints or fix type errors
-
-To view CI check results:
-1. Go to your pull request on GitHub
-2. Scroll to the bottom to see the "Checks" section
-3. Click on any failed check to view detailed logs
-4. Fix issues locally and push updates to your branch
-
-### PR Requirements
-
-- ✅ Clear description of changes
-- ✅ Follows style guidelines
-- ✅ No broken links or formatting issues
-- ✅ Consistent with existing content
-- ✅ Appropriate file/folder structure
-- ✅ Professional and accurate content
-- ✅ All CI checks passing (for backend changes)
-
-## 📐 Style Guidelines
-
-### Markdown Formatting
-
-- Use consistent heading levels (`#`, `##`, `###`)
-- Use bullet points for lists
-- Use numbered lists for sequential steps
-- Use code blocks with language specification:
-  ````markdown
-  ```bash
-  # Your command here
-  ```
-  ````
-
-### Documentation Style
-
-- **Clarity**: Write clear, concise content
-- **Consistency**: Follow existing formatting patterns
-- **Professionalism**: Maintain a professional tone
-- **Accuracy**: Ensure technical accuracy
-- **Examples**: Include practical examples where appropriate
-
-### File Naming
-
-- Use lowercase with hyphens: `test-planning.md`
-- Be descriptive: `agile-sprint-planning-template.md`
-- Match existing naming conventions
-
-### Directory Structure
-
-Maintain the existing structure:
+```bash
+git clone https://github.com/YOUR-USERNAME/BGSTM.git
+cd BGSTM
+git checkout -b feature/your-feature-name
 ```
+
+For backend work:
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+## Repository structure
+
+```text
 docs/
-├── phases/           # Testing phase documentation
-├── methodologies/    # Methodology guides
-├── templates/        # Testing templates
-├── examples/         # Practical examples
-└── integration/      # Integration guides
+├── phases/             # Canonical six-phase methodology guidance
+├── methodologies/      # Agile, Scrum, Waterfall, comparison guidance
+├── test-templates/     # Canonical testing templates
+├── templates/          # Legacy-link compatibility only; do not add new content here
+├── examples/           # Practical and specialized BGSTM examples
+├── integration/        # Integration and application guidance
+├── features/           # Feature documentation
+└── specs/              # API/contracts and specifications
+
+backend/                # FastAPI backend
+frontend/               # React/TypeScript frontend
+scripts/                # Repository validation/support scripts
+.github/workflows/      # CI and automation
 ```
 
-### Content Guidelines
+## Making changes
 
-- Use **American English** spelling
-- Write in **second person** ("you") for instructions
-- Use **active voice** when possible
-- Include **real-world examples**
-- Add **visual aids** (diagrams, tables) when helpful
-- Keep paragraphs **concise** (3-5 sentences)
+### Documentation
 
-## 🐛 Issue Reporting Guidelines
+- Put new templates in `docs/test-templates/`.
+- Put worked or domain-specific applications in `docs/examples/` unless they are truly part of the core methodology.
+- Do not introduce new BGSTM phases without an explicit project-level methodology decision.
+- Prefer links to canonical material over repeating large blocks of content in multiple README/index files.
+- Keep relative links valid and run the repository link checker before submitting documentation changes.
 
-### Before Creating an Issue
-
-1. **Search Existing Issues**: Check if the issue already exists
-2. **Check Documentation**: Ensure it's not already addressed
-3. **Gather Information**: Collect relevant details
-
-### Creating an Issue
-
-Use the following templates based on issue type:
-
-#### Bug Report
-```markdown
-**Description**: Brief description of the issue
-
-**Location**: Path to file or section
-
-**Expected Behavior**: What should happen
-
-**Actual Behavior**: What actually happens
-
-**Steps to Reproduce**:
-1. Step one
-2. Step two
-3. ...
-
-**Additional Context**: Any other relevant information
+```bash
+python scripts/check_markdown_links.py
 ```
 
-#### Feature Request
-```markdown
-**Feature Description**: What feature you'd like to see
+If MkDocs navigation is affected, also review `mkdocs.yml` for consistency.
 
-**Use Case**: Why this feature would be valuable
+### Backend
 
-**Proposed Solution**: How you envision it working
-
-**Alternatives Considered**: Other approaches you've thought about
-
-**Additional Context**: Any other relevant information
+```bash
+cd backend
+pytest
+ruff check .
+ruff format --check .
+mypy .
 ```
 
-#### Documentation Improvement
-```markdown
-**Area**: Which documentation needs improvement
+### Frontend
 
-**Current State**: What's currently there
-
-**Suggested Improvement**: What should be changed
-
-**Reasoning**: Why this improvement is needed
+```bash
+cd frontend
+npm install
+npm run lint
+npm run type-check
 ```
 
-### Issue Labels
+For end-to-end changes, see [`frontend/tests/e2e/README.md`](frontend/tests/e2e/README.md).
 
-We use the following labels:
-- `bug` - Something isn't working correctly
-- `enhancement` - New feature or request
-- `documentation` - Documentation improvements
-- `good first issue` - Good for newcomers
-- `help wanted` - Extra attention needed
-- `question` - Further information requested
+## Pull request process
 
-## 💬 Contact
+Before submitting a pull request:
 
-### Questions or Discussions
+1. Search existing issues and pull requests to avoid duplicate work.
+2. Keep the change focused and explain the problem it solves.
+3. Run the checks relevant to the files you changed.
+4. Update documentation when behavior, contracts, or navigation changes.
+5. Confirm methodology terminology remains consistent with the six-phase model.
 
-- **Issues**: For bugs, features, or improvements
-- **Discussions**: For questions and community discussions (if enabled)
+Use descriptive commit messages such as:
 
-### Getting Help
+- `docs: clarify test planning guidance`
+- `fix: correct traceability export behavior`
+- `feat: add release readiness filter`
+- `test: cover notification lifecycle`
 
-If you need help with your contribution:
+A pull request should include a concise summary, relevant issue references, and the validation performed. Address CI failures in the original PR rather than opening a separate fix PR.
 
-1. Check the [documentation](docs/README.md)
-2. Review existing issues and PRs
-3. Open a new issue with the `question` label
-4. Be specific about what you need help with
+## CI checks
 
-## 🎉 Recognition
+Different workflows run depending on the paths changed. The repository includes checks for:
 
-All contributors will be recognized for their contributions. We value every contribution, no matter how small!
+- backend tests, linting, formatting, and type checking;
+- frontend linting/type checks and end-to-end Playwright coverage;
+- Docker builds;
+- security scanning;
+- internal Markdown link integrity.
 
-### Types of Contributions Recognized
+A documentation-only pull request may not run backend/frontend jobs, but the **Documentation Links** workflow should validate local Markdown targets.
 
-- Code/documentation contributions
-- Issue reporting and triage
-- Community support
-- Spreading the word about BGSTM
+## Documentation style
 
-## 📚 Additional Resources
+Use clear, professional language and existing naming conventions. Prefer:
 
-- [README](README.md) - Project overview
-- [Getting Started Guide](docs/GETTING-STARTED.md) - Introduction to BGSTM
-- [Documentation](docs/README.md) - Complete documentation
-- [MIT License](LICENSE) - License information
+- concise paragraphs and descriptive headings;
+- American English spelling;
+- active voice where practical;
+- concrete examples where they improve understanding;
+- lowercase, hyphenated filenames such as `test-planning.md`;
+- canonical cross-links rather than duplicated guidance.
 
----
+## Reporting issues
 
-## Thank You! 🙏
+Use the repository issue templates when possible. Include enough context to reproduce or evaluate the problem, including the affected file/feature, expected behavior, actual behavior, and relevant evidence.
 
-Your contributions help make BGSTM better for the entire software testing community. We appreciate your time and effort!
+Common labels include `bug`, `enhancement`, `documentation`, `good first issue`, `help wanted`, and `question`.
 
-**Happy Contributing!** 🚀
+## Additional resources
+
+- [Repository README](README.md)
+- [Getting Started Guide](docs/GETTING-STARTED.md)
+- [Complete Documentation](docs/README.md)
+- [Six BGSTM Phases](docs/phases/index.md)
+- [Canonical Test Templates](docs/test-templates/README.md)
+- [Worked Examples](docs/examples/README.md)
+- [MIT License](LICENSE)
+
+Thank you for helping keep BGSTM useful, consistent, and practical for the software testing community.
