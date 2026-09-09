@@ -278,6 +278,7 @@ export default function QualityDashboardPage() {
         qualityMetricsApi.getPassRateTrend(filters.window, { signal }),
         qualityMetricsApi.getDefectsByModule(filters.window, 10, { signal }),
       ]);
+      if (signal.aborted) return;
       setDefectTrend(nextDefectTrend);
       setPassRateTrend(nextPassRateTrend);
       setDefectsByModule(nextDefectsByModule);
