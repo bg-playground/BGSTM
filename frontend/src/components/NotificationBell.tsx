@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { isRequestCanceled } from '../api/client';
 import { notificationsApi } from '../api/notifications';
 import type { Notification } from '../types/notification';
 
@@ -31,13 +32,14 @@ export const NotificationBell: React.FC = () => {
 
   // Poll for unread count every 30 seconds
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     const poll = async () => {
       try {
-        const count = await notificationsApi.getUnreadCount();
-        if (!cancelled) setUnreadCount(count);
-      } catch {
+        const count = await notificationsApi.getUnreadCount({ signal: controller.signal });
+        setUnreadCount(count);
+      } catch (error) {
+        if (isRequestCanceled(error)) return;
         // silent
       }
     };
@@ -45,7 +47,7 @@ export const NotificationBell: React.FC = () => {
     void poll();
     const interval = setInterval(() => { void poll(); }, POLL_INTERVAL_MS);
     return () => {
-      cancelled = true;
+      controller.abort();
       clearInterval(interval);
     };
   }, []);
@@ -53,22 +55,21 @@ export const NotificationBell: React.FC = () => {
   // Load notifications when dropdown opens
   useEffect(() => {
     if (!open) return;
-    let cancelled = false;
+    const controller = new AbortController();
 
     const load = async () => {
       try {
-        const data = await notificationsApi.list({ limit: 20 });
-        if (!cancelled) {
-          setNotifications(data.notifications);
-          setUnreadCount(data.unread_count);
-        }
-      } catch {
+        const data = await notificationsApi.list({ limit: 20 }, { signal: controller.signal });
+        setNotifications(data.notifications);
+        setUnreadCount(data.unread_count);
+      } catch (error) {
+        if (isRequestCanceled(error)) return;
         // silent
       }
     };
 
     void load();
-    return () => { cancelled = true; };
+    return () => { controller.abort(); };
   }, [open]);
 
   // Close dropdown on outside click
