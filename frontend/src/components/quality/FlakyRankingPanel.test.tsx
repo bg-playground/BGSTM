@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import {
   qualityMetricsApi,
   type FlakyRankingResponse,
+  type ModuleCoverageFailureResponse,
   type RecurringDefectsParetoResponse,
 } from '../../api/qualityMetrics';
 import { FlakyRankingPanel } from './FlakyRankingPanel';
@@ -16,6 +17,7 @@ vi.mock('../../api/qualityMetrics', async () => {
       ...actual.qualityMetricsApi,
       getFlakyRanking: vi.fn(),
       getRecurringDefectsPareto: vi.fn(),
+      getCoverageVsDefects: vi.fn(),
     },
   };
 });
@@ -84,10 +86,37 @@ const emptyPareto: RecurringDefectsParetoResponse = {
   reason: 'No test failed more than once in the selected window.',
 };
 
+const moduleRiskWithRows: ModuleCoverageFailureResponse = {
+  points: [
+    {
+      module: 'Checkout',
+      coverage_pct: 50,
+      failure_density_pct: 75,
+      total_requirements: 4,
+      covered_requirements: 2,
+      total_executions: 8,
+      total_failures: 6,
+    },
+  ],
+  median_coverage_pct: 50,
+  median_failure_density_pct: 75,
+  is_synthetic: false,
+  reason: null,
+};
+
+const emptyModuleRisk: ModuleCoverageFailureResponse = {
+  points: [],
+  median_coverage_pct: null,
+  median_failure_density_pct: null,
+  is_synthetic: true,
+  reason: 'requires requirements with module assignments; no requirements are available yet',
+};
+
 describe('FlakyRankingPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(qualityMetricsApi.getRecurringDefectsPareto).mockResolvedValue(emptyPareto);
+    vi.mocked(qualityMetricsApi.getCoverageVsDefects).mockResolvedValue(emptyModuleRisk);
   });
 
   it('renders ranking rows from API response', async () => {
@@ -123,6 +152,21 @@ describe('FlakyRankingPanel', () => {
     );
   });
 
+  it('renders module coverage versus failure-density analysis', async () => {
+    vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue(responseWithRows);
+    vi.mocked(qualityMetricsApi.getCoverageVsDefects).mockResolvedValue(moduleRiskWithRows);
+
+    render(
+      <MemoryRouter>
+        <FlakyRankingPanel window={30} />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByTestId('quality-dashboard-chart-coverage-vs-defects')).toBeInTheDocument();
+    expect(screen.getByText('Coverage vs Failure Density')).toBeInTheDocument();
+    await waitFor(() => expect(qualityMetricsApi.getCoverageVsDefects).toHaveBeenCalledWith(30, expect.any(Object)));
+  });
+
   it('shows synthetic empty reason when no flaky entries are returned', async () => {
     vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue({
       entries: [],
@@ -140,7 +184,7 @@ describe('FlakyRankingPanel', () => {
     expect(screen.getByText('requires external case-result outcomes; no execution results are available yet')).toBeInTheDocument();
   });
 
-  it('re-fetches both analyses when the selected window changes', async () => {
+  it('re-fetches analyses when the selected window changes', async () => {
     vi.mocked(qualityMetricsApi.getFlakyRanking).mockResolvedValue(responseWithRows);
 
     const { rerender } = render(
@@ -151,6 +195,7 @@ describe('FlakyRankingPanel', () => {
 
     await waitFor(() => expect(qualityMetricsApi.getFlakyRanking).toHaveBeenCalledWith(30, 10, expect.any(Object)));
     await waitFor(() => expect(qualityMetricsApi.getRecurringDefectsPareto).toHaveBeenCalledWith(30, 10, expect.any(Object)));
+    await waitFor(() => expect(qualityMetricsApi.getCoverageVsDefects).toHaveBeenCalledWith(30, expect.any(Object)));
 
     rerender(
       <MemoryRouter>
@@ -160,6 +205,7 @@ describe('FlakyRankingPanel', () => {
 
     await waitFor(() => expect(qualityMetricsApi.getFlakyRanking).toHaveBeenCalledWith(7, 10, expect.any(Object)));
     await waitFor(() => expect(qualityMetricsApi.getRecurringDefectsPareto).toHaveBeenCalledWith(7, 10, expect.any(Object)));
+    await waitFor(() => expect(qualityMetricsApi.getCoverageVsDefects).toHaveBeenCalledWith(7, expect.any(Object)));
   });
 
   it('sorts rows when a sortable column header is clicked', async () => {
