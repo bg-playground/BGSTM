@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { isRequestCanceled } from '../api/client';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { externalResultsApi, type CaseOutcome, type CaseResult, type RunStatus, type TestSession } from '../api/externalResults';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
@@ -39,12 +39,15 @@ function formatSessionDuration(startedAt: string, finishedAt: string | null): st
 
 const TestRunDetailPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useToast();
 
   const [session, setSession] = useState<TestSession | null>(null);
   const [cases, setCases] = useState<CaseResult[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  const caseFilter = searchParams.get('case');
 
   const loadData = useCallback(async (signal: AbortSignal) => {
     if (!sessionId) {
@@ -104,6 +107,17 @@ const TestRunDetailPage: React.FC = () => {
     const remainingPct = Math.max(0, 100 - passedPct - failedPct);
     return { passedPct, failedPct, remainingPct };
   }, [session]);
+
+  const visibleCases = useMemo(() => {
+    if (!caseFilter) return cases;
+    return cases.filter((result) => result.test_case_id === caseFilter || result.external_id === caseFilter);
+  }, [caseFilter, cases]);
+
+  const clearCaseFilter = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('case');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   if (loading) {
     return (
@@ -198,6 +212,15 @@ const TestRunDetailPage: React.FC = () => {
         </div>
       </div>
 
+      {caseFilter ? (
+        <div data-testid="run-case-filter" className="mb-4 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <span>Showing evidence for test identity: <span className="font-mono">{caseFilter}</span></span>
+          <button onClick={clearCaseFilter} className="font-medium text-blue-700 hover:text-blue-900">
+            Show all cases
+          </button>
+        </div>
+      ) : null}
+
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -213,7 +236,7 @@ const TestRunDetailPage: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {cases.map((result) => (
+            {visibleCases.map((result) => (
               <React.Fragment key={result.id}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-800">{result.external_id ?? result.title}</td>
@@ -256,10 +279,10 @@ const TestRunDetailPage: React.FC = () => {
                 ) : null}
               </React.Fragment>
             ))}
-            {cases.length === 0 ? (
+            {visibleCases.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-sm text-gray-500 text-center">
-                  No case results recorded for this run.
+                  {caseFilter ? 'No case result in this run matches the selected test identity.' : 'No case results recorded for this run.'}
                 </td>
               </tr>
             ) : null}
