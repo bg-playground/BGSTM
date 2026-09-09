@@ -1,6 +1,6 @@
 # Testing Phases
 
-BGSTM defines six core phases that structure the software testing process from initial planning through final reporting, plus an ETL semantic validation phase for data-pipeline initiatives that require NATAegisFlow evidence. Each phase builds upon the previous one, creating a comprehensive testing workflow.
+BGSTM defines six core phases that structure the software testing process from initial planning through final reporting. Each phase builds upon the previous one, creating a comprehensive testing workflow that can be adapted to different delivery methodologies and specialized testing contexts.
 
 ## The Phases
 
@@ -58,15 +58,6 @@ Communicate test findings, analysis, and recommendations to stakeholders through
 
 ---
 
-### [Phase 7: ETL Semantic Validation](07-etl-semantic-validation.md)
-**Validate ETL semantics using NATAegisFlow outputs**
-
-Verify that ETL outputs preserve business meaning, document semantic findings, capture approvals, and assemble audit evidence for data-pipeline release or handoff decisions.
-
-**Key Activities:** NATAegisFlow output review, semantic findings triage, approval capture, audit evidence assembly
-
----
-
 ## Phase Workflow
 
 ```mermaid
@@ -76,10 +67,14 @@ graph LR
     C --> D[Phase 4:<br>Test Execution]
     D --> E[Phase 5:<br>Test Results Analysis]
     E --> F[Phase 6:<br>Test Results Reporting]
-    F --> G[Phase 7:<br>ETL Semantic<br>Validation]
     D -.Iterative.-> D
     E -.Feedback.-> D
+    F -.Next cycle.-> A
 ```
+
+## Applied Testing Examples
+
+Specialized testing problems should be implemented through the six BGSTM phases rather than added as new phases. See the [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md) for one such implementation using NATAegisFlow evidence.
 
 ## Methodology Adaptations
 
