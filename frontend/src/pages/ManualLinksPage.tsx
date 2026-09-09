@@ -31,6 +31,7 @@ export const ManualLinksPage: React.FC = () => {
         requirementsApi.list(1, 200, { signal }),
         testCasesApi.list(1, 200, { signal }),
       ]);
+      if (signal?.aborted) return;
       setLinks(linksData.items);
       setRequirements(reqData.items);
       setTestCases(tcData.items);
