@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime
 from statistics import mean
 from typing import Literal
 from uuid import UUID
@@ -38,9 +38,9 @@ async def get_recovery_trend(
 ) -> RecoveryTrendResponse:
     """Measure time-to-green from an opening failed execution to the next pass.
 
-    The window is anchored on the opening failure. We intentionally load complete
-    execution history so failures near the end of a reporting window can resolve
-    later without inventing a defect-resolution timestamp.
+    The window is anchored on the opening failure. Complete history is loaded so
+    pre-window failure state is preserved and failures near the end of a reporting
+    window can resolve later without inventing a defect-resolution timestamp.
     """
 
     if window_days not in _VALID_WINDOWS:
@@ -76,7 +76,7 @@ async def get_recovery_trend(
 
         for case_result, test_case in ordered:
             if opening is None:
-                if case_result.outcome == CaseStatus.failed and case_result.created_at >= start_at:
+                if case_result.outcome == CaseStatus.failed:
                     opening = (case_result, test_case)
                 continue
 
@@ -84,15 +84,16 @@ async def get_recovery_trend(
                 continue
 
             failed_result, failed_test_case = opening
-            test_case_id = failed_result.test_case_id if isinstance(failed_result.test_case_id, UUID) else None
-            linked_requirements = requirements_by_test_case_id.get(test_case_id, []) if test_case_id else []
-            module = _module_from_context(failed_test_case, linked_requirements)
-            severity = _severity_from_context(failed_test_case, linked_requirements)
-            duration_hours = (case_result.created_at - failed_result.created_at).total_seconds() / 3600
-            resolved.append((failed_result.created_at, module, severity, duration_hours))
+            if failed_result.created_at >= start_at:
+                test_case_id = failed_result.test_case_id if isinstance(failed_result.test_case_id, UUID) else None
+                linked_requirements = requirements_by_test_case_id.get(test_case_id, []) if test_case_id else []
+                module = _module_from_context(failed_test_case, linked_requirements)
+                severity = _severity_from_context(failed_test_case, linked_requirements)
+                duration_hours = (case_result.created_at - failed_result.created_at).total_seconds() / 3600
+                resolved.append((failed_result.created_at, module, severity, duration_hours))
             opening = None
 
-        if opening is not None:
+        if opening is not None and opening[0].created_at >= start_at:
             open_episodes += 1
 
     if not resolved:
@@ -106,7 +107,7 @@ async def get_recovery_trend(
             reason="No failed execution episode in the selected window has a subsequent passing execution yet.",
         )
 
-    buckets: dict[tuple[datetime.date, str], list[float]] = defaultdict(list)
+    buckets: dict[tuple[date, str], list[float]] = defaultdict(list)
     for opened_at, module, severity, duration_hours in resolved:
         group = "Overall" if group_by == "overall" else (module if group_by == "module" else severity.title())
         buckets[(opened_at.date(), group)].append(duration_hours)
