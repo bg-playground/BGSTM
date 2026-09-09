@@ -5,7 +5,7 @@
 
 ## 🎯 Overview
 
-BGSTM provides a structured approach to software testing through **six core phases** plus an ETL semantic validation phase, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+BGSTM provides a structured approach to software testing through **six core phases**, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
 
 ---
 
@@ -57,15 +57,17 @@ BGSTM provides a structured approach to software testing through **six core phas
 4. **[Test Execution](phases/04-test-execution.md)** - Execute tests and manage defects
 5. **[Test Results Analysis](phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
-7. **[ETL Semantic Validation](phases/07-etl-semantic-validation.md)** - Validate ETL semantics using NATAegisFlow outputs
 
 ---
 
-## 🧭 NATAegisFlow Artifact Workflow
+## 🧭 ETL Semantic Validation Applied Example
 
+ETL semantic validation is an application of the six-phase BGSTM methodology, not an additional methodology phase.
+
+- **[ETL Semantic Validation Applied Example](examples/etl-semantic-validation-example.md)** - Shows how the six BGSTM phases can be applied to an ETL semantic-validation initiative using NATAegisFlow evidence
 - **[NATAegisFlow Artifact Workflow Checklist Template](test-templates/nataegisflow-artifact-workflow-template.md)** - Story and artifact acceptance checklist with semantic validation, policy gate, approval, evidence, and patch validation checkpoints
 - **[NATAegisFlow Artifact Workflow Example](examples/nataegisflow-artifact-workflow-example.md)** - Worked example showing a completed ETL artifact patch validation
-- **[AegisFlow BGSTM Adoption Retrospective and Sign-off](examples/nataegisflow-bgstm-pilot-retrospective.md)** - Finalized adoption record with process changes, rollout readiness, and process owner sign-off
+- **[AegisFlow BGSTM Adoption Retrospective and Sign-off](examples/nataegisflow-bgstm-pilot-retrospective.md)** - Adoption record with process changes, rollout readiness, and process owner sign-off
 
 ---
 

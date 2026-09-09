@@ -328,27 +328,28 @@ Different stakeholders need different information:
 The following templates support Test Results Reporting activities:
 
 ### Primary Templates
-- **[Test Summary Report Template](../templates/test-summary-report-template.md)** - Final comprehensive test report
+- **[Test Summary Report Template](../test-templates/test-summary-report-template.md)** - Final comprehensive test report
   - Use this template as the primary deliverable for final test reporting
   - Includes executive summary, complete test results, quality assessment, and release recommendation
   - Designed for stakeholder review and formal sign-off
   
-- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Final coverage verification
+- **[Traceability Matrix Template](../test-templates/traceability-matrix-template.md)** - Final coverage verification
   - Include as supporting documentation to demonstrate complete requirement coverage
   - Shows final execution status and defect resolution for all requirements
 
 ### Supporting Templates  
-- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Supporting execution data
+- **[Test Execution Report Template](../test-templates/test-execution-report-template.md)** - Supporting execution data
   - Provide as appendices or supporting detail for comprehensive reporting
   
-- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Final risk status
+- **[Risk Assessment Template](../test-templates/risk-assessment-template.md)** - Final risk status
   - Include final risk assessment and residual risks in reporting package
   
-- **[Defect Report Template](../templates/defect-report-template.md)** - Defect summaries
+- **[Defect Report Template](../test-templates/defect-report-template.md)** - Defect summaries
   - Reference for detailed defect information in final reports
 
 ## Examples
 - [Traceability Matrix Example](../examples/traceability-matrix-example.md) - Complete requirements traceability matrix linking 64 requirements to 350 test cases. Shows bidirectional traceability with test execution status, defect linkage, coverage analysis (100% achieved), gap analysis, and compliance validation (PCI-DSS, WCAG 2.1 AA). Includes final QA sign-off.
+- [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md) - Demonstrates how a specialized ETL semantic-validation initiative can use the six BGSTM phases with NATAegisFlow evidence.
 
 ## Deliverables Checklist
 - [ ] Test summary report completed
@@ -365,10 +366,8 @@ The following templates support Test Results Reporting activities:
 ## Previous Phase
 [Test Results Analysis](05-test-results-analysis.md)
 
-## Next Phase
-For ETL and data-pipeline initiatives that require NATAegisFlow evidence, proceed to
-[ETL Semantic Validation](07-etl-semantic-validation.md). Otherwise, return to
-[Phase 1: Test Planning](01-test-planning.md) for the next project cycle.
+## Next Cycle
+Test Results Reporting completes the six-phase BGSTM methodology. Use reporting insights to begin the next cycle with [Phase 1: Test Planning](01-test-planning.md), or apply the six phases to a specialized testing context such as the [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md).
 
 ## Continuous Improvement
 Use insights from reporting to improve:
@@ -381,4 +380,4 @@ Use insights from reporting to improve:
 
 ---
 
-**This completes the core six phases of the BGSTM framework. ETL and data-pipeline initiatives can extend the workflow with Phase 7: ETL Semantic Validation to verify semantic correctness with NATAegisFlow evidence.**
+**This completes the six phases of the BGSTM framework. Specialized testing contexts extend the application of these phases; they do not add phases to the methodology.**
