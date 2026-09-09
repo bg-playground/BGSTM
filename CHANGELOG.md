@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Finalized BGSTM Phase 7 ETL Semantic Validation as process version 1.2 with updated NATAegisFlow checklist artifacts, methodology cross-links, rollout readiness guidance, and process owner sign-off (#387).
+- Corrected the accidental classification of ETL Semantic Validation as BGSTM Phase 7. BGSTM remains a six-phase methodology; the NATAegisFlow/ETL material is now documented as a specialized applied example across Phases 1–6 (#393, #392).
+- Preserved legacy `docs/templates/` paths as compatibility redirects to the canonical `docs/test-templates/` directory and added automated internal Markdown-link validation (#392).
 
 ## [2.0.1] - 2026-03-05
 

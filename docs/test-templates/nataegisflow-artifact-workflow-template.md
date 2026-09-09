@@ -4,6 +4,8 @@
 **Purpose:** This checklist helps teams validate NATAegisFlow-related artifacts before acceptance, release, adoption review, or governance review.  
 **When to Use:** Use for user stories, patches, or controlled artifact changes that rely on NATAegisFlow semantic validation evidence.
 
+> This checklist is a specialized application of the six BGSTM phases. It does not define an additional BGSTM phase.
+
 ---
 
 ## Artifact and Story Details
@@ -91,7 +93,8 @@
 
 ## Related Documentation
 
-- [Phase 7: ETL Semantic Validation](../phases/07-etl-semantic-validation.md)
+- [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md)
+- [BGSTM Testing Phases](../phases/index.md)
 - [Test Case Template](test-case-template.md)
 - [Traceability Matrix Template](traceability-matrix-template.md)
 - [NATAegisFlow Artifact Workflow Example](../examples/nataegisflow-artifact-workflow-example.md)

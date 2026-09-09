@@ -1,0 +1,36 @@
+name: Documentation Links
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+      - 'scripts/check_markdown_links.py'
+      - '.github/workflows/docs-links.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.md'
+      - 'scripts/check_markdown_links.py'
+      - '.github/workflows/docs-links.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  internal-links:
+    name: Internal Markdown Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Check internal Markdown links
+        run: python scripts/check_markdown_links.py
