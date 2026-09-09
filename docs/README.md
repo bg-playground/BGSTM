@@ -17,7 +17,6 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 4. [Test Execution](phases/04-test-execution.md)
 5. [Test Results Analysis](phases/05-test-results-analysis.md)
 6. [Test Results Reporting](phases/06-test-results-reporting.md)
-7. [ETL Semantic Validation](phases/07-etl-semantic-validation.md)
 
 #### Methodology Guides
 - [Agile Testing](methodologies/agile.md)
@@ -28,6 +27,7 @@ New to BGSTM? Start here for a step-by-step guide to implementing this framework
 #### Templates & Examples
 - [Templates](test-templates/README.md)
 - [NATAegisFlow Artifact Workflow Checklist](test-templates/nataegisflow-artifact-workflow-template.md)
+- [ETL Semantic Validation Applied Example](examples/etl-semantic-validation-example.md)
 - [NATAegisFlow Artifact Workflow Example](examples/nataegisflow-artifact-workflow-example.md)
 - [AegisFlow BGSTM Adoption Retrospective and Sign-off](examples/nataegisflow-bgstm-pilot-retrospective.md)
 - [Examples](examples/README.md)
