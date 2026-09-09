@@ -45,7 +45,7 @@ describe('NotificationBell request cancellation', () => {
     vi.mocked(notificationsApi.getUnreadCount).mockResolvedValue(0);
     vi.mocked(notificationsApi.list).mockImplementation(async (_params, config) => {
       signal = config?.signal;
-      return await new Promise(() => undefined);
+      return await new Promise<never>(() => undefined);
     });
 
     render(<NotificationBell />);
