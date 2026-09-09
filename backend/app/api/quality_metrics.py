@@ -1,4 +1,4 @@
-from typing import Literal
+from enum import IntEnum
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +21,11 @@ from app.schemas.quality_recurring import RecurringDefectsParetoResponse
 
 router = APIRouter(prefix="/quality-metrics")
 
-WindowParam = Literal[7, 30, 90]
+
+class WindowParam(IntEnum):
+    DAYS_7 = 7
+    DAYS_30 = 30
+    DAYS_90 = 90
 
 
 @router.get("/", response_model=QualityDashboardSnapshot)
@@ -35,7 +39,7 @@ async def get_quality_dashboard(
 
 @router.get("/defect-trend", response_model=DefectTrendResponse)
 async def get_defect_trend(
-    window: WindowParam = Query(30),
+    window: WindowParam = Query(WindowParam.DAYS_30),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> DefectTrendResponse:
@@ -45,7 +49,7 @@ async def get_defect_trend(
 
 @router.get("/pass-rate-trend", response_model=PassRateTrendResponse)
 async def get_pass_rate_trend(
-    window: WindowParam = Query(30),
+    window: WindowParam = Query(WindowParam.DAYS_30),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> PassRateTrendResponse:
@@ -55,7 +59,7 @@ async def get_pass_rate_trend(
 
 @router.get("/defects-by-module", response_model=DefectsByModuleResponse)
 async def get_defects_by_module(
-    window: WindowParam = Query(30),
+    window: WindowParam = Query(WindowParam.DAYS_30),
     top_n: int = Query(10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -66,7 +70,7 @@ async def get_defects_by_module(
 
 @router.get("/recurring-defects", response_model=RecurringDefectsParetoResponse)
 async def get_recurring_defects_pareto(
-    window: WindowParam = Query(30),
+    window: WindowParam = Query(WindowParam.DAYS_30),
     top_n: int = Query(10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -86,7 +90,7 @@ async def get_automation_coverage(
 
 @router.get("/flaky-ranking", response_model=FlakyRankingResponse)
 async def get_flaky_ranking(
-    window: WindowParam = Query(30),
+    window: WindowParam = Query(WindowParam.DAYS_30),
     top_n: int = Query(10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
