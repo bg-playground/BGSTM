@@ -124,8 +124,8 @@
 ## Related Resources
 - [Agile Testing Guide](agile.md) - Complete Agile testing methodology
 - [Scrum Testing Checklist](scrum-testing-checklist.md) - Scrum-specific checklist
-- [Phase 7: ETL Semantic Validation](../phases/07-etl-semantic-validation.md) - Finalized NATAegisFlow process guidance
+- [ETL Semantic Validation Applied Example](../examples/etl-semantic-validation-example.md) - Example of applying all six BGSTM phases to ETL semantic validation
 - [NATAegisFlow Artifact Workflow Checklist](../test-templates/nataegisflow-artifact-workflow-template.md) - Artifact workflow checklist
-- [Test Plan Template](../templates/test-plan-template.md)
-- [Test Case Template](../templates/test-case-template.md)
-- [Traceability Matrix Template](../templates/traceability-matrix-template.md)
+- [Test Plan Template](../test-templates/test-plan-template.md)
+- [Test Case Template](../test-templates/test-case-template.md)
+- [Traceability Matrix Template](../test-templates/traceability-matrix-template.md)
