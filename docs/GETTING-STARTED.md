@@ -1,6 +1,10 @@
 # Getting Started with BGSTM
 
-Welcome to BGSTM! This guide will help you get started with implementing professional software testing practices in your projects.
+BGSTM (Better Global Software Testing Methodology) provides a structured six-phase testing lifecycle that can be adapted to Agile, Scrum, Waterfall, and hybrid delivery models.
+
+> **BGSTM has exactly six core phases.** Specialized applications such as ETL semantic validation use the same six-phase lifecycle rather than extending it.
+
+This guide focuses on adopting the methodology. The FastAPI/React software in this repository is an optional reference implementation, not a prerequisite for using BGSTM.
 
 ## 🎯 Step 1: Assess Your Current Situation
 
@@ -41,7 +45,7 @@ Where does your team currently stand?
 - Mature testing processes
 - High automation coverage
 - Metrics-driven decisions
-- → Explore: [Multi-Platform App Development](integration/multi-platform-guide.md)
+- → Strengthen measurement, traceability, release readiness, and continuous improvement; optionally explore the [reference application guide](integration/multi-platform-guide.md)
 
 ## 🎓 Step 2: Learn the Framework
 
@@ -86,7 +90,7 @@ If you're short on time, read these essentials:
 2. [Test Planning Overview](phases/01-test-planning.md#overview) - 5 minutes
 3. [Test Case Structure](phases/02-test-case-development.md#test-case-structure) - 5 minutes
 4. [Test Execution Overview](phases/04-test-execution.md#overview) - 5 minutes
-5. Browse [Templates](templates/README.md) - 5 minutes
+5. Browse [Templates](test-templates/README.md) - 5 minutes
 
 ## 📋 Step 3: Customize for Your Project
 
@@ -94,16 +98,16 @@ If you're short on time, read these essentials:
 Based on your methodology, select and customize appropriate templates:
 
 **For Agile/Scrum Projects:**
-- ✅ [Test Case Template](templates/test-case-template.md) (simplified)
-- ✅ [Defect Report Template](templates/defect-report-template.md)
-- ✅ [Test Execution Report Template](templates/test-execution-report-template.md) (lightweight version)
-- Optional: [Test Plan Template](templates/test-plan-template.md) (high-level only)
+- ✅ [Test Case Template](test-templates/test-case-template.md) (simplified)
+- ✅ [Defect Report Template](test-templates/defect-report-template.md)
+- ✅ [Test Execution Report Template](test-templates/test-execution-report-template.md) (lightweight version)
+- Optional: [Test Plan Template](test-templates/test-plan-template.md) (high-level only)
 
 **For Waterfall Projects:**
-- ✅ [Test Plan Template](templates/test-plan-template.md) (complete)
-- ✅ [Test Case Template](templates/test-case-template.md) (detailed)
-- ✅ [Defect Report Template](templates/defect-report-template.md)
-- ✅ [Test Execution Report Template](templates/test-execution-report-template.md) (full version)
+- ✅ [Test Plan Template](test-templates/test-plan-template.md) (complete)
+- ✅ [Test Case Template](test-templates/test-case-template.md) (detailed)
+- ✅ [Defect Report Template](test-templates/defect-report-template.md)
+- ✅ [Test Execution Report Template](test-templates/test-execution-report-template.md) (full version)
 
 ### Adapt to Your Context
 1. **Review** each template
@@ -143,35 +147,31 @@ Don't try to implement everything at once. Start with a pilot:
 
 ## 🛠️ Step 5: Set Up Your Tools
 
-### Essential Tools (Free Options)
+BGSTM does not require a specific toolchain. Use the tools that fit your team's scale, risk, and existing environment.
+
+### Common tool categories
 
 **Test Case Management**
-- Option 1: Spreadsheets (Excel, Google Sheets) - Free
-- Option 2: TestRail - Trial available
-- Option 3: Zephyr for Jira - Free tier available
+- Spreadsheets for lightweight adoption
+- Dedicated test-management platforms where scale or governance requires them
+- The BGSTM reference application for teams evaluating repository-native traceability workflows
 
 **Defect Tracking**
-- Option 1: Jira - Free for small teams
-- Option 2: GitHub Issues - Free
-- Option 3: Bugzilla - Open source
+- GitHub Issues, Jira, Azure DevOps, Bugzilla, or an equivalent system
 
 **Test Automation**
-- Option 1: Selenium - Open source
-- Option 2: Cypress - Open source
-- Option 3: Playwright - Open source
+- Playwright, Selenium, Cypress, API-level frameworks, performance tools, and domain-specific automation as appropriate
 
 **Collaboration**
-- Option 1: Slack - Free tier
-- Option 2: Microsoft Teams - Free with Microsoft account
-- Option 3: Discord - Free
+- Your existing team communication and documentation platforms
 
 ### Tool Setup Checklist
-- [ ] Choose test management tool
+- [ ] Choose test management approach
 - [ ] Set up defect tracking
 - [ ] Configure access for team
 - [ ] Create project structure
-- [ ] Import templates
-- [ ] Set up integrations (if applicable)
+- [ ] Import or adapt BGSTM templates
+- [ ] Set up integrations where they add value
 
 ## 👥 Step 6: Train Your Team
 
@@ -191,10 +191,10 @@ Don't try to implement everything at once. Start with a pilot:
 4. **Session 4 (2 hours)**: Tool setup and Q&A
 
 ### Training Materials
-- Present [Methodology Slides](methodologies/comparison.md)
-- Walk through [Testing Phases](phases/01-test-planning.md)
-- Practice with [Templates](templates/README.md)
-- Review [Examples](examples/README.md) (when available)
+- Present [Methodology Comparison](methodologies/comparison.md)
+- Walk through [Testing Phases](phases/index.md)
+- Practice with [Templates](test-templates/README.md)
+- Review [Examples](examples/README.md)
 
 ## 📊 Step 7: Track Your Progress
 
@@ -247,7 +247,7 @@ Don't try to implement everything at once. Start with a pilot:
 ## 🆘 Common Challenges and Solutions
 
 ### Challenge: "We don't have time for testing"
-**Solution**: 
+**Solution**:
 - Start with smoke tests on critical features
 - Automate repetitive tests
 - Integrate testing into development (shift left)
@@ -269,37 +269,36 @@ Don't try to implement everything at once. Start with a pilot:
 
 ### Challenge: "We need specialized tools but have no budget"
 **Solution**:
-- Start with free tools (spreadsheets, GitHub)
-- Use free tiers of commercial tools
-- Consider open-source alternatives
-- Build ROI case for tool investment
+- Start with tools already available to your team
+- Use open-source or free-tier options where appropriate
+- Introduce dedicated tooling only when the workflow justifies it
+- Build the ROI case before adding operational complexity
 
 ## 📚 Additional Resources
 
 ### Within This Repository
 - [Complete Documentation](README.md)
-- [Testing Phases](phases/01-test-planning.md)
-- [Methodology Guides](methodologies/agile.md)
-- [Templates](templates/README.md)
+- [Testing Phases](phases/index.md)
+- [Methodology Guides](methodologies/comparison.md)
+- [Canonical Templates](test-templates/README.md)
+- [Worked Examples](examples/README.md)
+- [ETL Semantic Validation Applied Example](examples/etl-semantic-validation-example.md)
 - [Multi-Platform App Guide](integration/multi-platform-guide.md)
 
 ### External Resources
 - [ISTQB Certification](https://www.istqb.org/)
-- [Agile Testing by Lisa Crispin](https://agiletester.ca/)
+- [Agile Testing](https://agiletester.ca/)
 - [Test Automation Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
 - [Ministry of Testing](https://www.ministryoftesting.com/)
 
 ## 💬 Get Help
 
-### Support Options
 1. **Documentation**: Check the [docs](README.md) first
 2. **Issues**: Open an issue in this repository
-3. **Discussions**: Start a discussion for questions
-4. **Community**: Join testing communities
+3. **Discussions**: Start a discussion if enabled
+4. **Community**: Participate in established software testing communities
 
 ## ✅ Your First Week Checklist
-
-Use this checklist for your first week with BGSTM:
 
 **Day 1**
 - [ ] Read this getting started guide
@@ -317,13 +316,13 @@ Use this checklist for your first week with BGSTM:
 - [ ] Create a simple test plan for pilot project
 - [ ] Write 5-10 test cases using template
 - [ ] Get feedback from team
-- [ ] Set up basic test management tool
+- [ ] Set up basic test management approach
 
 **Day 4**
 - [ ] Execute your test cases
 - [ ] Log any defects found
 - [ ] Track execution progress
-- [ ] Take notes on what works/doesn't work
+- [ ] Take notes on what works and what does not
 
 **Day 5**
 - [ ] Create a simple test report
@@ -333,18 +332,8 @@ Use this checklist for your first week with BGSTM:
 
 ## 🎉 Next Steps
 
-Congratulations on getting started with BGSTM! 
-
-Your journey to professional software testing has begun. Remember:
-- **Start small** - Don't try to do everything at once
-- **Be consistent** - Follow the processes you establish
-- **Improve continuously** - Learn and adapt as you go
-- **Share knowledge** - Help others on the same journey
-
-Ready to dive deeper? Choose your next step:
-- 📖 [Deep dive into your methodology](methodologies/comparison.md)
-- 🔧 [Set up a multi-platform app](integration/multi-platform-guide.md)
-- 📋 [Explore all templates](templates/README.md)
-- 🎓 [Study all six phases in detail](phases/01-test-planning.md)
-
-**Welcome to the BGSTM community!** 🚀
+- 📖 [Compare methodology adaptations](methodologies/comparison.md)
+- 📋 [Explore the canonical templates](test-templates/README.md)
+- 🧭 [Review practical examples](examples/README.md)
+- 🎓 [Study all six phases](phases/index.md)
+- 🛠️ [Explore the reference application](integration/multi-platform-guide.md) if software tooling is useful for your adoption
