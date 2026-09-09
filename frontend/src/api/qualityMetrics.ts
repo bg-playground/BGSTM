@@ -47,6 +47,24 @@ export interface DefectsByModuleResponse {
   reason: string | null;
 }
 
+export interface ModuleCoverageFailurePoint {
+  module: string;
+  coverage_pct: number;
+  failure_density_pct: number;
+  total_requirements: number;
+  covered_requirements: number;
+  total_executions: number;
+  total_failures: number;
+}
+
+export interface ModuleCoverageFailureResponse {
+  points: ModuleCoverageFailurePoint[];
+  median_coverage_pct: number | null;
+  median_failure_density_pct: number | null;
+  is_synthetic: boolean;
+  reason: string | null;
+}
+
 export interface RecurringDefectEntry {
   test_case_id: string | null;
   external_id: string | null;
@@ -139,6 +157,17 @@ export const qualityMetricsApi = {
   ): Promise<DefectsByModuleResponse> {
     const response = await apiClient.get<DefectsByModuleResponse>(
       `/quality-metrics/defects-by-module?window=${window}&top_n=${topN}`,
+      config
+    );
+    return response.data;
+  },
+
+  async getCoverageVsDefects(
+    window: WindowDays,
+    config?: AxiosRequestConfig
+  ): Promise<ModuleCoverageFailureResponse> {
+    const response = await apiClient.get<ModuleCoverageFailureResponse>(
+      `/quality-metrics/coverage-vs-defects?window=${window}`,
       config
     );
     return response.data;
