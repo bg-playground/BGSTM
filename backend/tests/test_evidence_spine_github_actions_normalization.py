@@ -51,7 +51,9 @@ def test_candidate_identity_is_derived_from_workflow_not_playwright_run():
     snapshot = _load(SNAPSHOT)
     source_shaped = apply_github_actions_snapshot(frozen, snapshot)
 
-    candidate_workflow = next(workflow for workflow in snapshot["workflow_runs"] if workflow.get("release", {}).get("candidate"))
+    candidate_workflow = next(
+        workflow for workflow in snapshot["workflow_runs"] if workflow.get("release", {}).get("candidate")
+    )
     assert source_shaped["release"]["candidate_sha"] == candidate_workflow["head_sha"]
     assert source_shaped["execution_builds"]["RUN-003"] == "GHA-9003"
 
