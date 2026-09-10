@@ -2,7 +2,7 @@
   <img src="docs/assets/logo.png" alt="BGSTM logo" width="120" />
 </p>
 
-<h1 align="center">BGSTM — Better Global Software Testing Methodology</h1>
+<h1 align="center">BGSTM - Better Global Software Testing Methodology</h1>
 
 <p align="center">
   <strong>A practical six-phase software testing methodology for Agile, Scrum, Waterfall, and hybrid delivery.</strong>
