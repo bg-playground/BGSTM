@@ -58,13 +58,15 @@ export const releaseReadinessApi = {
 
   async exportReport(
     format: 'md' | 'pdf',
-    window?: WindowDays,
+    windowOrConfig?: WindowDays | AxiosRequestConfig,
     config?: AxiosRequestConfig
   ): Promise<Blob> {
+    const window = typeof windowOrConfig === 'number' ? windowOrConfig : undefined;
+    const requestConfig = typeof windowOrConfig === 'number' ? config : windowOrConfig;
     const windowQuery = window ? `&window=${window}` : '';
     const response = await apiClient.get(`/release-readiness/export?format=${format}${windowQuery}`, {
       responseType: 'blob',
-      ...config,
+      ...requestConfig,
     });
     return response.data;
   },
