@@ -85,9 +85,13 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             _finding(
                 "F-002",
                 "Historical TC-007 evidence was invalidated by CHG-002.",
-                "A pricing-affecting change occurred after the historical execution; that execution cannot by itself support QO-004.",
+                (
+                    "A pricing-affecting change occurred after the historical execution; "
+                    "that execution cannot by itself support QO-004."
+                ),
                 ["QO-004"],
-                [f"{run['id']}@{run['executed_at']}" for run in stale_runs] + [f"CHG-002@{change['occurred_at']}"],
+                [f"{run['id']}@{run['executed_at']}" for run in stale_runs]
+                + [f"CHG-002@{change['occurred_at']}"],
                 [fixture["sources"]["requirements"], fixture["sources"]["executions"]],
                 ["CHG-002", "TC-007", *[run["id"] for run in stale_runs]],
             )
@@ -145,7 +149,10 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             _finding(
                 "F-005",
                 "TC-011 is semantically orphaned.",
-                "The executed test has no declared quality-intent relationship and is not designated secondary evidence.",
+                (
+                    "The executed test has no declared quality-intent relationship "
+                    "and is not designated secondary evidence."
+                ),
                 [],
                 [run["id"] for run in runs if "TC-011" in run["results"]],
                 [fixture["sources"]["executions"]],
@@ -190,7 +197,10 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             _finding(
                 "F-007",
                 "Qualifying TC-004 evidence is contradictory.",
-                "Candidate observations on the approved environment contain both PASS and FAIL; no reconciliation fact exists.",
+                (
+                    "Candidate observations on the approved environment contain both PASS and FAIL; "
+                    "no reconciliation fact exists."
+                ),
                 ["QO-002", "QO-007"],
                 [f"{run['id']}:{outcome}@{run['executed_at']}" for run, outcome in tc4_observations],
                 [fixture["sources"]["executions"]],
