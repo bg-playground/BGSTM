@@ -127,6 +127,7 @@ nav:
   - Home:
     - index.md
     - Getting Started: GETTING-STARTED.md
+    - Minimum Viable Adoption: minimum-viable-adoption.md
 
   - Testing Phases:
     - phases/index.md
