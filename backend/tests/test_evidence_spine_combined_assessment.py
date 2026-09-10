@@ -63,9 +63,7 @@ def test_combined_proof_includes_non_missing_link_semantics():
 
 
 def test_contradiction_remains_unresolved_and_requires_human_review():
-    finding = next(
-        finding for finding in evaluate(_combined_fixture()) if finding["finding_id"] == "F-007"
-    )
+    finding = next(finding for finding in evaluate(_combined_fixture()) if finding["finding_id"] == "F-007")
 
     assert finding["human_review_required"] is True
     assert "PASS and FAIL" in finding["reason"]
