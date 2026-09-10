@@ -1,4 +1,4 @@
-# BGSTM — Better Global Software Testing Methodology
+# BGSTM - Better Global Software Testing Methodology
 
 [![Backend CI](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/ci.yml)
 [![Frontend CI](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/bg-playground/BGSTM/actions/workflows/frontend-ci.yml)
