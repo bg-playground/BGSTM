@@ -71,12 +71,12 @@ flowchart LR
 
 ## Why BGSTM?
 
-- **Methodology agnostic** — use it with Agile, Scrum, Waterfall, or hybrid delivery without redefining the testing lifecycle.
-- **Traceable** — connect requirements, tests, results, defects, evidence, and decisions in a meaningful chain.
-- **Risk aware** — scale testing depth and rigor according to business and technical risk.
-- **Evidence based** — turn execution results and quality signals into clear stakeholder decisions.
-- **Practical to adopt** — start with a small evidence chain, then add templates, automation, dashboards, and integrations as needed.
-- **Tool independent** — BGSTM is the methodology; the included application and integrations are optional implementation examples.
+- **Methodology agnostic**: use it with Agile, Scrum, Waterfall, or hybrid delivery without redefining the testing lifecycle.
+- **Traceable**: connect requirements, tests, results, defects, evidence, and decisions in a meaningful chain.
+- **Risk aware**: scale testing depth and rigor according to business and technical risk.
+- **Evidence based**: turn execution results and quality signals into clear stakeholder decisions.
+- **Practical to adopt**: start with a small evidence chain, then add templates, automation, dashboards, and integrations as needed.
+- **Tool independent**: BGSTM is the methodology; the included application and integrations are optional implementation examples.
 
 ## What is in this repository?
 
