@@ -1,275 +1,198 @@
 # Phase 5: Test Results Analysis
 
 ## Overview
-Test Results Analysis involves examining the outcomes of test execution, analyzing defect trends, evaluating test coverage, and deriving insights to improve software quality and testing processes.
+Test Results Analysis converts execution evidence into an assessment of product quality, test completeness, and residual risk. The purpose is not to produce the largest possible collection of metrics; it is to explain what the evidence means and what decisions it supports.
 
 ## Objectives
-- Analyze test execution results comprehensively
-- Identify patterns and trends in defects
-- Assess overall software quality
-- Evaluate test coverage and effectiveness
-- Provide data-driven insights for decision making
-- Identify areas for improvement
+- Consolidate and validate evidence from Test Execution
+- Identify meaningful failure, defect, coverage, and risk patterns
+- Assess confidence against the objectives and exit criteria established during planning
+- Distinguish observed facts from interpretations and predictions
+- Identify unresolved risks, evidence gaps, and recommended actions
+- Prepare decision-ready conclusions for Phase 6 reporting
 
 ## Key Activities
 
-### 1. Test Metrics Collection
-Gather and consolidate data from test execution:
-- Total test cases executed
-- Pass/Fail/Blocked counts
-- Test execution duration
-- Defects identified by severity and priority
-- Test coverage statistics
-- Environment-related issues
-- Test case execution trends over time
+### 1. Validate and Consolidate the Evidence
+Before calculating metrics, confirm that the underlying data is interpretable:
+- Identify the build, environment, test window, and scope represented
+- Reconcile duplicate or retried executions where appropriate
+- Separate product failures from automation, environment, configuration, and test-data failures
+- Check for missing or blocked critical coverage
+- Confirm that requirement, test, execution, and defect identifiers remain traceable
+- Document material limitations in the available evidence
 
-### 2. Defect Analysis
+### 2. Analyze Test Execution Results
+Evaluate:
+- Planned versus executed tests
+- Pass, fail, blocked, and not-executed counts
+- Changes in results across builds, cycles, or iterations
+- Concentrations of failures by feature, module, workflow, risk, platform, or environment
+- Retest and regression outcomes
+- Evidence that exit criteria have or have not been satisfied
 
-#### Defect Distribution Analysis
-- **By Severity**: Critical, High, Medium, Low
-- **By Priority**: High, Medium, Low
-- **By Module/Feature**: Which areas have most defects
-- **By Type**: Functional, Performance, Security, Usability
-- **By Root Cause**: Coding error, requirement gap, design flaw
+A failed execution is not necessarily a unique defect. Multiple failures may represent one underlying defect, and a single defect may affect many tests.
 
-#### Defect Trends Analysis
-- Defect detection rate over time
-- Defect closure rate
-- Open vs. closed defects trend
-- Defect aging (time to resolve)
-- Defect reopen rate
-- Defect density by module
+### 3. Analyze Defects When Lifecycle Data Exists
+Useful defect analysis can include:
+- Distribution by severity, priority, module, type, or root cause
+- Open versus closed trends
+- Defect aging
+- Reopen rate
+- Defect density using a clearly defined denominator
+- Time from defect creation to accepted resolution
+- Escaped/post-release defects when a production defect source exists
 
-#### Defect Age Analysis
-- Track how long defects remain open
-- Identify bottlenecks in defect resolution
-- Highlight high-priority old defects
-- Calculate average resolution time
+Do not infer defect-lifecycle measures solely from test execution rows. If the system records only failed and later passing executions, describe that evidence as execution recovery/time-to-green rather than defect repair time.
 
-### 3. Test Coverage Analysis
+### 4. Analyze Coverage
 
 #### Requirements Coverage
-- Percentage of requirements with test cases
-- Requirements not covered by tests
-- Test case to requirement mapping
-- Critical requirements validation status
+- Percentage of in-scope requirements linked to tests
+- Requirements without tests or without completed execution evidence
+- Critical requirement validation status
+- Traceability gaps that reduce confidence
 
-#### Code Coverage (if applicable)
-- Statement coverage percentage
-- Branch coverage percentage
-- Path coverage analysis
-- Untested code sections
+#### Code Coverage, When Applicable
+Statement, branch, condition, or other code-coverage measures can supplement test evidence, but high code coverage does not by itself demonstrate adequate behavioral or risk coverage.
 
 #### Risk Coverage
-- High-risk areas validation
-- Critical functionality coverage
-- Integration points validation
-- Security vulnerability coverage
+Assess whether the highest-priority risks identified during planning received sufficient test depth and whether residual risk remains acceptable.
 
-### 4. Test Effectiveness Analysis
+### 5. Assess Test Effectiveness
+Consider questions such as:
+- Did the test set expose meaningful product risks and failures?
+- Are repeated failures concentrated in particular workflows or components?
+- Are tests redundant, unstable, obsolete, or missing important scenarios?
+- Are escaped defects revealing gaps in requirements, design, test coverage, or release controls?
+- Is automation improving feedback without creating misleading confidence?
 
-#### Defect Detection Effectiveness
-- Number of defects found during testing vs. production
-- Percentage of defects caught before release
-- Cost of defects found in testing vs. production
-- Severity of escaped defects
+### 6. Perform Root Cause and Pattern Analysis
+For material or recurring failures:
+- Look for common technical, requirements, process, environment, or data causes
+- Use evidence such as logs, traces, defect history, and change history
+- Distinguish correlation from demonstrated causation
+- Identify systemic improvements rather than only individual fixes
 
-#### Test Case Effectiveness
-- Test cases that consistently find defects
-- Test cases that never fail
-- Redundant test cases identification
-- Test case execution efficiency
-
-### 5. Quality Metrics Analysis
-
-#### Product Quality Metrics
-- **Defect Density**: Defects per unit of code/feature
-- **Defect Removal Efficiency**: % of defects found before release
-- **Mean Time Between Failures (MTBF)**
-- **Mean Time To Repair (MTTR)**
-- **Customer Satisfaction Scores**
-
-#### Process Quality Metrics
-- **Test Execution Productivity**: Test cases executed per day
-- **Automation Coverage**: % of automated vs. manual tests
-- **Test Case Development Rate**: Test cases created per day
-- **Environment Availability**: % uptime of test environments
-
-### 6. Root Cause Analysis
-
-#### Common Defect Patterns
-- Recurring issues across modules
-- Systematic problems in development process
-- Communication gaps
-- Requirement ambiguities
-- Design flaws
-
-#### Process Gaps Identification
-- Testing process weaknesses
-- Documentation inadequacies
-- Tool limitations
-- Skill gaps in team
-- Environment issues
-
-### 7. Comparative Analysis
-
-#### Sprint/Release Comparison (Agile)
-- Quality trends across sprints
-- Velocity and defect correlation
-- Improvement over iterations
-
-#### Phase Comparison (Waterfall)
-- Defects by test phase
-- Test effectiveness by phase
-- Resource utilization trends
-
-#### Historical Comparison
-- Compare with previous projects
-- Benchmark against industry standards
-- Track improvement over time
-
-### 8. Risk Assessment
-
-#### Release Risk Analysis
-- Unresolved critical/high defects
-- Incomplete test coverage areas
+### 7. Reassess Release and Quality Risk
+Update the Phase 1 risk view using current evidence:
+- Unresolved critical/high-impact defects
+- Missing or blocked critical coverage
 - Known limitations and workarounds
-- Environment or data risks
-- Go/No-Go recommendation
+- Environment or data limitations
+- Performance, security, accessibility, reliability, or compatibility concerns
+- Areas where evidence is insufficient to support a confident conclusion
 
-#### Technical Debt Assessment
-- Deferred defects impact
-- Maintenance burden analysis
-- Refactoring requirements
-- Testing gaps for future sprints
+Analysis should support a recommendation and its rationale; the final release authority remains with the organization-defined decision makers.
 
 ## Analysis Techniques
+Use the simplest technique that answers the decision question reliably. Common techniques include:
+- Trend analysis across runs, builds, sprints, or releases
+- Pareto analysis to identify concentrated recurring problems
+- Distribution and aging analysis for defect lifecycle data
+- Coverage matrices and gap analysis
+- Failure clustering by module, workflow, risk, platform, or root cause
+- Statistical summaries where sample size and data quality justify them
+- Visualizations that expose patterns without hiding raw counts or denominators
 
-### Statistical Analysis
-- Mean, median, mode of defect metrics
-- Standard deviation and variance
-- Trend analysis and forecasting
-- Correlation analysis
-
-### Visual Analysis
-- Charts and graphs for trends
-- Heat maps for defect distribution
-- Burn-down charts for progress
-- Pareto charts for prioritization
-
-### Predictive Analysis
-- Defect prediction models
-- Risk forecasting
-- Test completion estimates
-- Quality prediction at release
+Predictive models can be useful when enough trustworthy historical data exists, but predictions should not be presented as observed quality evidence.
 
 ## Deliverables
-Enumerate all key outputs produced in this phase:
-- Test results summary report
-- Defect analysis and trends
-- Test coverage metrics
-- Risk assessment updates
-- Quality metrics dashboard
-- Recommendations for next steps
+Typical Phase 5 outputs include:
+- Validated analysis dataset or evidence summary
+- Test result and coverage analysis
+- Failure and, where supported, defect trends
+- Updated residual-risk assessment
+- Root-cause or recurring-pattern findings
+- Quality indicators with definitions and data limitations
+- Release/readiness recommendation with supporting rationale
+- Actionable recommendations for remediation, additional testing, or process improvement
+
+These outputs are the analytical basis for Phase 6 reporting.
 
 ## Best Practices
-Include tips, pitfalls to avoid, and recommendations:
-- Analyze trends, not just individual results
-- Compare actual vs. planned coverage
-- Identify root causes of failures
-- Assess quality against acceptance criteria
-- Provide actionable recommendations
-- Document lessons learned
-- Update risk assessments based on results
+- Start with the decision or risk question, then select the metric
+- Preserve raw counts and denominators alongside percentages
+- Define metric windows, populations, and status semantics
+- Separate execution failures from unique defects
+- State when data is insufficient rather than manufacturing a precise-looking metric
+- Compare actual evidence with planned scope, exit criteria, and risk priorities
+- Explain important trends and exceptions, not just dashboard values
+- Keep conclusions traceable to the evidence that supports them
+- Record assumptions and known data-quality limitations
 
-## Common Challenges and Solutions
+## Common Challenges and Responses
 
-### Challenge: Collecting Too Many Metrics Without Purpose
-**Solution**: Define clear goals for each metric, focus on actionable KPIs, align metrics with business objectives, and regularly review and prune unnecessary metrics.
+### Too Many Metrics Without Purpose
+Retain measures that inform quality, risk, capacity, or a concrete decision. Remove vanity metrics and duplicated indicators.
 
-### Challenge: Data Quality and Accuracy Issues
-**Solution**: Implement automated data collection, establish validation procedures, use single source of truth for metrics, and regular data quality audits.
+### Data Quality and Consistency Problems
+Establish stable identifiers, agreed status definitions, reliable timestamps, and validation rules. Document unresolved gaps before interpreting the data.
 
-### Challenge: Analysis Paralysis from Complex Data
-**Solution**: Start with simple trending analysis, use visualization tools, create executive summaries, and focus on key insights rather than all data points.
+### Analysis Paralysis
+Begin with release objectives, critical risks, exit criteria, and major failures. Add deeper analysis only where it can change understanding or action.
 
-### Challenge: Lack of Historical Data for Comparison
-**Solution**: Start collecting data immediately for future use, use industry benchmarks as baseline, document context for current project, and establish baseline metrics.
+### Limited Historical Data
+Use current evidence as a documented baseline. Avoid presenting external benchmarks as direct proof that the product meets its own quality goals.
 
-### Challenge: Stakeholder Disagreement on Interpretation
-**Solution**: Provide context with metrics, use multiple perspectives in analysis, facilitate discussion with data, and document assumptions and methodologies clearly.
+### Stakeholder Disagreement
+Make definitions, assumptions, raw counts, and evidence accessible so disagreement can focus on risk tolerance and decision criteria rather than hidden calculations.
 
-## Metrics to Track
-- Test execution completion rate
-- Defect detection rate per phase
-- Test coverage achieved vs. planned
-- Time spent on analysis activities
-- Number of actionable insights generated
-- Stakeholder satisfaction with analysis
-- Mean time to analyze and report
-- Prediction accuracy for quality metrics
+## Metric Semantics
+Metric names must match the evidence actually available.
 
-## Tools and Technologies
-- **Analytics Platforms**: Tableau, Power BI, Qlik, Looker
-- **Test Management Tools**: TestRail, Zephyr, qTest (built-in analytics)
-- **Defect Tracking**: Jira, Azure DevOps (reporting features)
-- **Code Coverage Tools**: JaCoCo, Istanbul, Coverage.py, Cobertura
-- **Custom Dashboards**: Grafana, Kibana, Splunk
-- **Statistical Analysis**: R, Python (pandas, matplotlib), Excel
-- **Data Visualization**: D3.js, Chart.js, Plotly
+### Execution Metrics
+Examples include execution volume, pass/fail/blocked rates, requirement coverage, automation coverage, recurring failed-test patterns, and **execution Mean Time to Recovery (time-to-green)**. Execution recovery measures the interval from the opening failed execution in a failure episode to a subsequent passing execution for the same stable test identity. It is useful operational evidence, but it is **not defect MTTR**.
+
+### Defect-Lifecycle Metrics
+Metrics such as defect age, mean time to repair/resolution, reopen rate, and defect closure rate require a defect system with meaningful lifecycle states and timestamps. A true defect MTTR should be calculated from the organization's defined defect-open and accepted-resolution events, not reconstructed from unrelated execution records.
+
+### Post-Release Metrics
+Defect Removal Efficiency, escape rate, and similar measures require a trustworthy source for production/post-release defects and a defined attribution window. If that source does not exist, report the metric as unsupported rather than treating zero as evidence of no escaped defects.
+
+### Reliability and Business Metrics
+Measures such as MTBF or customer satisfaction require operational or customer data beyond normal test execution evidence. Use them only when the relevant source and definition are available.
 
 ## Methodology-Specific Considerations
-Explain how Agile, Scrum, Waterfall, etc. impact this phase:
-- **Agile/Scrum**: Sprint retrospectives, velocity tracking, continuous improvement
-- **Waterfall**: Formal phase reviews, go/no-go decisions, comprehensive analysis
-- **DevOps/Continuous**: Real-time dashboards, automated metrics collection
+BGSTM keeps the same six phases across delivery models; the cadence of analysis changes.
+
+- **Agile/Scrum**: Analyze continuously within the iteration and use findings for story acceptance, release decisions, retrospectives, and backlog refinement.
+- **Waterfall**: Consolidate analysis around formal test cycles and phase gates, with documented exit-criteria and residual-risk review.
+- **DevOps/Continuous Delivery**: Automate trustworthy evidence collection and trend analysis where practical, while retaining human review for ambiguous failures and risk decisions.
+- **Hybrid**: Combine the cadence and governance appropriate to the project without changing Phase 5's purpose or evidence standards.
 
 ## Decision-Making Framework
+A release/readiness assessment should consider:
+- Critical and high-impact unresolved failures or defects
+- Planned versus achieved requirement and risk coverage
+- Blocked or omitted critical testing
+- Performance, security, reliability, accessibility, and compatibility objectives where applicable
+- Known limitations and workarounds
+- Evidence quality and confidence
+- Explicit acceptance of residual risk by the appropriate stakeholders
 
-### Go/No-Go Criteria
-- All critical defects resolved
-- High-priority defects within acceptable limits
-- Test coverage meets minimum threshold
-- Performance benchmarks achieved
-- Security vulnerabilities addressed
-- Stakeholder acceptance obtained
+Avoid universal numerical thresholds unless the project established them during planning. A 95% pass rate, for example, may be unacceptable if the remaining 5% covers critical behavior.
 
-### Risk-Based Decisions
-- Balance quality vs. time-to-market
-- Prioritize critical functionality
-- Document known limitations
-- Plan for post-release fixes if needed
+## Tools and Technologies
+BGSTM is tool-agnostic. Analysis can be performed in test-management and defect systems, observability platforms, BI tools, spreadsheets, statistical environments, or purpose-built dashboards. Select tools that preserve definitions, provenance, and traceability of the evidence.
 
 ## Related Templates
 
-The following templates support Test Results Analysis activities:
-
 ### Primary Templates
-- **[Test Summary Report Template](../templates/test-summary-report-template.md)** - Comprehensive final test report
-  - Use this template to create the executive-level summary of all testing activities and results
-  - Includes quality assessment, defect analysis, release recommendation, and stakeholder sign-off
-  - Essential for go/no-go decision making
-  
-- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Residual risk analysis
-  - Review and update risk assessment based on test results
-  - Document residual risks and their mitigation for release decision
+- **[Test Summary Report Template](../test-templates/test-summary-report-template.md)** - Decision-ready quality assessment, residual risk, and recommendation
+- **[Risk Assessment Template](../test-templates/risk-assessment-template.md)** - Update residual risks using current evidence
 
 ### Supporting Templates
-- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Source of execution data for analysis
-  - Aggregate data from multiple execution reports for comprehensive analysis
-  
-- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Coverage verification
-  - Use to verify complete requirement coverage and identify gaps
-  
-- **[Defect Report Template](../templates/defect-report-template.md)** - Defect details for analysis
-  - Analyze defect patterns, trends, and resolution status
+- **[Test Execution Report Template](../test-templates/test-execution-report-template.md)** - Execution evidence and interim metrics
+- **[Traceability Matrix Template](../test-templates/traceability-matrix-template.md)** - Requirement coverage and gap analysis
+- **[Defect Report Template](../test-templates/defect-report-template.md)** - Defect lifecycle evidence when applicable
 
 ## Examples
-- [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Comprehensive risk management document with 13 tracked risks using Impact × Likelihood scoring methodology. Includes risk heat map, mitigation strategies, weekly review process, and escalation procedures covering technical, resource, schedule, and compliance risks.
-- [Testing Schedule Example](../examples/testing-schedule-example.md) - Detailed testing schedule showing both Agile sprint-based approach (2-week sprints with day-by-day breakdown) and Waterfall phase-gate comparison. Includes resource allocation, milestones, dependencies, and buffer time management.
+- [Risk Assessment Matrix Example](../examples/risk-assessment-matrix-example.md) - Demonstrates structured risk scoring and mitigation.
+- [Six-Phase Checkout Worked Example](../examples/six-phase-checkout-worked-example.md) - Shows how execution evidence, a duplicate-order defect, coverage, and residual risk are analyzed before reporting.
 
 ## Previous Phase
 [Test Execution](04-test-execution.md)
 
 ## Next Phase
-→ [Phase 6: Test Results Reporting](06-test-results-reporting.md)
+Proceed to [Phase 6: Test Results Reporting](06-test-results-reporting.md) when the analysis is sufficiently stable to communicate decisions, evidence, and residual risk. In iterative delivery, reporting and analysis may occur repeatedly within the same delivery cycle.
