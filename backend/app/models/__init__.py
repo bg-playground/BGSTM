@@ -8,6 +8,7 @@ from .external_case_result import ExternalCaseResult
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
 from .project import Project
+from .quality_digest_subscription import DigestCadence, DigestChannel, QualityDigestSubscription
 from .release_signoff import ReleaseSignoff, ReleaseSignoffRole
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from .runner_token import RunnerToken
@@ -16,33 +17,10 @@ from .test_case import AutomationStatus, TestCase, TestCaseStatus, TestCaseType
 from .user import User, UserRole
 
 __all__ = [
-    "AuditLog",
-    "Base",
-    "TimestampMixin",
-    "EmbeddingCache",
-    "ArtifactKind",
-    "ExternalCaseArtifact",
-    "ExternalCaseResult",
-    "Notification",
-    "NotificationType",
-    "Project",
-    "ReleaseSignoff",
-    "ReleaseSignoffRole",
-    "Requirement",
-    "RequirementType",
-    "PriorityLevel",
-    "RequirementStatus",
-    "RunnerToken",
-    "TestCase",
-    "TestCaseType",
-    "TestCaseStatus",
-    "AutomationStatus",
-    "RequirementTestCaseLink",
-    "LinkType",
-    "LinkSource",
-    "LinkSuggestion",
-    "SuggestionMethod",
-    "SuggestionStatus",
-    "User",
-    "UserRole",
+    "AuditLog", "Base", "TimestampMixin", "EmbeddingCache", "ArtifactKind", "ExternalCaseArtifact",
+    "ExternalCaseResult", "Notification", "NotificationType", "Project", "QualityDigestSubscription",
+    "DigestCadence", "DigestChannel", "ReleaseSignoff", "ReleaseSignoffRole", "Requirement",
+    "RequirementType", "PriorityLevel", "RequirementStatus", "RunnerToken", "TestCase", "TestCaseType",
+    "TestCaseStatus", "AutomationStatus", "RequirementTestCaseLink", "LinkType", "LinkSource",
+    "LinkSuggestion", "SuggestionMethod", "SuggestionStatus", "User", "UserRole",
 ]
