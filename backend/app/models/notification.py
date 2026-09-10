@@ -16,6 +16,7 @@ class NotificationType(str, enum.Enum):
     SUGGESTION_REVIEWED = "suggestion_reviewed"
     REQUIREMENT_CREATED = "requirement_created"
     TEST_CASE_CREATED = "test_case_created"
+    QUALITY_DIGEST = "quality_digest"
 
 
 class Notification(Base):
