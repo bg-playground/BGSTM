@@ -72,6 +72,6 @@ def test_contradiction_remains_unresolved_and_requires_human_review():
 def test_combined_release_identity_comes_from_github_actions():
     fixture = _combined_fixture()
 
-    assert fixture["release"]["candidate_build_id"] == "GHA-9003"
+    assert fixture["sources"]["build"] == "github-actions"
     assert fixture["execution_builds"]["RUN-003"] == "GHA-9003"
     assert fixture["builds"]["GHA-9003"]["sha"] == fixture["release"]["candidate_sha"]
