@@ -168,7 +168,10 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             _finding(
                 "F-005",
                 "TC-011 is semantically orphaned.",
-                "The executed test has no declared quality-intent relationship and is not designated secondary evidence.",
+                (
+                    "The executed test has no declared quality-intent relationship "
+                    "and is not designated secondary evidence."
+                ),
                 [],
                 [run["id"] for run in runs if "TC-011" in run["results"]],
                 [fixture["sources"]["executions"]],
