@@ -129,9 +129,26 @@ Different workflows run depending on the paths changed. The repository includes 
 - frontend linting/type checks and end-to-end Playwright coverage;
 - Docker builds;
 - security scanning;
-- internal Markdown link integrity.
+- internal Markdown link integrity;
+- strict MkDocs builds for documentation changes.
 
-A documentation-only pull request may not run backend/frontend jobs, but the **Documentation Links** workflow should validate local Markdown targets.
+A documentation-only pull request may not run backend/frontend jobs, but Documentation Quality should validate Markdown targets and the strict MkDocs build.
+
+## Releasing
+
+BGSTM uses the root [`CHANGELOG.md`](CHANGELOG.md) as the canonical release record and follows Semantic Versioning.
+
+Before creating a release:
+
+1. Reconcile material changes since the previous release and move them from `Unreleased` into the new version section.
+2. Choose the version from compatibility and semantic scope rather than issue count or elapsed time.
+3. Ensure required CI and documentation checks are green on the release candidate commit.
+4. Merge the release-baseline pull request to `main`.
+5. Create and push an annotated `vX.Y.Z` tag at the verified `main` commit.
+6. Confirm the tag-triggered **Release** workflow succeeds and creates the GitHub Release.
+7. Verify the published release body matches the corresponding root changelog section.
+
+The release workflow extracts notes from the root `CHANGELOG.md`; `docs/CHANGELOG.md` is only a documentation-site pointer to that canonical file.
 
 ## Documentation style
 

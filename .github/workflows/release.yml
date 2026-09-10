@@ -27,12 +27,12 @@ jobs:
           VERSION="${{ steps.version.outputs.VERSION }}"
           NOTES_FILE="RELEASE_NOTES.md"
 
-          awk "/^## \[$VERSION\]/{found=1; next} found && /^## \[/{exit} found{print}" docs/CHANGELOG.md > "$NOTES_FILE"
+          awk "/^## \[$VERSION\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md > "$NOTES_FILE"
 
           if [ -s "$NOTES_FILE" ]; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Release $VERSION — see [CHANGELOG](https://github.com/bg-playground/BGSTM/blob/main/docs/CHANGELOG.md) for details." > "$NOTES_FILE"
+            echo "Release $VERSION — see [CHANGELOG](https://github.com/bg-playground/BGSTM/blob/main/CHANGELOG.md) for details." > "$NOTES_FILE"
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 

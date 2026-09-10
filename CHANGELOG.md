@@ -7,9 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-09-09
+
+BGSTM v2.1.0 is a methodology-maturity and reference-application capability release. It preserves the existing six-phase BGSTM methodology contract while substantially improving adoption guidance, traceability evidence, quality analysis, release-readiness workflows, and repository validation.
+
+### Added
+- Canonical end-to-end six-phase ShopFlow checkout worked example connecting requirements, risk, test design, environment readiness, execution evidence, analysis, and reporting (#405).
+- Specialized ETL Semantic Validation example that applies all six BGSTM phases without introducing an additional methodology phase (#393).
+- Quality KPI Dashboard capabilities for 7/30/90-day analysis, including execution/pass-rate trends, automation coverage, recurring-failure Pareto analysis, coverage-vs-failure-density analysis, and execution Mean Time to Recovery/time-to-green (#407, #408, #409).
+- Shareable/saved Quality KPI filter state so dashboard windows and views can be restored through URL/local preferences (#372).
+- Release-readiness KPI evidence in Markdown/PDF exports, using the selected dashboard window and bounded decision-relevant measures (#410).
+- Scheduled Quality KPI digest foundation with per-user daily/weekly/off preferences, 7/30/90-day windows, deterministic one-shot dispatch, and initial in-app delivery (#411).
+- Enhanced suggestion-review workflows with filtering, sorting, bulk review, keyboard shortcuts, and detailed preview support.
+- Strict documentation quality validation: repository-wide Markdown link checking plus `mkdocs build --strict` in CI (#394, #399).
+- Formal methodology maturity/release-readiness audit and phase-by-phase adoption assessment (#419).
+
 ### Changed
-- Corrected the accidental classification of ETL Semantic Validation as BGSTM Phase 7. BGSTM remains a six-phase methodology; the NATAegisFlow/ETL material is now documented as a specialized applied example across Phases 1–6 (#393, #392).
-- Preserved legacy `docs/templates/` paths as compatibility redirects to the canonical `docs/test-templates/` directory and added automated internal Markdown-link validation (#392).
+- Restored and made explicit the canonical BGSTM contract of **exactly six core testing phases**. ETL Semantic Validation is a specialized applied example, not Phase 7 (#393).
+- Reworked the repository README, public documentation identity, Getting Started guidance, contributor instructions, and MkDocs metadata around **BGSTM — Better Global Software Testing Methodology** and a methodology-first adoption path (#395, #414).
+- Clarified that Agile, Scrum, Waterfall, and hybrid approaches adapt BGSTM's cadence and governance without redefining its six phases.
+- Established `docs/test-templates/` as the canonical template location while retaining `docs/templates/` only as a compatibility layer for historical links (#394).
+- Finished and normalized practitioner guidance across the six canonical phase documents, including stronger execution-evidence guidance, canonical template links, and risk-based handoffs (#420).
+- Tightened Phase 5 metric semantics: failed executions are not automatically unique defects; execution recovery/time-to-green is not defect MTTR; DRE/escape-rate measures require a trustworthy post-release defect source (#420).
+- Repositioned the FastAPI/React software as an **optional reference application** that demonstrates selected BGSTM workflows rather than co-defining the methodology (#421).
+- Improved repository discoverability and first-impression metadata, navigation, examples, and canonical-document structure.
+
+### Fixed
+- Hardened external case-result idempotency against expected uniqueness races while preserving unrelated database errors (#401).
+- Migrated notification polling to AbortController-based cancellation and added post-await abort guards to multi-request frontend loaders (#402, #404).
+- Corrected stale and broken documentation cross-links, removed the obsolete Phase 7 document, and reduced duplicate README/index content (#394).
+- Corrected public documentation identity, license wording, and stale roadmap assumptions so the site matches the canonical repository baseline (#414).
+
+### Release semantics and known limitations
+- **Version choice:** v2.1.0 is a minor release because the public six-phase methodology contract remains compatible with v2.0.x while additive methodology guidance and reference-application capabilities have grown substantially. No intentional incompatible BGSTM phase or adoption contract is introduced.
+- The Quality KPI reference application can derive execution recovery/time-to-green from execution history; it does **not** claim true defect MTTR without a defect lifecycle source.
+- DRE and escape-rate metrics require trustworthy production/post-release defect data. Where that source is unavailable, those measures should remain unavailable rather than be inferred as zero.
+- Scheduled KPI digests currently provide an **in-app delivery foundation**. Email/Slack adapters are deferred, and overlapping-dispatch idempotency is tracked as follow-up hardening (#423, #424).
+- The Quality KPI feature page still needs a post-release documentation refresh to reflect the newest dashboard semantics and capabilities (#422); canonical Phase 5 guidance and this release record contain the authoritative metric distinctions for v2.1.0.
+- The reference application remains optional. BGSTM can be adopted with other tools and platforms or without a custom application.
 
 ## [2.0.1] - 2026-03-05
 
@@ -45,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **User Authentication & RBAC** — JWT-based authentication with admin, reviewer, and viewer roles; login, register, and logout flows
-- **Notification System** — In-app notifications for suggestion generation, coverage drops, suggestion reviews, and requirement/test case creation events; mark as read and mark all as read
+- **Notification System** — In-app notifications for suggestion generation, coverage drops, suggestion reviews, requirement/test case creation events; mark as read and mark all as read
 - **Audit Logging** — Full audit trail for all user actions including CRUD operations on requirements, test cases, links, and suggestions
 - **Traceability Matrix View** — Visual matrix showing requirement-to-test-case coverage with filtering and PDF export
 - **Metrics Dashboard** — Coverage metrics and suggestion statistics, exportable as CSV
@@ -87,6 +122,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Standardized all phase documentation to follow a uniform structure
 
+[Unreleased]: https://github.com/bg-playground/BGSTM/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/bg-playground/BGSTM/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/bg-playground/BGSTM/releases/tag/v2.0.1
 [2.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v2.0.0
 [1.0.0]: https://github.com/bg-playground/BGSTM/releases/tag/v1.0.0
