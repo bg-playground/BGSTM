@@ -1,11 +1,11 @@
-# BGSTM - Better Global Software Testing Methodology
+# BGSTM — Better Global Software Testing Methodology
 
 !!! info "Welcome to BGSTM"
-    A comprehensive, professional software testing framework adaptable to various software development methodologies including Agile, Scrum, and Waterfall.
+    A practical, methodology-agnostic software testing framework organized around exactly six core phases, adaptable to Agile, Scrum, Waterfall, and hybrid delivery models.
 
 ## 🎯 Overview
 
-BGSTM provides a structured approach to software testing through **six core phases**, with detailed guidance for implementing testing practices across different project methodologies. It serves as both a knowledge base for testing professionals and a foundation for building multi-platform testing management applications.
+BGSTM provides a structured approach to software testing through **exactly six core phases**, with practical guidance for adapting testing work to different delivery models without redefining the methodology. It serves first as a testing methodology and knowledge base; the repository's reference application demonstrates how parts of BGSTM can be represented in software.
 
 ---
 
@@ -17,15 +17,15 @@ BGSTM provides a structured approach to software testing through **six core phas
 
     ---
 
-    Start with our comprehensive getting started guide
+    Start with the practical getting started guide
 
     [:octicons-arrow-right-24: Getting Started](GETTING-STARTED.md)
 
--   :material-book-open-variant:{ .lg .middle } __Explore the Phases__
+-   :material-book-open-variant:{ .lg .middle } __Explore the Six Phases__
 
     ---
 
-    Learn about the BGSTM testing phases
+    Learn the canonical BGSTM testing lifecycle
 
     [:octicons-arrow-right-24: Testing Phases](phases/index.md)
 
@@ -33,15 +33,15 @@ BGSTM provides a structured approach to software testing through **six core phas
 
     ---
 
-    Download production-ready testing templates, including NATAegisFlow artifact workflow checks
+    Adapt ready-to-use testing templates to your project
 
     [:octicons-arrow-right-24: Templates](test-templates/index.md)
 
--   :material-lightbulb:{ .lg .middle } __Choose Your Methodology__
+-   :material-lightbulb:{ .lg .middle } __Adapt to Your Delivery Model__
 
     ---
 
-    Adapt BGSTM to your development approach
+    Apply BGSTM across Agile, Scrum, Waterfall, or hybrid delivery
 
     [:octicons-arrow-right-24: Methodologies](methodologies/index.md)
 
@@ -49,7 +49,9 @@ BGSTM provides a structured approach to software testing through **six core phas
 
 ---
 
-## 🔄 BGSTM Testing Phases
+## 🔄 The Six BGSTM Testing Phases
+
+BGSTM has exactly six core testing phases:
 
 1. **[Test Planning](phases/01-test-planning.md)** - Define scope, strategy, resources, and timelines
 2. **[Test Case Development](phases/02-test-case-development.md)** - Design and document test scenarios and cases
@@ -57,6 +59,8 @@ BGSTM provides a structured approach to software testing through **six core phas
 4. **[Test Execution](phases/04-test-execution.md)** - Execute tests and manage defects
 5. **[Test Results Analysis](phases/05-test-results-analysis.md)** - Analyze outcomes and identify patterns
 6. **[Test Results Reporting](phases/06-test-results-reporting.md)** - Communicate findings to stakeholders
+
+Specialized domains apply these six phases; they do not add methodology phases.
 
 ---
 
@@ -71,18 +75,18 @@ ETL semantic validation is an application of the six-phase BGSTM methodology, no
 
 ---
 
-## 🔧 Methodology Support
+## 🔧 Delivery-Model Adaptation
 
-BGSTM is methodology-agnostic and provides specific guidance for:
+BGSTM is methodology-agnostic. Agile, Scrum, Waterfall, and hybrid approaches change how teams implement and pace the work; they do not change BGSTM's six-phase structure.
 
 - **[Agile Testing](methodologies/agile.md)** - Continuous testing with rapid feedback
-- **[Scrum Testing](methodologies/scrum.md)** - Sprint-based testing approach  
-- **[Waterfall Testing](methodologies/waterfall.md)** - Sequential phase-based testing
-- **[Methodology Comparison](methodologies/comparison.md)** - Detailed comparison and selection guide
+- **[Scrum Testing](methodologies/scrum.md)** - Sprint-based testing approach
+- **[Waterfall Testing](methodologies/waterfall.md)** - Sequential delivery context
+- **[Methodology Comparison](methodologies/comparison.md)** - Compare adaptation approaches
 
 ---
 
-## ✨ Key Features
+## ✨ Core Characteristics
 
 <div class="grid cards" markdown>
 
@@ -92,35 +96,35 @@ BGSTM is methodology-agnostic and provides specific guidance for:
 
     Adaptable to Agile, Scrum, Waterfall, and hybrid approaches
 
--   :material-book-check:{ .lg .middle } __Comprehensive Coverage__
+-   :material-book-check:{ .lg .middle } __Six-Phase Lifecycle__
 
     ---
 
-    End-to-end testing process from planning to reporting
+    End-to-end testing work from planning through results reporting
 
--   :material-star:{ .lg .middle } __Professional Standards__
-
-    ---
-
-    Industry best practices and quality standards
-
--   :material-file-document:{ .lg .middle } __Practical Templates__
+-   :material-link-variant:{ .lg .middle } __Traceable__
 
     ---
 
-    Ready-to-use templates for immediate implementation
+    Connect requirements, tests, results, evidence, and decisions
 
--   :material-chart-line:{ .lg .middle } __Scalable__
-
-    ---
-
-    Suitable for projects of all sizes
-
--   :material-application:{ .lg .middle } __App-Ready__
+-   :material-file-document:{ .lg .middle } __Practical__
 
     ---
 
-    Foundation for building testing management tools
+    Ready-to-use templates and worked examples support adoption
+
+-   :material-alert-decagram:{ .lg .middle } __Risk Aware__
+
+    ---
+
+    Scale testing rigor and effort according to project risk
+
+-   :material-chart-line:{ .lg .middle } __Evidence Based__
+
+    ---
+
+    Use quality signals and test outcomes to support stakeholder decisions
 
 </div>
 
@@ -132,42 +136,41 @@ BGSTM is methodology-agnostic and provides specific guidance for:
 - Implement structured testing processes
 - Improve test coverage and quality
 - Standardize testing practices
-- Reduce defects and improve software quality
+- Connect testing evidence to quality decisions
 
 ### For Project Managers
 - Plan testing activities and resources
 - Track testing progress and metrics
 - Manage testing risks
-- Ensure quality standards
+- Support evidence-based release decisions
 
 ### For Organizations
 - Establish testing standards
 - Train testing teams
 - Improve testing maturity
-- Build custom testing tools
+- Adapt a common quality lifecycle across delivery models
 
-### For Developers
-- Build multi-platform testing management applications
+### For Developers and Tool Builders
 - Integrate testing into development workflows
-- Automate testing processes
-- Create testing dashboards and reports
+- Automate testing processes where useful
+- Build testing dashboards and reports
+- Use the reference application as an implementation example without coupling BGSTM to a specific technology stack
 
 ---
 
-## 🗺️ Project Roadmap
+## 🧪 Reference Application
 
-| Milestone | Focus | Status |
-|-----------|-------|--------|
-| **v1.0 - Core Framework** | Standardize all phase documentation | ✅ Complete |
-| **v1.1 - Templates & Examples** | Finalize templates, add examples, methodology checklists | 🔄 In Progress |
-| **v2.0 - Traceability & AI Features** | AI-powered requirement-test case linking, traceability matrix | ⬜ Planned |
-| **v3.0 - App Integration** | Multi-platform app integration guide, architecture patterns | ⬜ Planned |
+BGSTM is first and foremost a **testing methodology and knowledge base**. This repository also contains an open-source FastAPI and React reference application demonstrating traceability, dashboards, reporting, notifications, and related testing-management workflows.
+
+The application supports and demonstrates the methodology; it does **not** define BGSTM or add methodology phases.
+
+[:octicons-arrow-right-24: Reference Application Documentation](application/index.md)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Whether you want to improve documentation, add examples, share templates, report issues, or suggest features.
+Contributions are welcome for methodology guidance, documentation, examples, templates, application code, and integrations.
 
 [:octicons-arrow-right-24: Contributing Guide](CONTRIBUTING.md)
 
@@ -175,9 +178,7 @@ Contributions are welcome! Whether you want to improve documentation, add exampl
 
 ## 📄 License
 
-This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](LICENSE.md).
-
-You are free to share and adapt this material for any purpose, as long as appropriate credit is given.
+BGSTM is licensed under the MIT License. See the [license](LICENSE.md) for details.
 
 ---
 
@@ -186,7 +187,3 @@ You are free to share and adapt this material for any purpose, as long as approp
 - [:fontawesome-brands-github: View on GitHub](https://github.com/bg-playground/BGSTM)
 - [:material-bug: Report an Issue](https://github.com/bg-playground/BGSTM/issues)
 - [:material-message: Start a Discussion](https://github.com/bg-playground/BGSTM/discussions)
-
----
-
-**Made with ❤️ for the software testing community**
