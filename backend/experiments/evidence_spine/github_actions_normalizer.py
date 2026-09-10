@@ -28,7 +28,6 @@ def normalize_github_actions(snapshot: dict[str, Any]) -> dict[str, Any]:
             release = {
                 "id": release_data["id"],
                 "candidate_sha": workflow["head_sha"],
-                "candidate_build_id": build_id,
                 "release_time": release_data["declared_at"],
             }
 
