@@ -103,7 +103,7 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_generator: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -210,6 +210,7 @@ nav:
 
   - Discovery:
     - Quality Evidence Model v0: discovery/quality-evidence-model-v0.md
+    - Evidence Spine Fixture Contract v0: discovery/evidence-spine-fixture-contract-v0.md
 
   - About:
     - License: LICENSE.md
