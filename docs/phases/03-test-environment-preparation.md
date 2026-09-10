@@ -194,12 +194,12 @@ Test Environment Preparation involves setting up the hardware, software, network
 The following templates support Test Environment Preparation activities:
 
 ### Primary Templates
-- **[Test Plan Template](../templates/test-plan-template.md)** - Test environment section
+- **[Test Plan Template](../test-templates/test-plan-template.md)** - Test environment section
   - Refer to the test environment requirements section of your test plan
   - Documents hardware, software, network, and tool requirements
 
 ### Supporting Templates
-- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Environment status reporting
+- **[Test Execution Report Template](../test-templates/test-execution-report-template.md)** - Environment status reporting
   - Use the environment status section to track environment issues and availability
   - Report on environment downtime and its impact on testing
 
