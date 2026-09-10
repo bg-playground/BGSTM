@@ -211,6 +211,7 @@ nav:
   - Discovery:
     - Quality Evidence Model v0: discovery/quality-evidence-model-v0.md
     - Evidence Spine Fixture Contract v0: discovery/evidence-spine-fixture-contract-v0.md
+    - Evidence Spine Combined Assessment v0: discovery/evidence-spine-combined-assessment-v0.md
 
   - About:
     - License: LICENSE.md
