@@ -1,6 +1,7 @@
 import type { AxiosRequestConfig } from 'axios';
 
 import { apiClient } from './client';
+import type { WindowDays } from './qualityMetrics';
 
 export type ReadinessStatus = 'pass' | 'fail' | 'warn' | 'na';
 export type OverallStatus = 'go' | 'no_go' | 'caution';
@@ -55,8 +56,13 @@ export const releaseReadinessApi = {
     await apiClient.post('/release-readiness/signoff/request', { role, note: note ?? null }, config);
   },
 
-  async exportReport(format: 'md' | 'pdf', config?: AxiosRequestConfig): Promise<Blob> {
-    const response = await apiClient.get(`/release-readiness/export?format=${format}`, {
+  async exportReport(
+    format: 'md' | 'pdf',
+    window?: WindowDays,
+    config?: AxiosRequestConfig
+  ): Promise<Blob> {
+    const windowQuery = window ? `&window=${window}` : '';
+    const response = await apiClient.get(`/release-readiness/export?format=${format}${windowQuery}`, {
       responseType: 'blob',
       ...config,
     });
