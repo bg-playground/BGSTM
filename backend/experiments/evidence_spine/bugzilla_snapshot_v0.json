@@ -1,0 +1,45 @@
+{
+  "source_system": "bugzilla",
+  "bugs": [
+    {
+      "id": 1001,
+      "alias": ["BUG-001"],
+      "summary": "Duplicate order after payment retry",
+      "status": "CLOSED",
+      "resolution": "FIXED",
+      "cf_fix_sha": "sha-fix-bug-001",
+      "cf_verification_test_case": "TC-008",
+      "last_change_time": "2026-09-09T15:00:00Z"
+    },
+    {
+      "id": 1002,
+      "alias": ["BUG-002"],
+      "summary": "Firefox checkout submit failure",
+      "status": "CLOSED",
+      "resolution": "FIXED",
+      "cf_fix_sha": "sha-candidate-003",
+      "cf_verification_test_case": "TC-004",
+      "last_change_time": "2026-09-10T11:00:00Z"
+    },
+    {
+      "id": 1003,
+      "alias": ["BUG-003"],
+      "summary": "Shipping selection persistence",
+      "status": "NEW",
+      "resolution": "",
+      "cf_fix_sha": null,
+      "cf_verification_test_case": "TC-006",
+      "last_change_time": "2026-09-10T09:00:00Z"
+    },
+    {
+      "id": 1004,
+      "alias": ["BUG-004"],
+      "summary": "Audit event missing candidate SHA",
+      "status": "CLOSED",
+      "resolution": "FIXED",
+      "cf_fix_sha": "sha-candidate-003",
+      "cf_verification_test_case": "TC-010",
+      "last_change_time": "2026-09-10T11:30:00Z"
+    }
+  ]
+}
