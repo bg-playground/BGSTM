@@ -1,6 +1,10 @@
-# BGSTM Application
+# BGSTM Reference Application
 
-BGSTM is both a **testing methodology framework** and a **full-stack web application** that puts that methodology into practice. The application automates requirements traceability, AI-powered test case suggestions, coverage analysis, and audit logging — all behind a secure role-based API.
+BGSTM is the **Better Global Software Testing Methodology**: a methodology-agnostic framework organized around exactly six core testing phases. The methodology does not require this repository's software stack, application, or automation features in order to be adopted.
+
+This repository also includes an **optional reference application** that demonstrates how selected BGSTM practices can be supported in software. It provides working examples of requirements traceability, AI-assisted test-case suggestions, coverage and quality dashboards, reporting, notifications, auditability, and related testing-management workflows.
+
+The reference application is an implementation example, not the definition of BGSTM. Teams can apply the six-phase methodology with different tools, platforms, delivery models, or no custom application at all.
 
 ## Architecture Overview
 
@@ -12,12 +16,12 @@ BGSTM is both a **testing methodology framework** and a **full-stack web applica
 | Auth | JWT (HS256), bcrypt password hashing |
 | Containerisation | Docker, Docker Compose |
 
-The backend exposes a RESTful JSON API at `/api/v1` and serves interactive documentation at `/docs` (Swagger UI) and `/redoc` (ReDoc).
+The reference application's backend exposes a RESTful JSON API at `/api/v1` and serves interactive documentation at `/docs` (Swagger UI) and `/redoc` (ReDoc).
 
 ## Application Pages
 
 - [Authentication & RBAC](authentication.md) — User registration, login, JWT tokens, and role-based access control
-- [API Reference](api-reference.md) — Complete endpoint reference for all 10 router modules
+- [API Reference](api-reference.md) — Endpoint reference for the reference application
 - [Notifications](notifications.md) — Event-driven notification system
-- [Audit Logging](audit-logging.md) — Immutable audit trail for all write operations
+- [Audit Logging](audit-logging.md) — Immutable audit trail for write operations
 - [Deployment Guide](deployment.md) — Docker Compose setup, environment variables, and production configuration
