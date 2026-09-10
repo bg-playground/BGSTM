@@ -2,8 +2,8 @@
   "source_system": "github-actions",
   "repository": "example/checkout",
   "workflow_runs": [
-    {"id":9001,"name":"Checkout CI","head_sha":"sha-before-change","event":"push","status":"completed","conclusion":"success","run_started_at":"2026-09-08T09:30:00Z","updated_at":"2026-09-08T10:00:00Z","artifacts":[{"name":"playwright-results-RUN-001","execution_run_id":"RUN-001"}]},
-    {"id":9002,"name":"Checkout CI","head_sha":"sha-candidate-003","event":"workflow_dispatch","status":"completed","conclusion":"success","run_started_at":"2026-09-10T09:30:00Z","updated_at":"2026-09-10T10:00:00Z","artifacts":[{"name":"playwright-results-RUN-002","execution_run_id":"RUN-002"}]},
-    {"id":9003,"name":"Release Candidate CI","head_sha":"sha-candidate-003","event":"workflow_dispatch","status":"completed","conclusion":"success","run_started_at":"2026-09-10T11:30:00Z","updated_at":"2026-09-10T12:01:00Z","artifacts":[{"name":"playwright-results-RUN-003","execution_run_id":"RUN-003"},{"name":"playwright-results-RUN-003-OBS-2","execution_run_id":"RUN-003-OBS-2"}],"release":{"id":"REL-001","candidate":true,"declared_at":"2026-09-10T14:00:00Z"}}
+    {"id":9001,"name":"Checkout CI","head_sha":"sha-before-change","contains_shas":["sha-before-change"],"event":"push","status":"completed","conclusion":"success","run_started_at":"2026-09-08T09:30:00Z","updated_at":"2026-09-08T10:00:00Z","artifacts":[{"name":"playwright-results-RUN-001","execution_run_id":"RUN-001"}]},
+    {"id":9002,"name":"Checkout CI","head_sha":"sha-candidate-003","contains_shas":["sha-candidate-003","sha-fix-bug-001"],"event":"workflow_dispatch","status":"completed","conclusion":"success","run_started_at":"2026-09-10T09:30:00Z","updated_at":"2026-09-10T10:00:00Z","artifacts":[{"name":"playwright-results-RUN-002","execution_run_id":"RUN-002"}]},
+    {"id":9003,"name":"Release Candidate CI","head_sha":"sha-candidate-003","contains_shas":["sha-candidate-003","sha-fix-bug-001"],"event":"workflow_dispatch","status":"completed","conclusion":"success","run_started_at":"2026-09-10T11:30:00Z","updated_at":"2026-09-10T12:01:00Z","artifacts":[{"name":"playwright-results-RUN-003","execution_run_id":"RUN-003"},{"name":"playwright-results-RUN-003-OBS-2","execution_run_id":"RUN-003-OBS-2"}],"release":{"id":"REL-001","candidate":true,"declared_at":"2026-09-10T14:00:00Z"}}
   ]
 }
