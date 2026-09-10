@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
 from app.crud import quality_metrics as crud
 from app.crud.quality_module_risk import get_module_coverage_failure_density
+from app.crud.quality_recovery import get_recovery_trend as get_recovery_trend_data
 from app.crud.quality_recurring import get_recurring_defects_pareto as get_recurring_defects_pareto_data
 from app.db.session import get_db
 from app.models.user import User
@@ -19,9 +21,11 @@ from app.schemas.quality_metrics import (
     SummaryStatsResponse,
 )
 from app.schemas.quality_module_risk import ModuleCoverageFailureResponse
+from app.schemas.quality_recovery import RecoveryTrendResponse
 from app.schemas.quality_recurring import RecurringDefectsParetoResponse
 
 router = APIRouter(prefix="/quality-metrics")
+_RECOVERY_SEMANTIC_NOTE = "Execution recovery (time-to-green), not defect lifecycle repair time."
 
 
 class WindowParam(IntEnum):
@@ -30,13 +34,26 @@ class WindowParam(IntEnum):
     DAYS_90 = 90
 
 
+async def _apply_recovery_summary(db: AsyncSession, summary: SummaryStatsResponse) -> SummaryStatsResponse:
+    recovery = await get_recovery_trend_data(db, 30, "overall")
+    summary.mean_time_to_repair_hours = recovery.mean_recovery_hours
+    summary.mean_time_to_repair_hours_reason = (
+        _RECOVERY_SEMANTIC_NOTE
+        if recovery.mean_recovery_hours is not None
+        else f"{_RECOVERY_SEMANTIC_NOTE} {recovery.reason or 'No resolved recovery episodes are available.'}"
+    )
+    return summary
+
+
 @router.get("/", response_model=QualityDashboardSnapshot)
 async def get_quality_dashboard(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> QualityDashboardSnapshot:
     _ = current_user
-    return await crud.get_quality_dashboard_snapshot(db, 30)
+    snapshot = await crud.get_quality_dashboard_snapshot(db, 30)
+    snapshot.summary_stats = await _apply_recovery_summary(db, snapshot.summary_stats)
+    return snapshot
 
 
 @router.get("/defect-trend", response_model=DefectTrendResponse)
@@ -80,6 +97,17 @@ async def get_coverage_vs_defects(
     return await get_module_coverage_failure_density(db, window)
 
 
+@router.get("/recovery-trend", response_model=RecoveryTrendResponse)
+async def get_recovery_trend(
+    window: WindowParam = Query(WindowParam.DAYS_30),
+    group_by: Literal["overall", "module", "severity"] = Query("overall"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> RecoveryTrendResponse:
+    _ = current_user
+    return await get_recovery_trend_data(db, window, group_by)
+
+
 @router.get("/recurring-defects", response_model=RecurringDefectsParetoResponse)
 async def get_recurring_defects_pareto(
     window: WindowParam = Query(WindowParam.DAYS_30),
@@ -117,4 +145,4 @@ async def get_summary_stats(
     current_user: User = Depends(get_current_user),
 ) -> SummaryStatsResponse:
     _ = current_user
-    return await crud.get_summary_stats(db)
+    return await _apply_recovery_summary(db, await crud.get_summary_stats(db))

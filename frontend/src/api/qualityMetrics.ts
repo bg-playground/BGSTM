@@ -3,6 +3,7 @@ import type { AxiosRequestConfig } from 'axios';
 import { apiClient } from './client';
 
 export type WindowDays = 7 | 30 | 90;
+export type RecoveryGroupBy = 'overall' | 'module' | 'severity';
 
 export interface SeverityMix {
   critical: number;
@@ -61,6 +62,24 @@ export interface ModuleCoverageFailureResponse {
   points: ModuleCoverageFailurePoint[];
   median_coverage_pct: number | null;
   median_failure_density_pct: number | null;
+  is_synthetic: boolean;
+  reason: string | null;
+}
+
+export interface RecoveryTrendPoint {
+  date: string;
+  group: string;
+  mean_recovery_hours: number;
+  resolved_episodes: number;
+}
+
+export interface RecoveryTrendResponse {
+  window_days: WindowDays;
+  group_by: RecoveryGroupBy;
+  points: RecoveryTrendPoint[];
+  mean_recovery_hours: number | null;
+  resolved_episodes: number;
+  open_episodes: number;
   is_synthetic: boolean;
   reason: string | null;
 }
@@ -168,6 +187,18 @@ export const qualityMetricsApi = {
   ): Promise<ModuleCoverageFailureResponse> {
     const response = await apiClient.get<ModuleCoverageFailureResponse>(
       `/quality-metrics/coverage-vs-defects?window=${window}`,
+      config
+    );
+    return response.data;
+  },
+
+  async getRecoveryTrend(
+    window: WindowDays,
+    groupBy: RecoveryGroupBy = 'overall',
+    config?: AxiosRequestConfig
+  ): Promise<RecoveryTrendResponse> {
+    const response = await apiClient.get<RecoveryTrendResponse>(
+      `/quality-metrics/recovery-trend?window=${window}&group_by=${groupBy}`,
       config
     );
     return response.data;

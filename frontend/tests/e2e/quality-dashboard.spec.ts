@@ -21,6 +21,7 @@ test.describe('Quality KPI Dashboard', () => {
     await expect(page.getByTestId('quality-dashboard-chart-defects-by-module')).toBeVisible();
     await expect(page.getByTestId('quality-dashboard-chart-automation-coverage')).toBeVisible();
     await expect(page.getByTestId('quality-dashboard-chart-coverage-vs-defects')).toBeVisible();
+    await expect(page.getByTestId('quality-dashboard-chart-recovery-trend')).toBeVisible();
     await expect(page.getByTestId('quality-dashboard-chart-recurring-defects')).toBeVisible();
 
     await page.getByTestId('quality-dashboard-window-7').click();
