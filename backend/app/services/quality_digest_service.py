@@ -57,7 +57,8 @@ async def build_digest(db: AsyncSession, window_days: int) -> QualityDigest:
         "This is execution recovery, not defect lifecycle Mean Time To Repair."
     )
     if modules.modules:
-        lines.append("Top failing modules: " + ", ".join(f"{item.module} ({item.count})" for item in modules.modules) + ".")
+        module_summary = ", ".join(f"{item.module} ({item.count})" for item in modules.modules)
+        lines.append(f"Top failing modules: {module_summary}.")
     else:
         lines.append(f"Top failing modules: {modules.reason or 'No failed executions in this window.'}")
 
