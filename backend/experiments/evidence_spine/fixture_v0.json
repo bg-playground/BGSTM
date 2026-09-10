@@ -1,0 +1,53 @@
+{
+  "release": {"id":"REL-001","candidate_sha":"sha-candidate-003","release_time":"2026-09-10T14:00:00Z"},
+  "requirements": {
+    "REQ-001":{"modified_at":"2026-09-09T09:00:00Z","risk_ids":["RISK-001"]},
+    "REQ-002":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":["RISK-002"]},
+    "REQ-003":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":["RISK-003"]},
+    "REQ-005":{"modified_at":"2026-09-08T11:00:00Z","risk_ids":["RISK-004"]},
+    "REQ-008":{"modified_at":"2026-09-09T12:00:00Z","risk_ids":["RISK-005"]}
+  },
+  "risks": {
+    "RISK-001":{"severity":"high","obligation_ids":["QO-001"]},
+    "RISK-002":{"severity":"high","obligation_ids":["QO-002"]},
+    "RISK-003":{"severity":"high","obligation_ids":["QO-003"]},
+    "RISK-004":{"severity":"high","obligation_ids":["QO-004"]},
+    "RISK-005":{"severity":"medium","obligation_ids":["QO-006"]}
+  },
+  "obligations": {
+    "QO-001":{"test_case_ids":["TC-001","TC-002"],"requires_candidate":true,"required_environment":"ENVDEF-001"},
+    "QO-002":{"test_case_ids":["TC-003","TC-004"],"requires_candidate":true,"required_environment":"ENVDEF-001","required_browsers":["chromium","firefox"]},
+    "QO-003":{"test_case_ids":["TC-005"],"requires_candidate":true,"required_environment":"ENVDEF-001","required_artifact":"no_order_created"},
+    "QO-004":{"test_case_ids":["TC-007"],"requires_candidate":true,"required_environment":"ENVDEF-001","affected_by":"CHG-002"},
+    "QO-005":{"applies_to":"closed_fixed_defects"},
+    "QO-006":{"test_case_ids":["TC-010"],"requires_candidate":true,"required_environment":"ENVDEF-001","required_artifact":"candidate_sha_recorded"},
+    "QO-007":{"applies_to":"conflicting_qualifying_observations"}
+  },
+  "environments": {
+    "ENV-001":{"definition_id":"ENVDEF-001","identity_mode":"production-equivalent","payment_mode":"sandbox"},
+    "ENV-002":{"definition_id":"ad-hoc-local","identity_mode":"mock","payment_mode":"stub"}
+  },
+  "changes": {
+    "CHG-001":{"affected_requirement":"REQ-001","occurred_at":"2026-09-09T09:00:00Z","introduced_sha":"sha-change-001"},
+    "CHG-002":{"affected_requirement":"REQ-005","occurred_at":"2026-09-08T11:00:00Z","introduced_sha":"sha-change-002"},
+    "CHG-003":{"affected_requirement":"REQ-008","occurred_at":"2026-09-09T12:00:00Z","introduced_sha":"sha-candidate-003"}
+  },
+  "traceability": [
+    {"requirement_id":"REQ-001","test_case_id":"TC-001","confirmed_at":"2026-09-08T08:00:00Z"},
+    {"requirement_id":"REQ-001","test_case_id":"TC-002","confirmed_at":"2026-09-08T08:00:00Z"}
+  ],
+  "runs": [
+    {"id":"RUN-001","sha":"sha-before-change","environment_id":"ENV-001","executed_at":"2026-09-08T10:00:00Z","results":{"TC-001":"pass","TC-002":"pass","TC-003":"pass","TC-004":"pass","TC-005":"pass","TC-006":"pass","TC-007":"pass","TC-008":"pass","TC-009":"pass","TC-010":"pass"},"artifacts":{}},
+    {"id":"RUN-002","sha":"sha-candidate-003","environment_id":"ENV-002","executed_at":"2026-09-10T10:00:00Z","results":{"TC-003":"pass","TC-004":"pass","TC-005":"pass","TC-011":"pass"},"artifacts":{}},
+    {"id":"RUN-003","sha":"sha-candidate-003","environment_id":"ENV-001","executed_at":"2026-09-10T12:00:00Z","results":{"TC-001":"pass","TC-002":"pass","TC-003":"pass","TC-004":"fail","TC-005":"pass","TC-006":"pass","TC-007":"pass","TC-008":"pass","TC-009":"pass","TC-010":"pass","TC-012":"pass"},"artifacts":{"TC-010":["candidate_sha_recorded"]}},
+    {"id":"RUN-003-OBS-2","sha":"sha-candidate-003","environment_id":"ENV-001","executed_at":"2026-09-10T12:01:00Z","results":{"TC-004":"pass"},"artifacts":{}}
+  ],
+  "defects": {
+    "BUG-001":{"status":"closed_fixed","fix_sha":"sha-fix-bug-001","verification_test_case_id":"TC-008"},
+    "BUG-002":{"status":"closed_fixed","fix_sha":"sha-candidate-003","verification_test_case_id":"TC-004"},
+    "BUG-003":{"status":"open","fix_sha":null,"verification_test_case_id":"TC-006"},
+    "BUG-004":{"status":"closed_fixed","fix_sha":"sha-candidate-003","verification_test_case_id":"TC-010"}
+  },
+  "secondary_test_cases":["TC-006","TC-008","TC-009","TC-012"],
+  "sources":{"requirements":"openproject","executions":"playwright","build":"github-actions","defects":"bugzilla"}
+}
