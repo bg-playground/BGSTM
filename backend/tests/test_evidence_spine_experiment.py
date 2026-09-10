@@ -2,7 +2,6 @@ from pathlib import Path
 
 from experiments.evidence_spine.evaluator import evaluate_file
 
-
 FIXTURE = Path(__file__).parents[1] / "experiments" / "evidence_spine" / "fixture_v0.json"
 
 
@@ -52,8 +51,7 @@ def test_contradiction_requires_human_review():
 def test_current_controls_are_not_misreported():
     findings = _by_id()
     text = " ".join(
-        " ".join([finding["claim"], finding["reason"], *finding["source_object_ids"]])
-        for finding in findings.values()
+        " ".join([finding["claim"], finding["reason"], *finding["source_object_ids"]]) for finding in findings.values()
     )
     assert "BUG-002 lacks" not in text
     assert "BUG-004 lacks" not in text

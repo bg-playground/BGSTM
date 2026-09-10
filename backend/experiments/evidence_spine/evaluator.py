@@ -90,8 +90,7 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
                     "that execution cannot by itself support QO-004."
                 ),
                 ["QO-004"],
-                [f"{run['id']}@{run['executed_at']}" for run in stale_runs]
-                + [f"CHG-002@{change['occurred_at']}"],
+                [f"{run['id']}@{run['executed_at']}" for run in stale_runs] + [f"CHG-002@{change['occurred_at']}"],
                 [fixture["sources"]["requirements"], fixture["sources"]["executions"]],
                 ["CHG-002", "TC-007", *[run["id"] for run in stale_runs]],
             )
