@@ -44,9 +44,7 @@ def test_every_executed_test_is_a_declared_frozen_test_case():
 def test_orphan_condition_is_semantic_not_missing_inventory():
     fixture = _load(FIXTURE)
     mapped = {
-        test_id
-        for obligation in fixture["obligations"].values()
-        for test_id in obligation.get("test_case_ids", [])
+        test_id for obligation in fixture["obligations"].values() for test_id in obligation.get("test_case_ids", [])
     }
 
     assert "TC-011" in fixture["test_cases"]
