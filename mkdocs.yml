@@ -29,21 +29,18 @@ validation:
 theme:
   name: material
   palette:
-    # Light mode
     - scheme: default
       primary: blue
       accent: light-blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    # Dark mode
     - scheme: slate
       primary: blue
       accent: light-blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  
   features:
     - navigation.instant
     - navigation.tracking
@@ -62,12 +59,10 @@ theme:
     - content.action.edit
     - content.action.view
     - toc.follow
-  
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
     view: material/eye
-
   favicon: assets/favicon.png
   logo: assets/logo.png
 
@@ -212,6 +207,7 @@ nav:
     - Quality Evidence Model v0: discovery/quality-evidence-model-v0.md
     - Evidence Spine Fixture Contract v0: discovery/evidence-spine-fixture-contract-v0.md
     - Evidence Spine Combined Assessment v0: discovery/evidence-spine-combined-assessment-v0.md
+    - Evidence Spine Human Baseline v0: discovery/evidence-spine-human-baseline-v0.md
 
   - About:
     - License: LICENSE.md
