@@ -1,0 +1,23 @@
+{
+  "source_system": "openproject",
+  "project": {"id": 42, "identifier": "checkout-release"},
+  "work_packages": [
+    {"id": 101, "type": "Requirement", "subject": "Authentication behavior", "updatedAt": "2026-09-09T09:00:00Z", "customFields": {"bgstm_id": "REQ-001", "risk_ids": ["RISK-001"]}},
+    {"id": 102, "type": "Requirement", "subject": "Supported browser behavior", "updatedAt": "2026-09-01T09:00:00Z", "customFields": {"bgstm_id": "REQ-002", "risk_ids": ["RISK-002"]}},
+    {"id": 103, "type": "Requirement", "subject": "Failed payment creates no order", "updatedAt": "2026-09-01T09:00:00Z", "customFields": {"bgstm_id": "REQ-003", "risk_ids": ["RISK-003"]}},
+    {"id": 105, "type": "Requirement", "subject": "Pricing calculation", "updatedAt": "2026-09-08T11:00:00Z", "customFields": {"bgstm_id": "REQ-005", "risk_ids": ["RISK-004"]}},
+    {"id": 108, "type": "Requirement", "subject": "Candidate build identity", "updatedAt": "2026-09-09T12:00:00Z", "customFields": {"bgstm_id": "REQ-008", "risk_ids": ["RISK-005"]}},
+    {"id": 201, "type": "Risk", "subject": "Authentication regression", "customFields": {"bgstm_id": "RISK-001", "severity": "high", "obligation_ids": ["QO-001"]}},
+    {"id": 202, "type": "Risk", "subject": "Unsupported browser behavior", "customFields": {"bgstm_id": "RISK-002", "severity": "high", "obligation_ids": ["QO-002"]}},
+    {"id": 203, "type": "Risk", "subject": "Order created after failed payment", "customFields": {"bgstm_id": "RISK-003", "severity": "high", "obligation_ids": ["QO-003"]}},
+    {"id": 204, "type": "Risk", "subject": "Incorrect pricing after change", "customFields": {"bgstm_id": "RISK-004", "severity": "high", "obligation_ids": ["QO-004"]}},
+    {"id": 205, "type": "Risk", "subject": "Release evidence not tied to candidate", "customFields": {"bgstm_id": "RISK-005", "severity": "medium", "obligation_ids": ["QO-006"]}},
+    {"id": 301, "type": "Change", "subject": "Authentication behavior change", "updatedAt": "2026-09-09T09:00:00Z", "customFields": {"bgstm_id": "CHG-001", "affected_requirement": "REQ-001", "introduced_sha": "sha-change-001"}},
+    {"id": 302, "type": "Change", "subject": "Pricing behavior change", "updatedAt": "2026-09-08T11:00:00Z", "customFields": {"bgstm_id": "CHG-002", "affected_requirement": "REQ-005", "introduced_sha": "sha-change-002"}},
+    {"id": 303, "type": "Change", "subject": "Candidate identity change", "updatedAt": "2026-09-09T12:00:00Z", "customFields": {"bgstm_id": "CHG-003", "affected_requirement": "REQ-008", "introduced_sha": "sha-candidate-003"}}
+  ],
+  "relations": [
+    {"id": 401, "type": "verifies", "from": {"bgstm_id": "REQ-001"}, "to": {"bgstm_id": "TC-001"}, "createdAt": "2026-09-08T08:00:00Z"},
+    {"id": 402, "type": "verifies", "from": {"bgstm_id": "REQ-001"}, "to": {"bgstm_id": "TC-002"}, "createdAt": "2026-09-08T08:00:00Z"}
+  ]
+}
