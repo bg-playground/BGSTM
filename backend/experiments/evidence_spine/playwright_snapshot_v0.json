@@ -1,0 +1,9 @@
+{
+  "source_system": "playwright",
+  "runs": [
+    {"metadata":{"run_id":"RUN-001","commit_sha":"sha-before-change","environment_id":"ENV-001","finished_at":"2026-09-08T10:00:00Z"},"tests":[{"id":"TC-001","status":"passed"},{"id":"TC-002","status":"passed"},{"id":"TC-003","status":"passed"},{"id":"TC-004","status":"passed"},{"id":"TC-005","status":"passed"},{"id":"TC-006","status":"passed"},{"id":"TC-007","status":"passed"},{"id":"TC-008","status":"passed"},{"id":"TC-009","status":"passed"},{"id":"TC-010","status":"passed"}]},
+    {"metadata":{"run_id":"RUN-002","commit_sha":"sha-candidate-003","environment_id":"ENV-002","finished_at":"2026-09-10T10:00:00Z"},"tests":[{"id":"TC-003","status":"passed"},{"id":"TC-004","status":"passed"},{"id":"TC-005","status":"passed"},{"id":"TC-011","status":"passed"}]},
+    {"metadata":{"run_id":"RUN-003","commit_sha":"sha-candidate-003","environment_id":"ENV-001","finished_at":"2026-09-10T12:00:00Z"},"tests":[{"id":"TC-001","status":"passed"},{"id":"TC-002","status":"passed"},{"id":"TC-003","status":"passed"},{"id":"TC-004","status":"failed"},{"id":"TC-005","status":"passed"},{"id":"TC-006","status":"passed"},{"id":"TC-007","status":"passed"},{"id":"TC-008","status":"passed"},{"id":"TC-009","status":"passed"},{"id":"TC-010","status":"passed","attachments":[{"name":"candidate_sha_recorded"}]},{"id":"TC-012","status":"passed"}]},
+    {"metadata":{"run_id":"RUN-003-OBS-2","commit_sha":"sha-candidate-003","environment_id":"ENV-001","finished_at":"2026-09-10T12:01:00Z"},"tests":[{"id":"TC-004","status":"passed"}]}
+  ]
+}
