@@ -37,11 +37,13 @@ def test_candidate_qualification_uses_linked_build_not_run_claimed_sha():
 
 def test_non_candidate_linked_build_overrides_run_claimed_candidate_sha():
     fixture = _with_build_provenance()
+    run = next(run for run in fixture["runs"] if run["id"] == "RUN-002")
     fixture["builds"]["GHA-9002"]["sha"] = "sha-not-candidate"
 
-    finding = next(finding for finding in evaluate(fixture) if finding["finding_id"] == "F-003")
+    finding_ids = {finding["finding_id"] for finding in evaluate(fixture)}
 
-    assert "RUN-002" not in finding["source_object_ids"]
+    assert run["sha"] == "sha-candidate-003"
+    assert "F-003" not in finding_ids
 
 
 def test_later_build_containing_fix_satisfies_post_fix_verification():
