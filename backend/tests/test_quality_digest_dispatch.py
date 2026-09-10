@@ -81,6 +81,7 @@ async def test_due_period_is_delivered_once_and_immediate_rerun_is_noop(db_sessi
 @pytest.mark.asyncio
 async def test_failed_delivery_rolls_back_claim_notification_and_schedule(db_session, monkeypatch) -> None:
     _, subscription, due_at = await _subscription(db_session)
+    subscription_id = subscription.id
 
     async def fail_build_digest(db, window_days):
         raise RuntimeError("synthetic digest failure")
@@ -92,7 +93,7 @@ async def test_failed_delivery_rolls_back_claim_notification_and_schedule(db_ses
 
     notification_count = await db_session.scalar(select(func.count()).select_from(Notification))
     delivery_count = await db_session.scalar(select(func.count()).select_from(QualityDigestDelivery))
-    stored = await db_session.get(QualityDigestSubscription, subscription.id)
+    stored = await db_session.get(QualityDigestSubscription, subscription_id)
 
     assert notification_count == 0
     assert delivery_count == 0
