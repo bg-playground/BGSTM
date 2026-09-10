@@ -14,6 +14,7 @@ def normalize_github_actions(snapshot: dict[str, Any]) -> dict[str, Any]:
         build_id = f"GHA-{workflow['id']}"
         builds[build_id] = {
             "sha": workflow["head_sha"],
+            "contains_shas": workflow.get("contains_shas", [workflow["head_sha"]]),
             "workflow_name": workflow["name"],
             "status": workflow["status"],
             "conclusion": workflow["conclusion"],
@@ -27,6 +28,7 @@ def normalize_github_actions(snapshot: dict[str, Any]) -> dict[str, Any]:
             release = {
                 "id": release_data["id"],
                 "candidate_sha": workflow["head_sha"],
+                "candidate_build_id": build_id,
                 "release_time": release_data["declared_at"],
             }
 
