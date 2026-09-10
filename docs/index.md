@@ -1,4 +1,4 @@
-# BGSTM — Better Global Software Testing Methodology
+# BGSTM - Better Global Software Testing Methodology
 
 !!! info "A practical six-phase testing methodology"
     BGSTM gives teams a stable, methodology-agnostic quality lifecycle that works across Agile, Scrum, Waterfall, and hybrid delivery models.
