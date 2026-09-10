@@ -6,6 +6,8 @@ BGSTM (Better Global Software Testing Methodology) provides a structured six-pha
 
 This guide focuses on adopting the methodology. The FastAPI/React software in this repository is an optional reference implementation, not a prerequisite for using BGSTM.
 
+> **Starting a project now?** Use the [Minimum Viable BGSTM Adoption Path](minimum-viable-adoption.md) for the smallest credible evidence chain across all six phases, then return here for broader rollout, tooling, training, and maturity guidance.
+
 ## 🎯 Step 1: Assess Your Current Situation
 
 ### Identify Your Methodology
@@ -277,6 +279,7 @@ BGSTM does not require a specific toolchain. Use the tools that fit your team's 
 ## 📚 Additional Resources
 
 ### Within This Repository
+- [Minimum Viable BGSTM Adoption Path](minimum-viable-adoption.md)
 - [Complete Documentation](README.md)
 - [Testing Phases](phases/index.md)
 - [Methodology Guides](methodologies/comparison.md)
@@ -332,6 +335,7 @@ BGSTM does not require a specific toolchain. Use the tools that fit your team's 
 
 ## 🎉 Next Steps
 
+- ⚡ [Use the Minimum Viable BGSTM Adoption Path](minimum-viable-adoption.md)
 - 📖 [Compare methodology adaptations](methodologies/comparison.md)
 - 📋 [Explore the canonical templates](test-templates/README.md)
 - 🧭 [Review practical examples](examples/README.md)
