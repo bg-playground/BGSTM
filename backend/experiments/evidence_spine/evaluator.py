@@ -15,6 +15,25 @@ def load_fixture(path: str | Path) -> dict[str, Any]:
         return json.load(handle)
 
 
+def _build_for_run(fixture: dict[str, Any], run: dict[str, Any]) -> dict[str, Any] | None:
+    build_id = fixture.get("execution_builds", {}).get(run["id"])
+    if build_id is None:
+        return None
+    return fixture.get("builds", {}).get(build_id)
+
+
+def _run_sha(fixture: dict[str, Any], run: dict[str, Any]) -> str:
+    build = _build_for_run(fixture, run)
+    return build["sha"] if build is not None else run["sha"]
+
+
+def _build_contains_sha(fixture: dict[str, Any], run: dict[str, Any], sha: str) -> bool:
+    build = _build_for_run(fixture, run)
+    if build is None:
+        return run["sha"] == sha
+    return sha in build.get("contains_shas", [build["sha"]])
+
+
 def _finding(
     finding_id: str,
     claim: str,
@@ -53,7 +72,7 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
     qualifying_tc5 = [
         run
         for run in runs
-        if run["sha"] == release["candidate_sha"]
+        if _run_sha(fixture, run) == release["candidate_sha"]
         and environments[run["environment_id"]]["definition_id"] == qo3["required_environment"]
         and run["results"].get("TC-005") == "pass"
     ]
@@ -101,7 +120,7 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
     mismatched = [
         run
         for run in runs
-        if run["sha"] == release["candidate_sha"]
+        if _run_sha(fixture, run) == release["candidate_sha"]
         and (run["results"].get("TC-003") == "pass" or run["results"].get("TC-004") == "pass")
         and environments[run["environment_id"]]["definition_id"] != qo2["required_environment"]
     ]
@@ -119,27 +138,28 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
         )
 
     # F-004: closed/fixed BUG-001 lacks post-fix verification on a build
-    # containing its fix SHA.
+    # containing its fix SHA. A later build may qualify; exact SHA equality is
+    # not required when normalized build ancestry is available.
     bug = fixture["defects"]["BUG-001"]
     verification = [
         run
         for run in runs
-        if run["results"].get(bug["verification_test_case_id"]) == "pass" and run["sha"] == bug["fix_sha"]
+        if run["results"].get(bug["verification_test_case_id"]) == "pass"
+        and _build_contains_sha(fixture, run, bug["fix_sha"])
     ]
     if bug["status"] == "closed_fixed" and not verification:
         findings.append(
             _finding(
                 "F-004",
                 "BUG-001 lacks qualifying post-fix verification.",
-                "No passing verification execution is recorded on the defect fix SHA.",
+                "No passing verification execution is recorded on a build containing the defect fix SHA.",
                 ["QO-005"],
                 [f"BUG-001:fix_sha={bug['fix_sha']}"],
-                [fixture["sources"]["defects"], fixture["sources"]["executions"]],
+                [fixture["sources"]["defects"], fixture["sources"]["executions"], fixture["sources"]["build"]],
                 ["BUG-001", bug["verification_test_case_id"]],
             )
         )
 
-    # F-005: TC-011 is explicitly outside all intent relationships and controls.
     mapped = {test_id for obligation in obligations.values() for test_id in obligation.get("test_case_ids", [])}
     executed = {test_id for run in runs for test_id in run["results"]}
     secondary = set(fixture["secondary_test_cases"])
@@ -148,10 +168,7 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             _finding(
                 "F-005",
                 "TC-011 is semantically orphaned.",
-                (
-                    "The executed test has no declared quality-intent relationship "
-                    "and is not designated secondary evidence."
-                ),
+                "The executed test has no declared quality-intent relationship and is not designated secondary evidence.",
                 [],
                 [run["id"] for run in runs if "TC-011" in run["results"]],
                 [fixture["sources"]["executions"]],
@@ -159,8 +176,6 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             )
         )
 
-    # F-006: REQ-001 traceability was confirmed before CHG-001 changed the
-    # requirement-relevant authentication behavior.
     chg1 = fixture["changes"]["CHG-001"]
     outdated = [
         relation
@@ -181,13 +196,12 @@ def evaluate(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             )
         )
 
-    # F-007: contradictory qualifying observations remain unresolved.
     tc4_observations = []
     for run in runs:
         outcome = run["results"].get("TC-004")
         if (
             outcome in {"pass", "fail"}
-            and run["sha"] == release["candidate_sha"]
+            and _run_sha(fixture, run) == release["candidate_sha"]
             and environments[run["environment_id"]]["definition_id"] == "ENVDEF-001"
         ):
             tc4_observations.append((run, outcome))
