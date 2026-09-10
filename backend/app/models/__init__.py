@@ -8,6 +8,7 @@ from .external_case_result import ExternalCaseResult
 from .link import LinkSource, LinkType, RequirementTestCaseLink
 from .notification import Notification, NotificationType
 from .project import Project
+from .quality_digest_subscription import DigestCadence, DigestChannel, QualityDigestSubscription
 from .release_signoff import ReleaseSignoff, ReleaseSignoffRole
 from .requirement import PriorityLevel, Requirement, RequirementStatus, RequirementType
 from .runner_token import RunnerToken
@@ -26,6 +27,9 @@ __all__ = [
     "Notification",
     "NotificationType",
     "Project",
+    "QualityDigestSubscription",
+    "DigestCadence",
+    "DigestChannel",
     "ReleaseSignoff",
     "ReleaseSignoffRole",
     "Requirement",

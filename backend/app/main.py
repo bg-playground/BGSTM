@@ -13,6 +13,7 @@ from app.api import (
     links,
     notifications,
     projects,
+    quality_digest,
     quality_metrics,
     release_readiness,
     requirements,
@@ -26,7 +27,6 @@ from app.db.session import init_db
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION, description="BGSTM AI-Powered Traceability System")
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -35,7 +35,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX, tags=["auth"])
 app.include_router(requirements.router, prefix=settings.API_V1_PREFIX, tags=["requirements"])
 app.include_router(test_cases.router, prefix=settings.API_V1_PREFIX, tags=["test_cases"])
@@ -49,10 +48,9 @@ app.include_router(notifications.router, prefix=settings.API_V1_PREFIX, tags=["n
 app.include_router(external_results.router, prefix=settings.API_V1_PREFIX, tags=["external_results"])
 app.include_router(projects.router, prefix=settings.API_V1_PREFIX, tags=["projects"])
 app.include_router(quality_metrics.router, prefix=settings.API_V1_PREFIX, tags=["quality_metrics"])
+app.include_router(quality_digest.router, prefix=settings.API_V1_PREFIX, tags=["quality_digest"])
 app.include_router(release_readiness.router, prefix=settings.API_V1_PREFIX, tags=["release_readiness"])
 
-# Dev-only static route: serve local artifact files when BGSTM_STORAGE_BACKEND=local.
-# This is intentionally NOT mounted in production (S3 or other remote backends).
 if settings.BGSTM_STORAGE_BACKEND.lower() == "local":
     _artifacts_dir = Path(settings.BGSTM_ARTIFACTS_DIR)
     _artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -65,8 +63,6 @@ async def startup_event():
     if not settings.DATABASE_URL.startswith("postgresql"):
         await init_db()
 
-    # Seed default admin user if no users exist
-    # WARNING: Change the default password on first use in production!
     from app.auth.security import get_password_hash
     from app.crud.user import get_user_by_email
     from app.db.session import AsyncSessionLocal
