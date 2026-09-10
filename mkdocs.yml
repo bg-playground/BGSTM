@@ -208,6 +208,9 @@ nav:
     - Implementation Summary: architecture/implementation-summary.md
     - Templates Directory Note: architecture/templates-directory-rename.md
 
+  - Discovery:
+    - Quality Evidence Model v0: discovery/quality-evidence-model-v0.md
+
   - About:
     - License: LICENSE.md
     - Contributing: CONTRIBUTING.md
