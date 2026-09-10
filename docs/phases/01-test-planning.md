@@ -123,17 +123,17 @@ Test Planning is the foundational phase where the testing strategy, scope, objec
 The following templates support Test Planning activities:
 
 ### Primary Templates
-- **[Test Plan Template](../templates/test-plan-template.md)** - Comprehensive test planning document
+- **[Test Plan Template](../test-templates/test-plan-template.md)** - Comprehensive test planning document
   - Use this template to document your complete testing strategy, scope, resources, schedule, and approach
   - Includes sections for test objectives, strategy, resource planning, risk management, and entry/exit criteria
   
-- **[Risk Assessment Template](../templates/risk-assessment-template.md)** - Risk identification and mitigation
+- **[Risk Assessment Template](../test-templates/risk-assessment-template.md)** - Risk identification and mitigation
   - Use this template to identify, analyze, and manage testing risks proactively
   - Includes risk probability/impact ratings, risk scoring, mitigation strategies, and ongoing risk tracking
 
 ### Supporting Templates
-- **[Traceability Matrix Template](../templates/traceability-matrix-template.md)** - Begin establishing traceability during planning
-- **[Test Execution Report Template](../templates/test-execution-report-template.md)** - Reference to understand reporting requirements
+- **[Traceability Matrix Template](../test-templates/traceability-matrix-template.md)** - Begin establishing traceability during planning
+- **[Test Execution Report Template](../test-templates/test-execution-report-template.md)** - Reference to understand reporting requirements
 
 ## Examples
 - [Test Plan Example](../examples/test-plan-example.md) - Complete test plan for an e-commerce checkout system showing Agile sprint-based approach with comprehensive strategy, resource allocation, risk assessment, and schedule. Includes Waterfall variation in appendix.
