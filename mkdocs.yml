@@ -203,6 +203,7 @@ nav:
     - License: LICENSE.md
     - Contributing: CONTRIBUTING.md
     - Changelog: CHANGELOG.md
+    - Maturity & Release-Readiness Audit: maturity-release-readiness-audit-2026-09.md
     - Custom Domain Setup: custom-domain-setup.md
     - Site Assets: assets/README.md
 
