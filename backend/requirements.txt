@@ -16,7 +16,7 @@ scikit-learn==1.8.0
 PyJWT==2.13.0
 bcrypt>=4.0.0
 email-validator==2.3.0
-reportlab==4.5.0
+reportlab==5.0.1
 # Streaming multipart parser — used by upload_artifact for true mid-wire size-limit abort.
 # Pinned to <2.0 to avoid breaking API changes; Dependabot will bump the minor.
 streaming-form-data>=2.0.0,<3.0
