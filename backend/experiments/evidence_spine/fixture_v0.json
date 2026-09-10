@@ -4,8 +4,25 @@
     "REQ-001":{"modified_at":"2026-09-09T09:00:00Z","risk_ids":["RISK-001"]},
     "REQ-002":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":["RISK-002"]},
     "REQ-003":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":["RISK-003"]},
+    "REQ-004":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":[]},
     "REQ-005":{"modified_at":"2026-09-08T11:00:00Z","risk_ids":["RISK-004"]},
+    "REQ-006":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":[]},
+    "REQ-007":{"modified_at":"2026-09-01T09:00:00Z","risk_ids":[]},
     "REQ-008":{"modified_at":"2026-09-09T12:00:00Z","risk_ids":["RISK-005"]}
+  },
+  "test_cases": {
+    "TC-001":{"name":"authenticated checkout succeeds"},
+    "TC-002":{"name":"unauthenticated checkout is rejected"},
+    "TC-003":{"name":"Chromium checkout succeeds"},
+    "TC-004":{"name":"Firefox checkout succeeds"},
+    "TC-005":{"name":"payment-decline creates no order"},
+    "TC-006":{"name":"shipping selection persists"},
+    "TC-007":{"name":"totals remain stable through review"},
+    "TC-008":{"name":"order confirmation created exactly once"},
+    "TC-009":{"name":"cart retained after transient retry"},
+    "TC-010":{"name":"audit event contains build identity"},
+    "TC-011":{"name":"legacy coupon regression"},
+    "TC-012":{"name":"checkout smoke"}
   },
   "risks": {
     "RISK-001":{"severity":"high","obligation_ids":["QO-001"]},
