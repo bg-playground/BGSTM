@@ -67,15 +67,8 @@ async def _get_quality_evidence(db: AsyncSession, window_days: int) -> QualityKp
     recovery = await get_recovery_trend(db, window_days, "overall")
 
     total_executions = sum(point.total_executed for point in pass_rate.points)
-    passed_executions = sum(
-        round(point.total_executed * point.pass_rate_pct / 100)
-        for point in pass_rate.points
-    )
-    overall_pass_rate = (
-        round(passed_executions / total_executions * 100, 2)
-        if total_executions
-        else None
-    )
+    passed_executions = sum(round(point.total_executed * point.pass_rate_pct / 100) for point in pass_rate.points)
+    overall_pass_rate = round(passed_executions / total_executions * 100, 2) if total_executions else None
 
     return QualityKpiEvidence(
         window_days=window_days,
@@ -109,17 +102,12 @@ def _quality_markdown(evidence: QualityKpiEvidence) -> list[str]:
     lines.extend(
         [
             f"- **Failed executions in selected window:** {evidence.failed_executions}",
-            (
-                "- **Open critical failures (current/latest state):** "
-                f"{evidence.open_critical_failures}"
-            ),
+            (f"- **Open critical failures (current/latest state):** {evidence.open_critical_failures}"),
         ]
     )
 
     if evidence.automation.reason:
-        lines.append(
-            f"- **Automation coverage (current):** {evidence.automation.reason}"
-        )
+        lines.append(f"- **Automation coverage (current):** {evidence.automation.reason}")
     else:
         lines.append(
             "- **Automation coverage (current):** "
@@ -129,10 +117,7 @@ def _quality_markdown(evidence: QualityKpiEvidence) -> list[str]:
         )
 
     if evidence.recovery.mean_recovery_hours is None:
-        recovery_value = (
-            evidence.recovery.reason
-            or "No resolved recovery episodes are available."
-        )
+        recovery_value = evidence.recovery.reason or "No resolved recovery episodes are available."
     else:
         recovery_value = f"{evidence.recovery.mean_recovery_hours:.2f} hours"
 
@@ -145,23 +130,15 @@ def _quality_markdown(evidence: QualityKpiEvidence) -> list[str]:
 
     lines.extend(["", "### Top Failing Modules", ""])
     if evidence.modules.modules:
-        lines.extend(
-            f"- {bucket.module}: {bucket.count} failed execution(s)"
-            for bucket in evidence.modules.modules
-        )
+        lines.extend(f"- {bucket.module}: {bucket.count} failed execution(s)" for bucket in evidence.modules.modules)
     else:
-        reason = (
-            evidence.modules.reason
-            or "No failed executions were recorded in the selected window."
-        )
+        reason = evidence.modules.reason or "No failed executions were recorded in the selected window."
         lines.append(f"- {reason}")
     return lines
 
 
 def _build_markdown(snapshot: ReadinessSnapshot, evidence: QualityKpiEvidence) -> str:
-    generated_at = snapshot.generated_at.astimezone(timezone.utc).strftime(
-        "%Y-%m-%d %H:%M UTC"
-    )
+    generated_at = snapshot.generated_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
         "# Release Readiness Report",
         "",
@@ -202,9 +179,7 @@ def _build_markdown(snapshot: ReadinessSnapshot, evidence: QualityKpiEvidence) -
     )
     for signoff in snapshot.signoffs:
         signed_at = (
-            signoff.signed_off_at.astimezone(timezone.utc).strftime(
-                "%Y-%m-%d %H:%M UTC"
-            )
+            signoff.signed_off_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
             if signoff.signed_off_at
             else ""
         )
@@ -290,9 +265,7 @@ async def export_release_readiness(
         return Response(
             content=markdown_report,
             media_type="text/markdown",
-            headers={
-                "Content-Disposition": "attachment; filename=release_readiness_report.md"
-            },
+            headers={"Content-Disposition": "attachment; filename=release_readiness_report.md"},
         )
 
     buffer = io.BytesIO()
@@ -337,9 +310,7 @@ async def export_release_readiness(
         if line.startswith("### "):
             elements.append(Paragraph(line[4:], styles["Heading3"]))
         elif line.startswith("- "):
-            elements.append(
-                Paragraph(line[2:].replace("**", ""), styles["BodyText"])
-            )
+            elements.append(Paragraph(line[2:].replace("**", ""), styles["BodyText"]))
 
     elements.extend(
         [
@@ -349,8 +320,7 @@ async def export_release_readiness(
     )
     criteria_data = [["Category", "Criterion", "Status", "Value"]]
     criteria_data.extend(
-        [criterion.category, criterion.label, criterion.status, criterion.value]
-        for criterion in snapshot.criteria
+        [criterion.category, criterion.label, criterion.status, criterion.value] for criterion in snapshot.criteria
     )
     criteria_table = Table(
         criteria_data,
@@ -369,9 +339,7 @@ async def export_release_readiness(
     signoff_data = [["Role", "Signed Off", "By", "At"]]
     for signoff in snapshot.signoffs:
         signed_at = (
-            signoff.signed_off_at.astimezone(timezone.utc).strftime(
-                "%Y-%m-%d %H:%M UTC"
-            )
+            signoff.signed_off_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
             if signoff.signed_off_at
             else ""
         )
@@ -396,7 +364,5 @@ async def export_release_readiness(
     return Response(
         content=buffer.getvalue(),
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": "attachment; filename=release_readiness_report.pdf"
-        },
+        headers={"Content-Disposition": "attachment; filename=release_readiness_report.pdf"},
     )
