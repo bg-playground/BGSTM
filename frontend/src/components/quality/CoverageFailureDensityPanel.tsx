@@ -19,6 +19,7 @@ import {
 } from '../../api/qualityMetrics';
 import { useEffectAsync } from '../../hooks/useEffectAsync';
 import { LoadingSpinner } from '../LoadingSpinner';
+import { QualityDigestSubscription } from './QualityDigestSubscription';
 import { RecoveryTrendPanel } from './RecoveryTrendPanel';
 
 function ModuleRiskTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload?: unknown }> }) {
@@ -59,6 +60,7 @@ export function CoverageFailureDensityPanel({ window }: { window: WindowDays }) 
 
   return (
     <div className="space-y-6">
+      <QualityDigestSubscription dashboardWindow={window} />
       <section data-testid="quality-dashboard-chart-coverage-vs-defects" className="rounded-lg bg-white p-6 shadow">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-slate-900">Coverage vs Failure Density</h2>
@@ -67,7 +69,6 @@ export function CoverageFailureDensityPanel({ window }: { window: WindowDays }) 
             The upper-left quadrant is the relative investigation priority.
           </p>
         </div>
-
         {loading ? (
           <div className="flex h-80 items-center justify-center"><LoadingSpinner /></div>
         ) : error ? (
@@ -119,7 +120,6 @@ export function CoverageFailureDensityPanel({ window }: { window: WindowDays }) 
           </>
         )}
       </section>
-
       <RecoveryTrendPanel window={window} />
     </div>
   );
