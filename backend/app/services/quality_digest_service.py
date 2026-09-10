@@ -3,13 +3,14 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import quality_digest as digest_crud
 from app.crud import quality_metrics as quality_crud
-from app.crud.notification import create_notification
 from app.crud.quality_recovery import get_recovery_trend
-from app.models.notification import NotificationType
+from app.models.notification import Notification, NotificationType
+from app.models.quality_digest_delivery import QualityDigestDelivery
 from app.models.quality_digest_subscription import QualityDigestSubscription
 
 
@@ -72,28 +73,59 @@ async def build_digest(db: AsyncSession, window_days: int) -> QualityDigest:
     )
 
 
-async def deliver_in_app(
-    db: AsyncSession,
-    subscription: QualityDigestSubscription,
-    digest: QualityDigest,
-) -> None:
-    await create_notification(
-        db,
+def _notification_for_digest(subscription: QualityDigestSubscription, digest: QualityDigest) -> Notification:
+    return Notification(
         user_id=subscription.user_id,
         type=NotificationType.QUALITY_DIGEST,
         title=digest.title,
         message=digest.body,
-        metadata={"window_days": digest.window_days, "dashboard_path": digest.dashboard_path},
+        metadata_={"window_days": digest.window_days, "dashboard_path": digest.dashboard_path},
     )
 
 
 async def dispatch_due_digests(db: AsyncSession, now: datetime | None = None) -> int:
+    """Deliver each due subscription at most once for its scheduled due period.
+
+    The delivery-ledger insert is flushed before the notification is created. Its
+    unique constraint serializes overlapping dispatchers on (subscription, due_at).
+    Notification creation, ledger completion, and subscription advancement are then
+    committed together so a failed transaction remains eligible for a later retry.
+    """
     now = now or datetime.utcnow()
     due = await digest_crud.get_due_subscriptions(db, now)
     delivered = 0
+
     for subscription in due:
-        digest = await build_digest(db, subscription.window_days)
-        await deliver_in_app(db, subscription, digest)
-        await digest_crud.mark_delivered(db, subscription, now)
+        due_at = subscription.next_delivery_at
+        if due_at is None:
+            continue
+
+        ledger = QualityDigestDelivery(
+            subscription_id=subscription.id,
+            due_at=due_at,
+            delivered_at=now,
+        )
+        db.add(ledger)
+        try:
+            await db.flush()
+        except IntegrityError:
+            await db.rollback()
+            continue
+
+        try:
+            digest = await build_digest(db, subscription.window_days)
+            notification = _notification_for_digest(subscription, digest)
+            db.add(notification)
+            await db.flush()
+
+            ledger.notification_id = notification.id
+            subscription.last_delivered_at = now
+            subscription.next_delivery_at = digest_crud.next_delivery(subscription.cadence, now)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            raise
+
         delivered += 1
+
     return delivered
