@@ -52,10 +52,15 @@ def build_packet() -> dict[str, Any]:
             }
         )
 
+    candidate_build_id = fixture.get("execution_builds", {}).get("RUN-003")
+    candidate_build = deepcopy(fixture.get("builds", {}).get(candidate_build_id))
+    if candidate_build is not None:
+        candidate_build = {"id": candidate_build_id, **candidate_build}
+
     return {
         "measurement_id": "AE-001",
         "release": deepcopy(fixture["release"]),
-        "candidate_build": deepcopy(fixture.get("builds", {}).get(fixture.get("execution_builds", {}).get("RUN-003"))),
+        "candidate_build": candidate_build,
         "findings": safe_findings,
         "semantic_context": {
             "test_cases": deepcopy(fixture["test_cases"]),
@@ -101,7 +106,11 @@ def render_markdown(packet: dict[str, Any]) -> str:
         f"- Release time: `{release['release_time']}`",
         f"- Candidate build: `{build.get('id', 'not-recorded')}`",
         "",
-        "Review each deterministic finding as `ACCEPT`, `REJECT`, or `NEEDS_REVIEW`. Open raw source snapshots only when needed to validate the evidence.",
+        (
+            "Review each deterministic finding as `ACCEPT`, `REJECT`, or "
+            "`NEEDS_REVIEW`. Open raw source snapshots only when needed to "
+            "validate the evidence."
+        ),
         "",
         "## Deterministic findings",
         "",
