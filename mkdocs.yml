@@ -208,6 +208,7 @@ nav:
     - Evidence Spine Fixture Contract v0: discovery/evidence-spine-fixture-contract-v0.md
     - Evidence Spine Combined Assessment v0: discovery/evidence-spine-combined-assessment-v0.md
     - Evidence Spine Human Baseline v0: discovery/evidence-spine-human-baseline-v0.md
+    - Evidence Spine Human Baseline Result v0: discovery/evidence-spine-human-baseline-result-v0.md
 
   - About:
     - License: LICENSE.md
