@@ -31,8 +31,8 @@ The AI suggestions engine computes similarity scores between requirements and te
 ```python
 config = SuggestionConfig(
     default_algorithm="tfidf",
-    tfidf_max_features=100,      # Maximum vocabulary size
-    tfidf_ngram_range=(1, 2)     # Consider 1-grams and 2-grams
+    tfidf_max_features=100,  # Maximum vocabulary size
+    tfidf_ngram_range=(1, 2),  # Consider 1-grams and 2-grams
 )
 ```
 
@@ -59,8 +59,8 @@ config = SuggestionConfig(
 ```python
 config = SuggestionConfig(
     default_algorithm="keyword",
-    keyword_min_word_length=3,   # Minimum word length to consider
-    keyword_top_n=10             # Number of top keywords to extract
+    keyword_min_word_length=3,  # Minimum word length to consider
+    keyword_top_n=10,  # Number of top keywords to extract
 )
 ```
 
@@ -75,8 +75,8 @@ config = SuggestionConfig(
 ```python
 config = SuggestionConfig(
     default_algorithm="hybrid",
-    hybrid_tfidf_weight=0.6,     # Weight for TF-IDF score
-    hybrid_keyword_weight=0.4    # Weight for keyword score
+    hybrid_tfidf_weight=0.6,  # Weight for TF-IDF score
+    hybrid_keyword_weight=0.4,  # Weight for keyword score
 )
 ```
 
@@ -111,15 +111,12 @@ config = SuggestionConfig(
     default_algorithm="llm",
     llm_provider="openai",
     llm_model="text-embedding-3-small",  # or "text-embedding-3-large"
-    llm_cache_embeddings=True
+    llm_cache_embeddings=True,
 )
 
 # Using HuggingFace (runs locally)
 config = SuggestionConfig(
-    default_algorithm="llm",
-    llm_provider="huggingface",
-    llm_model="all-MiniLM-L6-v2",
-    llm_cache_embeddings=True
+    default_algorithm="llm", llm_provider="huggingface", llm_model="all-MiniLM-L6-v2", llm_cache_embeddings=True
 )
 ```
 
@@ -158,8 +155,8 @@ The engine is configured using the `SuggestionConfig` class:
 from app.ai_suggestions.config import SuggestionConfig
 
 config = SuggestionConfig(
-    min_confidence_threshold=0.3,   # Only create suggestions above this score (0.0-1.0)
-    default_algorithm="tfidf",      # Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'
+    min_confidence_threshold=0.3,  # Only create suggestions above this score (0.0-1.0)
+    default_algorithm="tfidf",  # Algorithm to use: 'tfidf', 'keyword', 'hybrid', or 'llm'
     tfidf_max_features=100,
     tfidf_ngram_range=(1, 2),
     keyword_min_word_length=3,
@@ -167,9 +164,9 @@ config = SuggestionConfig(
     hybrid_tfidf_weight=0.6,
     hybrid_keyword_weight=0.4,
     # LLM settings (only needed if using 'llm' algorithm)
-    llm_provider="openai",          # 'openai' or 'huggingface'
-    llm_model=None,                 # Optional: model override
-    llm_cache_embeddings=True       # Cache embeddings for performance
+    llm_provider="openai",  # 'openai' or 'huggingface'
+    llm_model=None,  # Optional: model override
+    llm_cache_embeddings=True,  # Cache embeddings for performance
 )
 ```
 
@@ -309,11 +306,11 @@ class SuggestionConfig(BaseModel):
 
 ```python
 method_map = {
-    'tfidf': SuggestionMethod.SEMANTIC_SIMILARITY,
-    'keyword': SuggestionMethod.KEYWORD_MATCH,
-    'hybrid': SuggestionMethod.HYBRID,
-    'llm': SuggestionMethod.LLM_EMBEDDING,
-    'mycustom': SuggestionMethod.HEURISTIC  # or add new enum value
+    "tfidf": SuggestionMethod.SEMANTIC_SIMILARITY,
+    "keyword": SuggestionMethod.KEYWORD_MATCH,
+    "hybrid": SuggestionMethod.HYBRID,
+    "llm": SuggestionMethod.LLM_EMBEDDING,
+    "mycustom": SuggestionMethod.HEURISTIC,  # or add new enum value
 }
 ```
 
